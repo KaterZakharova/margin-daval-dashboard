@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Маржинальность и давальческие схемы</title>
+  <style>
+    :root {
+      --bg:#f4f6f8; --panel:#fff; --text:#182230; --muted:#667085; --line:#d8dee8;
+      --blue:#2563eb; --red:#d92d20; --green:#168a5b; --teal:#0f8b8d; --ink:#263445;
+      --soft-blue:#eaf1ff; --soft-red:#fff0ec; --soft-green:#e8f6ef; --soft-teal:#e6f7f7;
+      --shadow:0 12px 30px rgba(15,23,42,.08); --radius:8px;
+    }
+    *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:20px}.shell{max-width:1560px;margin:0 auto;display:grid;gap:16px}
+    .top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.title h1{margin:0;font-size:25px}.title p{margin:7px 0 0;color:var(--muted);font-size:13px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px}
+    .filters{display:grid;grid-template-columns:repeat(7,minmax(140px,1fr));gap:10px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+    select,input{width:100%;height:36px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:0 9px;color:var(--text)}
+    select[multiple]{height:86px;padding:6px}.field .small{font-size:11px;color:var(--muted);margin-top:4px}
+    .kpis{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr));gap:10px}.kpi{padding:13px}.kpi .label{font-size:12px;color:var(--muted)}.kpi .value{font-size:22px;font-weight:750;margin-top:7px}.kpi .sub{font-size:12px;color:var(--muted);margin-top:7px}
+    .grid{display:grid;grid-template-columns:1.4fr .9fr;gap:14px}.grid3{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    h2{font-size:16px;margin:0 0 10px}.hint{font-size:12px;color:var(--muted)}.chart{height:330px;position:relative}.bubble{height:430px}
+    .chart-tooltip{position:absolute;z-index:5;pointer-events:none;background:#111827;color:#fff;border-radius:6px;padding:7px 9px;font-size:12px;line-height:1.35;box-shadow:0 8px 22px rgba(16,24,40,.2);transform:translate(-50%,-115%);white-space:nowrap}
+    svg{width:100%;height:100%;display:block}.axis text{font-size:11px;fill:#667085}.axis line,.axis path{stroke:#d8dee8}.bar{fill:var(--blue);opacity:.78;cursor:pointer}.bar:hover{opacity:1}.selected-bar{fill:#1d4ed8;opacity:1;stroke:#0f172a;stroke-width:2}.line{fill:none;stroke:var(--red);stroke-width:3}.dot{fill:var(--red)}.margin-hit{fill:transparent;cursor:crosshair}
+    .table{overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:7px}table{width:100%;border-collapse:collapse;min-width:820px}th,td{padding:9px 10px;border-bottom:1px solid #edf0f5;text-align:left;font-size:13px}th{position:sticky;top:0;background:#f8fafc;color:#475467;z-index:1}td.num,th.num{text-align:right;white-space:nowrap}tr.click{cursor:pointer}tr.click:hover td{background:#f7fbff}tr.selected td{background:var(--soft-blue)}
+    .badge{display:inline-flex;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:650}.key{background:var(--soft-blue);color:var(--blue)}.dav{background:var(--soft-green);color:var(--green)}.mix{background:var(--soft-teal);color:var(--teal)}.raw{background:#f3e8ff;color:#7e22ce}.miss{background:var(--soft-red);color:var(--red)}
+    .detail{display:grid;gap:12px}.detail-empty{color:var(--muted);padding:22px;text-align:center;border:1px dashed var(--line);border-radius:8px}.detail-head{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.fact{background:#f8fafc;border:1px solid #edf0f5;border-radius:7px;padding:10px}.fact span{display:block;font-size:11px;color:var(--muted)}.fact strong{display:block;font-size:15px;margin-top:5px}
+    .scenario-controls{display:grid;grid-template-columns:1.4fr 1fr .8fr .8fr .8fr .7fr auto auto;gap:10px;align-items:end;margin-top:12px}.btn{height:36px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--text);padding:0 12px;cursor:pointer;font-weight:650}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.scenario-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.delta-pos{color:var(--green);font-weight:700}.delta-neg{color:var(--red);font-weight:700}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center}.sw{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}.sw.blue{background:var(--blue)}.sw.green{background:var(--green)}.sw.teal{background:var(--teal)}.sw.red{background:var(--red)}
+    .footer-note{font-size:12px;color:var(--muted)}
+    @media(max-width:1150px){.filters{grid-template-columns:repeat(2,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}.grid,.grid3{grid-template-columns:1fr}.detail-head,.scenario-kpis{grid-template-columns:repeat(2,1fr)}.scenario-controls{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+<main class="shell">
+  <div class="top">
+    <div class="title">
+      <h1>Маржинальность, объемы и давальческие схемы</h1>
+      <p>Плановая валовая маржа из куба «Факт продаж», раскрытие до SKU и ресурсной спецификации.</p>
+    </div>
+    <div class="hint" id="meta"></div>
+  </div>
+
+  <section class="panel filters">
+    <div class="field"><label>Годы</label><select id="yearFilter" multiple></select><div class="small">Ctrl/Shift для нескольких</div></div>
+    <div class="field"><label>Месяцы</label><select id="monthFilter" multiple></select></div>
+    <div class="field"><label>Менеджер</label><select id="managerFilter"><option value="">Все</option></select></div>
+    <div class="field"><label>Бренд</label><select id="brandFilter"><option value="">Все</option></select></div>
+    <div class="field"><label>SKU</label><select id="skuFilter"><option value="">Все</option></select></div>
+    <div class="field"><label>Схема</label><select id="schemeFilter"><option value="">Все</option></select></div>
+    <div class="field"><label>Давальческий состав</label><select id="davFilter"><option value="">Все</option><option value="raw">Есть дав. сырье</option><option value="mat">Есть дав. материалы</option><option value="mixed">Смешанная схема</option><option value="mat2">2+ дав. материалов</option><option value="key">Под ключ</option></select></div>
+  </section>
+
+  <section class="kpis">
+    <div class="panel kpi"><div class="label">Штук</div><div class="value" id="kpiQty">0</div><div class="sub">в выбранном срезе</div></div>
+    <div class="panel kpi"><div class="label">Выручка без НДС</div><div class="value" id="kpiRevenue">0</div><div class="sub">руб.</div></div>
+    <div class="panel kpi"><div class="label">Валовая маржа</div><div class="value" id="kpiMargin">0</div><div class="sub">плановая, руб.</div></div>
+    <div class="panel kpi"><div class="label">Валовая маржа %</div><div class="value" id="kpiMarginPct">0%</div><div class="sub">маржа / выручка</div></div>
+    <div class="panel kpi"><div class="label">Доля давальческих схем</div><div class="value" id="kpiDavQty">0%</div><div class="sub">по штукам</div></div>
+    <div class="panel kpi"><div class="label">Доля в марже: давальческие</div><div class="value" id="kpiDavMargin">0%</div><div class="sub">от общей маржи</div></div>
+  </section>
+
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
+      <div><h2>Динамика: количество и валовая маржа %</h2><div class="hint">Синие столбцы — штуки, красная линия — маржа %. Клик по столбцу пересчитывает топ-10 ниже. <span id="activeMonth"></span></div></div>
+      <div class="legend"><span><i class="sw blue"></i>Штук</span><span><i class="sw red"></i>Маржа %</span></div>
+    </div>
+    <div class="chart" id="comboChart"></div>
+  </section>
+
+  <section class="grid3">
+    <div class="panel">
+      <h2>Топ-10 по влиянию на маржу</h2>
+      <div class="hint">Отрицательное значение снижает общий % маржи выбранного среза.</div>
+      <div class="table"><table id="topMarginTable"></table></div>
+    </div>
+    <div class="panel">
+      <h2>Топ-10 по влиянию на штуки</h2>
+      <div class="hint">Кто формирует основной объем отгрузок.</div>
+      <div class="table"><table id="topQtyTable"></table></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
+      <div><h2>Пузырьки клиентов</h2><div class="hint">X — маржа %, Y — штуки, размер — выручка. Клик по пузырьку раскрывает клиента ниже.</div></div>
+      <div class="legend"><span><i class="sw blue"></i>Под ключ</span><span><i class="sw green"></i>Давальческая</span><span><i class="sw teal"></i>Смешанная</span></div>
+    </div>
+    <div class="chart bubble" id="bubbleChart"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Прогноз загрузки мощности</h2>
+    <div class="hint">Добавляй гипотезы по заказам: можно выбрать клиента/SKU для исторических цены и маржи или оставить ручной сценарий и ввести только объем, цену и маржу.</div>
+    <div class="scenario-controls">
+      <div class="field"><label>Клиент</label><select id="forecastClient"><option value="">Ручной сценарий</option></select></div>
+      <div class="field"><label>SKU</label><select id="forecastSku"><option value="">Все SKU клиента</option></select></div>
+      <div class="field"><label>Месяц базы</label><select id="forecastMonth"><option value="">Текущий срез</option></select></div>
+      <div class="field"><label>Объем, шт.</label><input id="forecastQty" type="number" min="0" step="1000" placeholder="100000"></div>
+      <div class="field"><label>Цена без НДС / шт.</label><input id="forecastPrice" type="number" min="0" step="0.01"></div>
+      <div class="field"><label>Маржа %</label><input id="forecastMarginPct" type="number" min="-100" max="100" step="0.1"></div>
+      <button class="btn primary" type="button" onclick="addScenario()">Добавить</button>
+      <button class="btn" type="button" onclick="clearScenarios()">Очистить</button>
+    </div>
+    <div class="scenario-kpis" id="forecastSummary"></div>
+    <div class="table"><table id="forecastTable"></table></div>
+  </section>
+
+  <section class="panel detail">
+    <div>
+      <h2>Детализация выбранного клиента / SKU</h2>
+      <div class="hint">Кликни по клиенту в топах или пузырьке, затем по SKU в таблице, чтобы увидеть РС и давальческие строки.</div>
+    </div>
+    <div id="detailBlock" class="detail-empty">Выберите клиента или SKU.</div>
+  </section>
+
+  <div class="footer-note" id="ruleNote"></div>
+</main>
+
+<script>
+const fmtNum = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
+const fmtMoney = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
+const fmtPct = new Intl.NumberFormat('ru-RU', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+let DATA, state = { customer: '', sku: '', month: '' };
+let scenarios = [];
+
+const q = s => document.querySelector(s);
+const sum = (arr, f) => arr.reduce((a, x) => a + (+f(x) || 0), 0);
+const uniq = arr => [...new Set(arr.filter(x => x !== null && x !== undefined && String(x).trim() !== '').map(String))].sort((a,b)=>a.localeCompare(b,'ru'));
+const multiValues = el => [...el.selectedOptions].map(o => o.value).filter(Boolean);
+
+function bySchemeClass(s) {
+  if (s === 'Смешанная схема') return 'mix';
+  if (s && s.startsWith('Давальческая')) return s.includes('сырье') ? 'raw' : 'dav';
+  if (s === 'Под ключ') return 'key';
+  return 'miss';
+}
+function schemeColor(s) {
+  if (s === 'Смешанная схема') return '#0f8b8d';
+  if (s && s.startsWith('Давальческая')) return '#168a5b';
+  return '#2563eb';
+}
+
+async function init() {
+  DATA = await fetch('data.json').then(r => r.json());
+  q('#meta').textContent = `Обновлено: ${DATA.meta.generatedAt}`;
+  q('#ruleNote').textContent = DATA.meta.rule + ' · источник маржи: ' + DATA.meta.source;
+  fillFilters();
+  fillForecastControls();
+  document.querySelectorAll('.filters select').forEach(el => el.addEventListener('change', () => { state = { customer:'', sku:'', month:'' }; render(); }));
+  q('#forecastClient').addEventListener('change', () => { updateForecastSkuOptions(); updateForecastDefaults(); });
+  q('#forecastSku').addEventListener('change', updateForecastDefaults);
+  q('#forecastMonth').addEventListener('change', () => { updateForecastDefaults(); render(); });
+  render();
+}
+
+function fillFilters() {
+  const sales = DATA.sales;
+  fillMulti(q('#yearFilter'), uniq(sales.map(x => x.year)), true);
+  fillMulti(q('#monthFilter'), uniq(sales.map(x => x.month)), true);
+  fillSingle(q('#managerFilter'), uniq(sales.map(x => x.manager)));
+  fillSingle(q('#brandFilter'), uniq(sales.map(x => x.brand)));
+  fillSingle(q('#skuFilter'), uniq(sales.map(x => x.sku)));
+  fillSingle(q('#schemeFilter'), uniq(sales.map(x => x.scheme)));
+}
+function fillForecastControls() {
+  fillSingle(q('#forecastClient'), uniq(DATA.sales.map(x => x.customer)));
+  fillSingle(q('#forecastMonth'), uniq(DATA.sales.map(x => x.month)));
+  updateForecastSkuOptions();
+}
+function updateForecastSkuOptions() {
+  const client = q('#forecastClient').value;
+  const skuEl = q('#forecastSku');
+  if (!client) {
+    skuEl.innerHTML = '<option value="">Без SKU</option>';
+    q('#forecastPrice').value = '';
+    q('#forecastMarginPct').value = '';
+    return;
+  }
+  const rows = client ? DATA.sales.filter(x => x.customer === client) : DATA.sales;
+  skuEl.innerHTML = '<option value="">Все SKU клиента</option>' + uniq(rows.map(x => x.sku)).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+}
+function fillMulti(el, values, selectAll) {
+  el.innerHTML = values.map(v => `<option value="${escapeHtml(v)}" ${selectAll?'selected':''}>${escapeHtml(v)}</option>`).join('');
+}
+function fillSingle(el, values) {
+  const first = el.querySelector('option')?.outerHTML || '<option value="">Все</option>';
+  el.innerHTML = first + values.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+}
+function escapeHtml(v){ return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+function filteredSales() {
+  const years = multiValues(q('#yearFilter'));
+  const months = multiValues(q('#monthFilter'));
+  const manager = q('#managerFilter').value;
+  const brand = q('#brandFilter').value;
+  const sku = q('#skuFilter').value;
+  const scheme = q('#schemeFilter').value;
+  const dav = q('#davFilter').value;
+  return DATA.sales.filter(x => {
+    if (years.length && !years.includes(String(x.year))) return false;
+    if (months.length && !months.includes(x.month)) return false;
+    if (manager && x.manager !== manager) return false;
+    if (brand && x.brand !== brand) return false;
+    if (sku && x.sku !== sku) return false;
+    if (scheme && x.scheme !== scheme) return false;
+    if (dav === 'raw' && !x.hasDavRaw) return false;
+    if (dav === 'mat' && !x.hasDavMaterials) return false;
+    if (dav === 'mixed' && !x.isMixed) return false;
+    if (dav === 'mat2' && x.davMaterials < 2) return false;
+    if (dav === 'key' && x.scheme !== 'Под ключ') return false;
+    return true;
+  });
+}
+
+function groupBy(arr, keyFn) {
+  const m = new Map();
+  for (const x of arr) {
+    const k = keyFn(x);
+    if (!m.has(k)) m.set(k, []);
+    m.get(k).push(x);
+  }
+  return [...m.entries()].map(([key, rows]) => ({ key, rows }));
+}
+function aggRows(rows) {
+  const revenue = sum(rows, x=>x.revenue), marginRub = sum(rows, x=>x.marginRub), qty = sum(rows, x=>x.qty);
+  return { qty, revenue, marginRub, marginPct: revenue ? marginRub/revenue : 0 };
+}
+function dominantScheme(rows) {
+  const a = aggRows(rows.filter(x => x.scheme === 'Смешанная схема')).marginRub;
+  const b = aggRows(rows.filter(x => x.scheme && x.scheme.startsWith('Давальческая'))).marginRub;
+  const c = aggRows(rows.filter(x => x.scheme === 'Под ключ')).marginRub;
+  if (a >= b && a >= c && a !== 0) return 'Смешанная схема';
+  if (b >= c && b !== 0) return 'Давальческая схема';
+  return 'Под ключ';
+}
+
+function render() {
+  const baseRows = filteredSales();
+  const rows = state.month ? baseRows.filter(x => x.month === state.month) : baseRows;
+  const total = aggRows(rows);
+  const davRows = rows.filter(x => x.scheme && x.scheme !== 'Под ключ');
+  const dav = aggRows(davRows);
+  q('#kpiQty').textContent = fmtNum.format(total.qty);
+  q('#kpiRevenue').textContent = fmtMoney.format(total.revenue);
+  q('#kpiMargin').textContent = fmtMoney.format(total.marginRub);
+  q('#kpiMarginPct').textContent = fmtPct.format(total.marginPct);
+  q('#kpiDavQty').textContent = fmtPct.format(total.qty ? dav.qty / total.qty : 0);
+  q('#kpiDavMargin').textContent = fmtPct.format(total.marginRub ? dav.marginRub / total.marginRub : 0);
+
+  q('#activeMonth').textContent = state.month ? `Выбран месяц: ${state.month}. Повторный клик снимет выбор.` : '';
+  renderCombo(baseRows);
+  const clients = groupBy(rows, x=>x.customer).map(g => ({ customer:g.key, scheme:dominantScheme(g.rows), ...aggRows(g.rows) }));
+  clients.forEach(c => {
+    c.revenueShare = total.revenue ? c.revenue / total.revenue : 0;
+    c.qtyShare = total.qty ? c.qty / total.qty : 0;
+    c.marginWeight = total.marginRub ? c.marginRub / total.marginRub : 0;
+    c.influencePp = c.revenueShare * (c.marginPct - total.marginPct);
+  });
+  renderTopMargin(clients);
+  renderTopQty(clients);
+  renderBubbles(clients, total);
+  renderDetail(rows);
+  renderForecast();
+}
+
+function renderCombo(rows) {
+  const data = groupBy(rows, x=>x.month).map(g => ({ month:g.key, ...aggRows(g.rows) })).sort((a,b)=>a.month.localeCompare(b.month));
+  const el = q('#comboChart');
+  if (!data.length) { el.innerHTML = '<div class="detail-empty">Нет данных</div>'; return; }
+  const W = el.clientWidth || 900, H = 320, m = {l:60,r:60,t:18,b:42};
+  const maxQty = Math.max(...data.map(d=>d.qty), 1);
+  const maxPct = Math.max(...data.map(d=>d.marginPct), .01);
+  const minPct = Math.min(0, ...data.map(d=>d.marginPct));
+  const x = i => m.l + i * ((W-m.l-m.r)/Math.max(1,data.length-1));
+  const yQty = v => H-m.b - (v/maxQty)*(H-m.t-m.b);
+  const yPct = v => H-m.b - ((v-minPct)/(maxPct-minPct || 1))*(H-m.t-m.b);
+  const barW = Math.max(18, (W-m.l-m.r)/data.length*0.52);
+  const pts = data.map((d,i)=>`${x(i)},${yPct(d.marginPct)}`).join(' ');
+  el.innerHTML = `<div class="chart-tooltip" id="trendTooltip" style="display:none"></div><svg viewBox="0 0 ${W} ${H}">
+    <g class="axis"><line x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}"/><line x1="${m.l}" y1="${m.t}" x2="${m.l}" y2="${H-m.b}"/><line x1="${W-m.r}" y1="${m.t}" x2="${W-m.r}" y2="${H-m.b}"/>
+    ${data.map((d,i)=>`<text x="${x(i)}" y="${H-14}" text-anchor="middle">${d.month}</text>`).join('')}
+    <text x="8" y="${m.t+8}">шт</text><text x="${W-48}" y="${m.t+8}">маржа</text></g>
+    ${data.map((d,i)=>`<rect class="bar ${state.month===d.month?'selected-bar':''}" x="${x(i)-barW/2}" y="${yQty(d.qty)}" width="${barW}" height="${H-m.b-yQty(d.qty)}" onclick="selectMonth('${jsEsc(d.month)}')"><title>${d.month}: ${fmtNum.format(d.qty)} шт</title></rect>`).join('')}
+    <polyline class="line" points="${pts}"/>
+    ${data.map((d,i)=>`<circle class="dot" cx="${x(i)}" cy="${yPct(d.marginPct)}" r="4"></circle><circle class="margin-hit" cx="${x(i)}" cy="${yPct(d.marginPct)}" r="13" onmousemove="showTrendTooltip(event,'${jsEsc(d.month)}',${d.marginPct},${d.qty},${d.marginRub})" onmouseleave="hideTrendTooltip()"><title>${d.month}: ${fmtPct.format(d.marginPct)}</title></circle>`).join('')}
+  </svg>`;
+}
+
+function renderTopMargin(clients) {
+  const rows = [...clients].sort((a,b)=>a.influencePp-b.influencePp).slice(0,10);
+  q('#topMarginTable').innerHTML = `<thead><tr><th>Клиент</th><th class="num">Штук</th><th class="num">Маржа %</th><th class="num">Вес в марже</th><th class="num">Влияние, п.п.</th></tr></thead><tbody>` +
+    rows.map(r => `<tr class="click ${state.customer===r.customer?'selected':''}" onclick="selectCustomer('${jsEsc(r.customer)}')"><td>${escapeHtml(r.customer)}</td><td class="num">${fmtNum.format(r.qty)}</td><td class="num">${fmtPct.format(r.marginPct)}</td><td class="num">${fmtPct.format(r.marginWeight)}</td><td class="num">${fmtPct.format(r.influencePp)}</td></tr>`).join('') + '</tbody>';
+}
+function renderTopQty(clients) {
+  const rows = [...clients].sort((a,b)=>b.qtyShare-a.qtyShare).slice(0,10);
+  q('#topQtyTable').innerHTML = `<thead><tr><th>Клиент</th><th class="num">Штук</th><th class="num">Доля в штуках</th><th class="num">Маржа %</th><th class="num">Вес в марже</th></tr></thead><tbody>` +
+    rows.map(r => `<tr class="click ${state.customer===r.customer?'selected':''}" onclick="selectCustomer('${jsEsc(r.customer)}')"><td>${escapeHtml(r.customer)}</td><td class="num">${fmtNum.format(r.qty)}</td><td class="num">${fmtPct.format(r.qtyShare)}</td><td class="num">${fmtPct.format(r.marginPct)}</td><td class="num">${fmtPct.format(r.marginWeight)}</td></tr>`).join('') + '</tbody>';
+}
+function jsEsc(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+window.selectMonth = m => { state.month = state.month === m ? '' : m; state.customer = ''; state.sku = ''; render(); };
+window.showTrendTooltip = (event, month, marginPct, qty, marginRub) => {
+  const tip = q('#trendTooltip');
+  if (!tip) return;
+  const box = q('#comboChart').getBoundingClientRect();
+  tip.style.display = 'block';
+  tip.style.left = `${event.clientX - box.left}px`;
+  tip.style.top = `${event.clientY - box.top}px`;
+  tip.innerHTML = `<strong>${escapeHtml(month)}</strong><br>Маржа: ${fmtPct.format(marginPct)}<br>ВП: ${fmtMoney.format(marginRub)} руб.<br>Штук: ${fmtNum.format(qty)}`;
+};
+window.hideTrendTooltip = () => { const tip = q('#trendTooltip'); if (tip) tip.style.display = 'none'; };
+window.selectCustomer = c => { state.customer = c; state.sku = ''; render(); document.querySelector('.detail').scrollIntoView({behavior:'smooth',block:'start'}); };
+window.selectSku = s => { state.sku = s; render(); document.querySelector('.detail').scrollIntoView({behavior:'smooth',block:'start'}); };
+window.clearSkuSelection = () => { state.sku = ''; render(); document.querySelector('.detail').scrollIntoView({behavior:'smooth',block:'start'}); };
+
+function forecastBaseRows() {
+  const rows = filteredSales();
+  const month = q('#forecastMonth')?.value || state.month;
+  return month ? rows.filter(x => x.month === month) : rows;
+}
+function forecastProfile() {
+  const client = q('#forecastClient').value;
+  const sku = q('#forecastSku').value;
+  if (!client) return { rows: [], total: { qty:0, revenue:0, marginRub:0, marginPct:0 }, price: 0, marginPct: 0 };
+  let rows = filteredSales().filter(x => (!client || x.customer === client) && (!sku || x.sku === sku));
+  if (!rows.length) rows = DATA.sales.filter(x => (!client || x.customer === client) && (!sku || x.sku === sku));
+  const total = aggRows(rows);
+  return { rows, total, price: total.qty ? total.revenue / total.qty : 0, marginPct: total.revenue ? total.marginRub / total.revenue : 0 };
+}
+function updateForecastDefaults() {
+  const p = forecastProfile();
+  if (p.price) q('#forecastPrice').value = p.price.toFixed(2);
+  if (p.marginPct || p.total.revenue) q('#forecastMarginPct').value = (p.marginPct * 100).toFixed(1);
+}
+window.addScenario = () => {
+  const client = q('#forecastClient').value;
+  const sku = q('#forecastSku').value;
+  const qty = +q('#forecastQty').value || 0;
+  const price = +q('#forecastPrice').value || 0;
+  const marginPct = (+q('#forecastMarginPct').value || 0) / 100;
+  if (!qty || !price) return;
+  const profile = forecastProfile();
+  scenarios.push({
+    id: Date.now(),
+    client: client || 'Ручной сценарий',
+    sku,
+    qty,
+    price,
+    marginPct,
+    scheme: profile.rows[0]?.scheme || 'не задана',
+    revenue: qty * price,
+    marginRub: qty * price * marginPct
+  });
+  renderForecast();
+};
+window.clearScenarios = () => { scenarios = []; renderForecast(); };
+window.removeScenario = id => { scenarios = scenarios.filter(x => x.id !== id); renderForecast(); };
+function renderForecast() {
+  const base = aggRows(forecastBaseRows());
+  const added = { qty: sum(scenarios, x=>x.qty), revenue: sum(scenarios, x=>x.revenue), marginRub: sum(scenarios, x=>x.marginRub) };
+  added.marginPct = added.revenue ? added.marginRub / added.revenue : 0;
+  const combined = { qty: base.qty + added.qty, revenue: base.revenue + added.revenue, marginRub: base.marginRub + added.marginRub };
+  combined.marginPct = combined.revenue ? combined.marginRub / combined.revenue : 0;
+  const deltaPct = combined.marginPct - base.marginPct;
+  const deltaClass = deltaPct >= 0 ? 'delta-pos' : 'delta-neg';
+  q('#forecastSummary').innerHTML = `
+    <div class="fact"><span>База</span><strong>${fmtPct.format(base.marginPct)}</strong><span>${fmtNum.format(base.qty)} шт · ${fmtMoney.format(base.marginRub)} руб. ВП</span></div>
+    <div class="fact"><span>Добавлено сценариями</span><strong>${fmtNum.format(added.qty)} шт</strong><span>${fmtMoney.format(added.marginRub)} руб. ВП · ${fmtPct.format(added.marginPct)}</span></div>
+    <div class="fact"><span>После загрузки</span><strong>${fmtPct.format(combined.marginPct)}</strong><span>${fmtNum.format(combined.qty)} шт · ${fmtMoney.format(combined.marginRub)} руб. ВП</span></div>
+    <div class="fact"><span>Эффект к базе</span><strong class="${deltaClass}">${deltaPct >= 0 ? '+' : ''}${fmtPct.format(deltaPct)}</strong><span>${fmtMoney.format(combined.marginRub - base.marginRub)} руб. к ВП</span></div>`;
+  q('#forecastTable').innerHTML = `<thead><tr><th>Клиент</th><th>SKU</th><th>Схема</th><th class="num">Штук</th><th class="num">Цена</th><th class="num">Выручка</th><th class="num">Маржа %</th><th class="num">ВП</th><th class="num">ВП / 1000 шт.</th><th></th></tr></thead><tbody>` +
+    (scenarios.length ? scenarios.map(s => `<tr><td>${escapeHtml(s.client)}</td><td>${escapeHtml(s.sku || 'портфель')}</td><td>${escapeHtml(s.scheme)}</td><td class="num">${fmtNum.format(s.qty)}</td><td class="num">${fmtMoney.format(s.price)}</td><td class="num">${fmtMoney.format(s.revenue)}</td><td class="num">${fmtPct.format(s.marginPct)}</td><td class="num">${fmtMoney.format(s.marginRub)}</td><td class="num">${fmtMoney.format(s.qty ? s.marginRub / s.qty * 1000 : 0)}</td><td><button class="btn" type="button" onclick="removeScenario(${s.id})">Убрать</button></td></tr>`).join('') : '<tr><td colspan="10" class="hint">Добавь заказ, чтобы увидеть влияние на загрузку и маржу.</td></tr>') +
+    '</tbody>';
+}
+
+function renderBubbles(clients, total) {
+  const el = q('#bubbleChart');
+  const data = clients.filter(c=>c.revenue>0 && c.qty>0);
+  if (!data.length) { el.innerHTML = '<div class="detail-empty">Нет данных</div>'; return; }
+  const W = el.clientWidth || 1000, H = 420, m = {l:70,r:28,t:22,b:46};
+  const minX = Math.min(0, ...data.map(d=>d.marginPct));
+  const maxX = Math.max(...data.map(d=>d.marginPct), .55);
+  const maxY = Math.max(...data.map(d=>d.qty), 1);
+  const maxRev = Math.max(...data.map(d=>d.revenue), 1);
+  const x = v => m.l + ((v-minX)/(maxX-minX || 1))*(W-m.l-m.r);
+  const y = v => H-m.b - (v/maxY)*(H-m.t-m.b);
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}">
+    <g class="axis"><line x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}"/><line x1="${m.l}" y1="${m.t}" x2="${m.l}" y2="${H-m.b}"/>
+      <text x="${W/2}" y="${H-10}" text-anchor="middle">Маржа %</text><text x="10" y="${m.t+8}">штук</text>
+      ${[0,.15,.3,.45,.6].filter(v=>v>=minX&&v<=maxX).map(v=>`<text x="${x(v)}" y="${H-28}" text-anchor="middle">${Math.round(v*100)}%</text>`).join('')}
+    </g>
+    ${data.map(d => {
+      const r = 7 + Math.sqrt(d.revenue/maxRev)*28;
+      const stroke = d.marginPct < total.marginPct ? '#d92d20' : '#fff';
+      return `<circle cx="${x(d.marginPct)}" cy="${y(d.qty)}" r="${r}" fill="${schemeColor(d.scheme)}" fill-opacity=".72" stroke="${stroke}" stroke-width="2" style="cursor:pointer" onclick="selectCustomer('${jsEsc(d.customer)}')"><title>${escapeHtml(d.customer)}\n${fmtNum.format(d.qty)} шт\nМаржа ${fmtPct.format(d.marginPct)}</title></circle>`;
+    }).join('')}
+  </svg>`;
+}
+
+function renderDetail(rows) {
+  const el = q('#detailBlock');
+  let base = rows;
+  if (state.customer) base = base.filter(x=>x.customer===state.customer);
+  if (state.sku) base = base.filter(x=>x.sku===state.sku);
+  if (!state.customer && !state.sku) { el.className='detail-empty'; el.innerHTML='Выберите клиента или SKU.'; return; }
+  el.className = 'detail';
+  const total = aggRows(base);
+  const title = state.sku ? `${state.customer || ''} · ${state.sku}` : state.customer;
+  const skuRows = groupBy(base, x=>x.sku).map(g => ({ sku:g.key, productName:g.rows[0].productName, scheme:g.rows[0].scheme, specCode:g.rows[0].specCode, davRaw:g.rows[0].davRaw, davMaterials:g.rows[0].davMaterials, ...aggRows(g.rows) })).sort((a,b)=>b.marginRub-a.marginRub);
+  const selectedSku = state.sku || (skuRows.length===1 ? skuRows[0].sku : '');
+  const specInfo = selectedSku ? DATA.skuClass.find(x=>x.sku===selectedSku) : null;
+  const mats = specInfo ? DATA.materials.filter(m=>m.sku===selectedSku && (!specInfo.specCode || m.specCode===specInfo.specCode)) : [];
+  el.innerHTML = `
+    <div class="detail-head">
+      <div class="fact"><span>Выбор</span><strong>${escapeHtml(title)}</strong></div>
+      <div class="fact"><span>Штук</span><strong>${fmtNum.format(total.qty)}</strong></div>
+      <div class="fact"><span>Выручка</span><strong>${fmtMoney.format(total.revenue)}</strong></div>
+      <div class="fact"><span>Маржа</span><strong>${fmtMoney.format(total.marginRub)}</strong></div>
+      <div class="fact"><span>Маржа %</span><strong>${fmtPct.format(total.marginPct)}</strong></div>
+      <div class="fact"><span>SKU</span><strong>${skuRows.length}</strong></div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <h2>SKU выбранного клиента</h2>
+        ${state.sku ? '<button class="btn" type="button" onclick="clearSkuSelection()">Вернуться к списку SKU</button>' : ''}
+      </div>
+      <div class="table"><table><thead><tr><th>SKU</th><th>Наименование</th><th class="num">Штук</th><th class="num">Маржа %</th><th class="num">Вес в марже клиента</th><th>Схема</th><th class="num">Сырье</th><th class="num">Мат.</th><th>РС</th></tr></thead><tbody>
+        ${skuRows.map(r=>`<tr class="click ${state.sku===r.sku?'selected':''}" onclick="selectSku('${jsEsc(r.sku)}')"><td>${escapeHtml(r.sku)}</td><td>${escapeHtml(r.productName)}</td><td class="num">${fmtNum.format(r.qty)}</td><td class="num">${fmtPct.format(r.marginPct)}</td><td class="num">${fmtPct.format(total.marginRub ? r.marginRub/total.marginRub : 0)}</td><td><span class="badge ${bySchemeClass(r.scheme)}">${escapeHtml(r.scheme)}</span></td><td class="num">${r.davRaw}</td><td class="num">${r.davMaterials}</td><td>${escapeHtml(r.specCode || '')}</td></tr>`).join('')}
+      </tbody></table></div>
+    </div>
+    ${selectedSku ? `<div>
+      <h2>Ресурсная спецификация и давальческие строки</h2>
+      <div class="detail-head">
+        <div class="fact"><span>SKU</span><strong>${escapeHtml(selectedSku)}</strong></div>
+        <div class="fact"><span>РС</span><strong>${escapeHtml(specInfo?.specCode || 'не найдена')}</strong></div>
+        <div class="fact"><span>Статус РС</span><strong>${escapeHtml(specInfo?.specStatus || '')}</strong></div>
+        <div class="fact"><span>Период РС</span><strong>${escapeHtml([specInfo?.specStart, specInfo?.specEnd].filter(Boolean).join(' → '))}</strong></div>
+        <div class="fact"><span>Дав. сырье</span><strong>${specInfo?.davRaw ?? 0}</strong></div>
+        <div class="fact"><span>Дав. материалы</span><strong>${specInfo?.davMaterials ?? 0}</strong></div>
+      </div>
+      <div class="table"><table><thead><tr><th>№</th><th>Артикул материала</th><th>Материал</th><th>Тип</th><th>Папка</th><th class="num">Кол-во в РС</th><th>Способ получения</th></tr></thead><tbody>
+        ${mats.length ? mats.map(m=>`<tr><td>${m.lineNumber}</td><td>${escapeHtml(m.materialArticle)}</td><td>${escapeHtml(m.materialName)}</td><td>${escapeHtml(m.materialClass)}</td><td>${escapeHtml(m.parentFolder)}</td><td class="num">${fmtNum.format(m.quantityInSpec)}</td><td>${escapeHtml(m.supplyMethod)}</td></tr>`).join('') : '<tr><td colspan="7" class="hint">Давальческие строки РС не найдены.</td></tr>'}
+      </tbody></table></div>
+    </div>` : ''}
+  `;
+}
+
+init();
+</script>
+</body>
+</html>
