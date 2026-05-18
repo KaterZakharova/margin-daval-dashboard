@@ -623,8 +623,9 @@ function renderDetail(rows) {
   // compute per-SKU monthly trend using all-period data for this customer
   const allPeriodRows = state.customer ? filteredSalesNoMonth().filter(x => x.customer === state.customer) : [];
   const allMonthsSorted = uniq(allPeriodRows.map(x => x.month)).sort();
-  const recentMths = new Set(allMonthsSorted.slice(-3));
-  const priorMths  = new Set(allMonthsSorted.slice(-6, -3));
+  const TREND_WIN = 6; // месяцев в окне сравнения (последние N vs предыдущие N)
+  const recentMths = new Set(allMonthsSorted.slice(-TREND_WIN));
+  const priorMths  = new Set(allMonthsSorted.slice(-2*TREND_WIN, -TREND_WIN));
   const skuPeriod  = new Map(); // sku -> {recent, prior, series}
   for (const r of allPeriodRows) {
     if (!skuPeriod.has(r.sku)) skuPeriod.set(r.sku, { recentRub:0, priorRub:0, recentQty:0, priorQty:0, series: new Map() });
@@ -636,19 +637,22 @@ function renderDetail(rows) {
     const mp = s.series.get(r.month);
     mp.qty += qty; mp.marginRub += mar;
   }
-  function skuTrend(sku) {
+  function skuTrendBy(sku, metric) {
     const s = skuPeriod.get(sku);
     if (!s) return { trend:'stable', pct:0 };
-    const hasRecent = s.recentRub > 0, hasPrior = s.priorRub > 0;
+    const rec = metric==='qty' ? s.recentQty : s.recentRub;
+    const pri = metric==='qty' ? s.priorQty  : s.priorRub;
+    const hasRecent = rec > 0, hasPrior = pri > 0;
     const hasOlder  = allPeriodRows.some(r => r.sku === sku && !recentMths.has(r.month) && !priorMths.has(r.month));
     if (!hasRecent && (hasPrior || hasOlder)) return { trend:'lost', pct:-1 };
     if (!hasPrior) return { trend: hasRecent ? 'new' : 'stable', pct:0 };
-    const pct = s.priorRub ? (s.recentRub - s.priorRub) / Math.abs(s.priorRub) : 0;
+    const pct = pri ? (rec - pri) / Math.abs(pri) : 0;
     return { trend: pct < -0.12 ? 'falling' : pct > 0.12 ? 'rising' : 'stable', pct };
   }
+  function skuTrend(sku) { return skuTrendBy(sku, 'marginRub'); }
   function skuTrendBadge(sku) {
     const { trend, pct } = skuTrend(sku);
-    if (trend === 'lost')    return `<span class="trend-badge-lost" title="Нет продаж в посл. 3 мес.">⚠ Нет</span>`;
+    if (trend === 'lost')    return `<span class="trend-badge-lost" title="Нет продаж в посл. 6 мес.">⚠ Нет</span>`;
     if (trend === 'falling') return `<span class="trend-badge-fall">↓ ${Math.abs(Math.round(pct*100))}%</span>`;
     if (trend === 'rising')  return `<span class="trend-badge-rise">↑ ${Math.round(pct*100)}%</span>`;
     if (trend === 'new')     return `<span class="trend-badge-rise">✦ Новый</span>`;
@@ -664,7 +668,7 @@ function renderDetail(rows) {
     return `<svg width="${W}" height="${H}" style="display:inline-block;vertical-align:middle;margin-left:6px">${
       vals.map((v,i) => {
         const h = Math.max(1, (v/maxV)*H);
-        const isR = i >= n-3;
+        const isR = i >= n-6;
         const col = (trend==='falling'||trend==='lost') && isR ? '#d92d20' : trend==='rising' && isR ? '#168a5b' : '#2563eb';
         return `<rect x="${i*(W/n)}" y="${H-h}" width="${bw}" height="${h}" fill="${col}" opacity="${isR?.9:.35}"/>`;
       }).join('')
@@ -704,25 +708,30 @@ function renderDetail(rows) {
   const specInfo = selectedSku ? DATA.skuClass.find(x=>x.sku===selectedSku) : null;
   const mats = specInfo ? DATA.materials.filter(m=>m.sku===selectedSku && (!specInfo.specCode || m.specCode===specInfo.specCode)) : [];
 
-  // ── Feature B: per-SKU trend items (recent 3 мес. vs prior 3 мес.) ────────
+  // фильтр по статусу ассортимента (Новинка / Основной / Выводится)
+  const stMatch = sku => skuStatusFilter === 'all' || skuStatus(sku) === skuStatusFilter;
+
+  // ── Feature B: per-SKU trend items (recent 6 мес. vs prior 6 мес.) ────────
+  // % изменения / цвет / сортировка считаются по ВЫБРАННОЙ метрике
+  // (Маржа руб. либо Штуки) — переключатель реально меняет картину.
   const skuNameMap = new Map();
   allPeriodRows.forEach(r => { if (!skuNameMap.has(r.sku)) skuNameMap.set(r.sku, r.productName || r.sku); });
   const skuTrendItems = [...skuPeriod.entries()].map(([sku, s]) => {
     const recent = skuTrendMetric==='qty' ? s.recentQty : s.recentRub;
     const prior  = skuTrendMetric==='qty' ? s.priorQty  : s.priorRub;
-    const { trend, pct } = skuTrend(sku);
-    return { sku, name: skuNameMap.get(sku)||sku, recent, prior,
+    const { trend, pct } = skuTrendBy(sku, skuTrendMetric);
+    return { sku, name: skuNameMap.get(sku)||sku, recent, prior, status: skuStatus(sku),
              pct: trend==='lost'?-1 : trend==='new'?1 : pct, kind: trend };
-  }).filter(it => it.recent || it.prior);
+  }).filter(it => (it.recent || it.prior) && stMatch(it.sku));
 
   // ── Table: current period ──────────────────────────────────────────────────
   const currentTable = `<div class="table" style="max-height:460px"><table>
     <thead><tr>
       <th>SKU</th><th>Наименование</th><th>Статус</th>
       <th class="num">Штук</th><th class="num">Маржа %</th><th class="num">Вес в марже</th>
-      <th>Схема</th><th class="num">Сырье</th><th class="num">Мат.</th><th>РС</th><th>Тренд (3 мес.)</th>
+      <th>Схема</th><th class="num">Сырье</th><th class="num">Мат.</th><th>РС</th><th>Тренд (6 мес.)</th>
     </tr></thead><tbody>
-    ${skuRows.map(r=>{
+    ${skuRows.filter(r=>stMatch(r.sku)).map(r=>{
       const {trend}=skuTrend(r.sku);
       const bg=trend==='falling'||trend==='lost'?'background:#fff8f8':trend==='rising'?'background:#f0fdf4':'';
       return `<tr class="click ${state.sku===r.sku?'selected':''}" style="${bg}" onclick="selectSku('${jsEsc(r.sku)}')">
@@ -740,18 +749,23 @@ function renderDetail(rows) {
     </tbody></table></div>`;
 
   // ── Feature B block: table + visual SKU comparison chart ───────────────────
+  const stBtn = (v,t) => `<button class="tab-btn ${skuStatusFilter===v?'active':''}" onclick="setSkuStatusFilter('${v}')">${t}</button>`;
   const currentBlock = `${currentTable}
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 6px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 6px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <h2 style="margin:0">Сравнение SKU: рост / падение</h2>
         <div class="top20-tabs">
           <button class="tab-btn ${skuTrendMetric==='marginRub'?'active':''}" onclick="setSkuTrendMetric('marginRub')">Маржа руб.</button>
           <button class="tab-btn ${skuTrendMetric==='qty'?'active':''}" onclick="setSkuTrendMetric('qty')">Штуки</button>
         </div>
+        <span style="font-size:12px;color:var(--muted)">Статус:</span>
+        <div class="top20-tabs">
+          ${stBtn('all','Все')}${stBtn('new','✦ Новинка')}${stBtn('core','Основной')}${stBtn('exit','↓ Выводится')}
+        </div>
       </div>
       <button class="exp-btn" onclick="expandChart('#skuTrendChart','Сравнение SKU: рост / падение')">⤢ Развернуть</button>
     </div>
-    <div class="hint" style="margin-bottom:6px">Последние 3 мес. против предыдущих 3 мес. Зелёные — растут, красные — проседают, тёмные — продажи прекратились. Наведите на строку для абсолютных чисел.</div>
+    <div class="hint" style="margin-bottom:6px">Последние 6 мес. против предыдущих 6 мес. Зелёные — растут, красные — проседают, тёмные — продажи прекратились. Статус ассортимента — рядом с названием. Наведите на строку для абсолютных чисел.</div>
     <div id="skuTrendChart">${buildSkuTrendChart(skuTrendItems, skuTrendMetric)}</div>`;
 
   // ── Feature C: period comparison shell (filled by renderCompareArea) ───────
@@ -1089,6 +1103,7 @@ document.addEventListener('click', e => {
 
 let detailMode = 'current';      // 'current' | 'compare'
 let skuTrendMetric = 'marginRub';// feature B chart metric
+let skuStatusFilter = 'all';     // 'all' | 'new' | 'core' | 'exit'
 let cmpMetric = 'marginRub';     // feature C chart metric
 let cmpView = 'chart';           // 'chart' | 'table'
 
@@ -1123,6 +1138,7 @@ const metricName = mt => ({qty:'Штуки',revenue:'Выручка',marginRub:'
 
 window.setDetailMode = m => { detailMode = m; renderDetailFromState(); };
 window.setSkuTrendMetric = mt => { skuTrendMetric = mt; renderDetailFromState(); };
+window.setSkuStatusFilter = s => { skuStatusFilter = s; renderDetailFromState(); };
 window.setCmpMetric = mt => { cmpMetric = mt; renderDetailFromState(); };
 window.setCmpView = v => { cmpView = v; renderDetailFromState(); };
 
@@ -1157,13 +1173,14 @@ function buildSkuTrendChart(items, metric) {
   if (!items.length) return '<div class="detail-empty">Недостаточно истории для сравнения SKU.</div>';
   const data = items.slice().sort((a,b)=>b.pct-a.pct);
   const fmt = metricFmt(metric);
-  const rowH = 26, padT = 28, padB = 8, W = 1000, labelW = 250;
+  const rowH = 26, padT = 28, padB = 8, W = 1000, labelW = 330;
   const H = padT + padB + data.length*rowH;
   const cx = labelW + (W - labelW - 20) / 2;
   const half = (W - labelW - 20) / 2 - 6;
   const capped = v => Math.max(-2, Math.min(2, v));         // clamp ±200%
   const maxAbs = Math.max(0.25, ...data.map(d=>Math.abs(capped(d.pct))));
   const colorOf = k => k==='lost'?'#b42318':k==='falling'?'#f04438':k==='new'?'#2563eb':k==='rising'?'#12b76a':'#98a2b3';
+  const stMeta = s => s==='new' ? {t:'✦ Новинка',c:'#16a34a'} : s==='exit' ? {t:'↓ Выводится',c:'#d97706'} : {t:'Основной',c:'#64748b'};
   const rows = data.map((d,i)=>{
     const y = padT + i*rowH;
     const len = (Math.abs(capped(d.pct))/maxAbs)*half;
@@ -1171,14 +1188,17 @@ function buildSkuTrendChart(items, metric) {
     const bx = pos ? cx : cx-len, bw = Math.max(1,len);
     const pctTxt = d.kind==='lost'?'нет продаж':d.kind==='new'?'новый':`${d.pct>=0?'+':''}${Math.round(d.pct*100)}%`;
     const nm = (d.name||d.sku);
-    const lbl = nm.length>34 ? nm.slice(0,33)+'…' : nm;
+    const lbl = nm.length>32 ? nm.slice(0,31)+'…' : nm;
+    const sm = stMeta(d.status);
     return `<g class="skucmp-row">
       <rect class="hit" x="0" y="${y}" width="${W}" height="${rowH}" fill="transparent"/>
       <title>${escapeHtml(d.sku)} · ${escapeHtml(d.name||'')}
-Прошлые 3 мес.: ${fmt(d.prior)}
-Последние 3 мес.: ${fmt(d.recent)}
+Статус: ${sm.t.replace(/[✦↓]\s*/,'')}
+Прошлые 6 мес.: ${fmt(d.prior)}
+Последние 6 мес.: ${fmt(d.recent)}
 Изменение: ${pctTxt}</title>
       <text x="8" y="${y+rowH/2+4}" font-size="12" fill="#344054">${escapeHtml(lbl)}</text>
+      <text x="${labelW-8}" y="${y+rowH/2+4}" font-size="10.5" fill="${sm.c}" text-anchor="end" font-weight="600">${sm.t}</text>
       <rect x="${bx}" y="${y+5}" width="${bw}" height="${rowH-12}" rx="2" fill="${colorOf(d.kind)}" opacity=".9"/>
       <text x="${pos?bx+bw+6:bx-6}" y="${y+rowH/2+4}" font-size="11" fill="#475467"
         text-anchor="${pos?'start':'end'}">${pctTxt}</text>
