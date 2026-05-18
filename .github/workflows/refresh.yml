@@ -5,6 +5,9 @@ on:
     - cron: '0 7 * * 1-5'   # 10:00 МСК (UTC+3), пн–пт
   workflow_dispatch:          # ручной запуск
 
+permissions:
+  contents: write          # нужно для git push обновлённого data.json
+
 jobs:
   refresh:
     runs-on: windows-latest
