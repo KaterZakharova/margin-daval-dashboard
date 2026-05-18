@@ -6,6 +6,7 @@ $DataPath = Join-Path $OutDir "data.json"
 $SqlConn      = $env:SQL_CONN
 $ODataUrl     = $env:ODATA_URL
 $ODataKey     = $env:ODATA_KEY
+$ODataHeaders = @{ "X-API-Key" = $ODataKey }
 
 $StartDate        = [datetime]"2024-01-01"
 $EndDateExclusive = (Get-Date).Date.AddDays(1)
