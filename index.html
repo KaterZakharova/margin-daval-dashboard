@@ -39,6 +39,14 @@
     .det-tabs{display:flex;gap:6px;margin-bottom:10px}.det-tab{height:28px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--muted);padding:0 12px;cursor:pointer;font-size:13px;font-weight:600}.det-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
     .cmp-a{color:#2563eb;font-weight:700}.cmp-b{color:#0d9488;font-weight:700}.cmp-pos{color:#168a5b;font-weight:700}.cmp-neg{color:#d92d20;font-weight:700}.cmp-neu{color:#94a3b8}.cmp-lost-row td{background:#fffbeb!important}.cmp-new-row td{background:#f0fdf4!important}
     .period-controls{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}.period-controls label{font-size:12px;color:var(--muted);white-space:nowrap}.period-controls select{height:32px;font-size:13px;min-width:160px;width:auto}
+    .exp-btn{height:30px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--muted);padding:0 11px;cursor:pointer;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;flex-shrink:0}.exp-btn:hover{background:#f8fafc;border-color:#93c5fd;color:var(--blue)}
+    .chart-modal{position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,.62);display:none;align-items:center;justify-content:center;padding:24px}.chart-modal.open{display:flex}
+    .chart-modal-box{background:#fff;border-radius:12px;box-shadow:0 24px 60px rgba(15,23,42,.4);width:min(1500px,96vw);height:min(900px,93vh);display:flex;flex-direction:column;padding:18px 22px;position:relative}
+    .chart-modal-box h3{margin:0 0 12px;font-size:17px;padding-right:44px}
+    .chart-modal-x{position:absolute;top:14px;right:16px;width:32px;height:32px;border:1px solid var(--line);border-radius:7px;background:#fff;cursor:pointer;font-size:16px;color:var(--muted);line-height:1}.chart-modal-x:hover{background:#f1f5f9;color:var(--ink)}
+    .chart-modal-legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:12px;color:var(--text);margin-bottom:8px}
+    .chart-modal-body{flex:1;min-height:0;position:relative}.chart-modal-body svg{width:100%!important;height:100%!important}
+    .skucmp-wrap{border:1px solid var(--line);border-radius:7px;overflow-y:auto;overflow-x:hidden;max-height:420px;background:#fff}.skucmp-row:hover rect.hit{fill:rgba(37,99,235,.06)}
     @media(max-width:1150px){.filters{grid-template-columns:repeat(2,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}.grid,.grid3{grid-template-columns:1fr}.detail-head,.scenario-kpis{grid-template-columns:repeat(2,1fr)}.scenario-controls{grid-template-columns:repeat(2,1fr)}}
     #auth-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center}
     #auth-box{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:40px 36px;width:320px;text-align:center}
@@ -95,7 +103,14 @@
   </div>
 
   <section class="panel filters">
-    <div class="field"><label>Годы</label><select id="yearFilter" multiple></select><div class="small">Ctrl/Shift для нескольких</div></div>
+    <div class="field"><label>Годы</label>
+      <div class="multicheck-wrap" id="yearWrap">
+        <div class="multicheck-trigger" id="yearTrigger" onclick="msToggleDrop('year',event)">
+          <span id="yearTrigLabel">Все</span><span style="color:var(--muted);font-size:10px;margin-left:4px">▾</span>
+        </div>
+        <div class="multicheck-panel" id="yearPanel" style="display:none"></div>
+      </div>
+    </div>
     <div class="field"><label>Месяцы</label>
       <div class="multicheck-wrap" id="monthWrap">
         <div class="multicheck-trigger" id="monthTrigger" onclick="toggleMonthDrop(event)">
@@ -104,18 +119,46 @@
         <div class="multicheck-panel" id="monthPanel" style="display:none"></div>
       </div>
     </div>
-    <div class="field"><label>Менеджер</label><select id="managerFilter"><option value="">Все</option></select></div>
-    <div class="field"><label>Клиент</label>
-      <div class="multicheck-wrap" id="custWrap">
-        <div class="multicheck-trigger" id="custTrigger" onclick="toggleCustDrop(event)">
-          <span id="custTriggerLabel">Все</span><span style="color:var(--muted);font-size:10px;margin-left:4px">▾</span>
+    <div class="field"><label>Менеджер</label>
+      <div class="multicheck-wrap" id="managerWrap">
+        <div class="multicheck-trigger" id="managerTrigger" onclick="msToggleDrop('manager',event)">
+          <span id="managerTrigLabel">Все</span><span style="color:var(--muted);font-size:10px;margin-left:4px">▾</span>
         </div>
-        <div class="multicheck-panel" id="custPanel" style="display:none"></div>
+        <div class="multicheck-panel" id="managerPanel" style="display:none"></div>
       </div>
     </div>
-    <div class="field"><label>Бренд</label><select id="brandFilter"><option value="">Все</option></select></div>
-    <div class="field"><label>SKU</label><select id="skuFilter"><option value="">Все</option></select></div>
-    <div class="field"><label>Схема</label><select id="schemeFilter"><option value="">Все</option></select></div>
+    <div class="field"><label>Клиент</label>
+      <div class="multicheck-wrap" id="customerWrap">
+        <div class="multicheck-trigger" id="customerTrigger" onclick="msToggleDrop('customer',event)">
+          <span id="customerTrigLabel">Все</span><span style="color:var(--muted);font-size:10px;margin-left:4px">▾</span>
+        </div>
+        <div class="multicheck-panel" id="customerPanelDrop" style="display:none"></div>
+      </div>
+    </div>
+    <div class="field"><label>Бренд</label>
+      <div class="multicheck-wrap" id="brandWrap">
+        <div class="multicheck-trigger" id="brandTrigger" onclick="msToggleDrop('brand',event)">
+          <span id="brandTrigLabel">Все</span><span style="color:var(--muted);font-size:10px;margin-left:4px">▾</span>
+        </div>
+        <div class="multicheck-panel" id="brandPanel" style="display:none"></div>
+      </div>
+    </div>
+    <div class="field"><label>SKU</label>
+      <div class="multicheck-wrap" id="skuWrap">
+        <div class="multicheck-trigger" id="skuTrigger" onclick="msToggleDrop('sku',event)">
+          <span id="skuTrigLabel">Все</span><span style="color:var(--muted);font-size:10px;margin-left:4px">▾</span>
+        </div>
+        <div class="multicheck-panel" id="skuPanel" style="display:none"></div>
+      </div>
+    </div>
+    <div class="field"><label>Схема</label>
+      <div class="multicheck-wrap" id="schemeWrap">
+        <div class="multicheck-trigger" id="schemeTrigger" onclick="msToggleDrop('scheme',event)">
+          <span id="schemeTrigLabel">Все</span><span style="color:var(--muted);font-size:10px;margin-left:4px">▾</span>
+        </div>
+        <div class="multicheck-panel" id="schemePanel" style="display:none"></div>
+      </div>
+    </div>
     <div class="field"><label>Давальческий состав</label><select id="davFilter"><option value="">Все</option><option value="raw">Есть дав. сырье</option><option value="mat">Есть дав. материалы</option><option value="mixed">Смешанная схема</option><option value="mat2">2+ дав. материалов</option><option value="key">Под ключ</option></select></div>
   </section>
 
@@ -137,11 +180,14 @@
       </div>
     </div>
     <div id="customerChartCompare">
-      <div class="top20-tabs" style="margin-bottom:8px">
-        <button class="tab-btn cmetric-btn active" onclick="setCompareMetric('qty')">Штуки</button>
-        <button class="tab-btn cmetric-btn" onclick="setCompareMetric('revenue')">Выручка</button>
-        <button class="tab-btn cmetric-btn" onclick="setCompareMetric('marginRub')">Маржа руб.</button>
-        <button class="tab-btn cmetric-btn" onclick="setCompareMetric('marginPct')">Маржа %</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">
+        <div class="top20-tabs">
+          <button class="tab-btn cmetric-btn active" onclick="setCompareMetric('qty')">Штуки</button>
+          <button class="tab-btn cmetric-btn" onclick="setCompareMetric('revenue')">Выручка</button>
+          <button class="tab-btn cmetric-btn" onclick="setCompareMetric('marginRub')">Маржа руб.</button>
+          <button class="tab-btn cmetric-btn" onclick="setCompareMetric('marginPct')">Маржа %</button>
+        </div>
+        <button class="exp-btn" onclick="expandChart('#customerCompareChart',q('#customerPanelTitle').textContent,'#customerCompareLegend')">⤢ Развернуть</button>
       </div>
       <div id="customerCompareLegend" style="display:flex;flex-wrap:wrap;gap:8px 16px;margin-bottom:8px;font-size:12px;color:var(--text)"></div>
       <div class="chart" id="customerCompareChart" style="height:360px;position:relative"></div>
@@ -167,7 +213,10 @@
   <section class="panel">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
       <div><h2>Динамика: количество и валовая маржа %</h2><div class="hint">Синие столбцы — штуки, красная линия — маржа %. Клик по столбцу пересчитывает топ-10 ниже. <span id="activeMonth"></span></div></div>
-      <div class="legend"><span><i class="sw blue"></i>Штук</span><span><i class="sw red"></i>Маржа %</span></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="legend"><span><i class="sw blue"></i>Штук</span><span><i class="sw red"></i>Маржа %</span></div>
+        <button class="exp-btn" onclick="expandChart('#comboChart','Динамика: количество и валовая маржа %')">⤢ Развернуть</button>
+      </div>
     </div>
     <div class="chart" id="comboChart"></div>
   </section>
@@ -191,10 +240,13 @@
         <h2>ТОП-20 клиентов — динамика и тренды</h2>
         <div class="hint">Ранжирование за весь выбранный период фильтров. Красный = снижение, жёлтый = потерян, зелёный = рост. Наведи на строку для выноски, кликни — раскрой до SKU.</div>
       </div>
-      <div class="top20-tabs">
-        <button class="tab-btn active" onclick="setTop20Mode('margin')">По марже</button>
-        <button class="tab-btn" onclick="setTop20Mode('revenue')">По выручке</button>
-        <button class="tab-btn" onclick="setTop20Mode('qty')">По количеству</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="top20-tabs">
+          <button class="tab-btn active" onclick="setTop20Mode('margin')">По марже</button>
+          <button class="tab-btn" onclick="setTop20Mode('revenue')">По выручке</button>
+          <button class="tab-btn" onclick="setTop20Mode('qty')">По количеству</button>
+        </div>
+        <button class="exp-btn" onclick="expandChart('#top20Chart','ТОП-20 клиентов — '+top20Mode)">⤢ Развернуть</button>
       </div>
     </div>
     <div id="top20Chart" style="height:280px;margin-bottom:12px;position:relative"></div>
@@ -205,7 +257,10 @@
   <section class="panel">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
       <div><h2>Пузырьки клиентов</h2><div class="hint">X — маржа %, Y — штуки, размер — выручка. Клик по пузырьку раскрывает клиента ниже.</div></div>
-      <div class="legend"><span><i class="sw blue"></i>Под ключ</span><span><i class="sw green"></i>Давальческая</span><span><i class="sw teal"></i>Смешанная</span></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="legend"><span><i class="sw blue"></i>Под ключ</span><span><i class="sw green"></i>Давальческая</span><span><i class="sw teal"></i>Смешанная</span></div>
+        <button class="exp-btn" onclick="expandChart('#bubbleChart','Пузырьки клиентов')">⤢ Развернуть</button>
+      </div>
     </div>
     <div class="chart bubble" id="bubbleChart"></div>
   </section>
@@ -237,6 +292,15 @@
 
   <div class="footer-note" id="ruleNote"></div>
 </main>
+
+<div class="chart-modal" id="chartModal" onclick="if(event.target===this)closeChartModal()">
+  <div class="chart-modal-box">
+    <button class="chart-modal-x" onclick="closeChartModal()" title="Закрыть (Esc)">✕</button>
+    <h3 id="chartModalTitle"></h3>
+    <div class="chart-modal-legend" id="chartModalLegend"></div>
+    <div class="chart-modal-body" id="chartModalBody"></div>
+  </div>
+</div>
 
 <script>
 const fmtNum = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
@@ -271,11 +335,10 @@ async function init() {
   q('#ruleNote').textContent = DATA.meta.rule + ' · источник маржи: ' + DATA.meta.source;
   fillFilters();
   fillForecastControls();
-  document.querySelectorAll('.filters select').forEach(el => el.addEventListener('change', () => {
+  q('#davFilter').addEventListener('change', () => {
     state = { customer: state.customer, sku: '', month: '' };
     render();
-  }));
-  q('#yearFilter').addEventListener('change', () => { selectedMonths.clear(); updateMonthLabel(); buildMonthPanel(); });
+  });
   q('#forecastClient').addEventListener('change', () => { updateForecastSkuOptions(); updateForecastDefaults(); });
   q('#forecastSku').addEventListener('change', updateForecastDefaults);
   q('#forecastMonth').addEventListener('change', () => { updateForecastDefaults(); render(); });
@@ -284,13 +347,35 @@ async function init() {
 
 function fillFilters() {
   const sales = DATA.sales.filter(x => !EXCLUDE_CUSTOMERS.has(x.customer));
-  fillMulti(q('#yearFilter'), uniq(sales.map(x => x.year)), true);
-  fillSingle(q('#managerFilter'), uniq(sales.map(x => x.manager)));
-  allCustomers = uniq(sales.map(x => x.customer));
-  buildCustomerPanel(''); updateCustomerLabel();
-  fillSingle(q('#brandFilter'), uniq(sales.map(x => x.brand)));
-  fillSingle(q('#skuFilter'), uniq(sales.map(x => x.sku)));
-  fillSingle(q('#schemeFilter'), uniq(sales.map(x => x.scheme)));
+  const resetView = () => { state = { customer: state.customer, sku: '', month: '' }; render(); };
+
+  msInit('year', uniq(sales.map(x => x.year)), {
+    allLabel: 'Все годы', placeholder: 'Поиск года…',
+    onChange: () => { MS.month && (selectedMonths.clear(), updateMonthLabel(), buildMonthPanel()); resetView(); }
+  });
+  msInit('manager', uniq(sales.map(x => x.manager)), { allLabel: 'Все менеджеры', placeholder: 'Поиск менеджера…', onChange: resetView });
+  msInit('customer', uniq(sales.map(x => x.customer)), {
+    allLabel: 'Все клиенты', placeholder: 'Поиск клиента…', panelId: 'customerPanelDrop',
+    onChange: () => {
+      const sel = msSelected('customer');
+      state = { customer: sel.length === 1 ? sel[0] : '', sku:'', month:'' };
+      render();
+      if (sel.length) q('#customerPanel').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+  });
+  msInit('brand', uniq(sales.map(x => x.brand)), { allLabel: 'Все бренды', placeholder: 'Поиск бренда…', onChange: resetView });
+  msInit('sku', uniq(sales.map(x => x.sku)), { allLabel: 'Все SKU', placeholder: 'Поиск SKU…', onChange: resetView });
+  msInit('scheme', uniq(sales.map(x => x.scheme)), { allLabel: 'Все схемы', placeholder: 'Поиск схемы…', onChange: resetView });
+
+  const years = uniq(sales.map(x => x.year));
+  const periodVals = ['current', ...years.flatMap(y => ['y:'+y, ...[1,2,3,4].map(qn => `q:${y}:${qn}`)])];
+  msInit('period', periodVals, {
+    allLabel: 'Все периоды', placeholder: 'Поиск периода…', panelId: 'periodPanel',
+    labelFn: periodLabel, onChange: () => { if (detailMode==='compare') renderCompareArea(); }
+  });
+  // sensible default: current slice vs previous full year
+  MS.period.set = new Set(['current', years.length ? 'y:'+years[0] : 'current']);
+  msTrigLabel('period');
 }
 function fillForecastControls() {
   fillSingle(q('#forecastClient'), uniq(DATA.sales.map(x => x.customer)));
@@ -318,55 +403,34 @@ function fillSingle(el, values) {
 }
 function escapeHtml(v){ return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
-function filteredSalesNoMonth() {
-  const years = multiValues(q('#yearFilter'));
-  const manager = q('#managerFilter').value;
-  const customers = getSelectedCustomers();
-  const brand = q('#brandFilter').value;
-  const sku = q('#skuFilter').value;
-  const scheme = q('#schemeFilter').value;
+function applyBaseFilters(x) {
+  const years = msSelected('year'), managers = msSelected('manager'), customers = msSelected('customer');
+  const brands = msSelected('brand'), skus = msSelected('sku'), schemes = msSelected('scheme');
   const dav = q('#davFilter').value;
-  return DATA.sales.filter(x => {
-    if (EXCLUDE_CUSTOMERS.has(x.customer)) return false;
-    if (years.length && !years.includes(String(x.year))) return false;
-    if (manager && x.manager !== manager) return false;
-    if (customers.length && !customers.includes(x.customer)) return false;
-    if (brand && x.brand !== brand) return false;
-    if (sku && x.sku !== sku) return false;
-    if (scheme && x.scheme !== scheme) return false;
-    if (dav === 'raw' && !x.hasDavRaw) return false;
-    if (dav === 'mat' && !x.hasDavMaterials) return false;
-    if (dav === 'mixed' && !x.isMixed) return false;
-    if (dav === 'mat2' && x.davMaterials < 2) return false;
-    if (dav === 'key' && x.scheme !== 'Под ключ') return false;
-    return true;
-  });
+  if (EXCLUDE_CUSTOMERS.has(x.customer)) return false;
+  if (years.length    && !years.includes(String(x.year)))  return false;
+  if (managers.length && !managers.includes(x.manager))    return false;
+  if (customers.length&& !customers.includes(x.customer))  return false;
+  if (brands.length   && !brands.includes(x.brand))        return false;
+  if (skus.length     && !skus.includes(x.sku))            return false;
+  if (schemes.length  && !schemes.includes(x.scheme))      return false;
+  if (dav === 'raw'   && !x.hasDavRaw)        return false;
+  if (dav === 'mat'   && !x.hasDavMaterials)  return false;
+  if (dav === 'mixed' && !x.isMixed)          return false;
+  if (dav === 'mat2'  && x.davMaterials < 2)  return false;
+  if (dav === 'key'   && x.scheme !== 'Под ключ') return false;
+  return true;
+}
+
+function filteredSalesNoMonth() {
+  return DATA.sales.filter(applyBaseFilters);
 }
 
 function filteredSales() {
-  const years = multiValues(q('#yearFilter'));
   const months = getSelectedMonths();
-  const manager = q('#managerFilter').value;
-  const customers = getSelectedCustomers();
-  const brand = q('#brandFilter').value;
-  const sku = q('#skuFilter').value;
-  const scheme = q('#schemeFilter').value;
-  const dav = q('#davFilter').value;
   return DATA.sales.filter(x => {
-    if (EXCLUDE_CUSTOMERS.has(x.customer)) return false;
-    if (years.length && !years.includes(String(x.year))) return false;
     if (months.length && !months.includes(x.month)) return false;
-    if (manager && x.manager !== manager) return false;
-    if (customers.length && !customers.includes(x.customer)) return false;
-    if (brand && x.brand !== brand) return false;
-    if (sku && x.sku !== sku) return false;
-    if (scheme && x.scheme !== scheme) return false;
-    if (dav === 'raw' && !x.hasDavRaw) return false;
-    if (dav === 'mat' && !x.hasDavMaterials) return false;
-    if (dav === 'mixed' && !x.isMixed) return false;
-    if (dav === 'mat2' && x.davMaterials < 2) return false;
-    if (dav === 'key' && x.scheme !== 'Под ключ') return false;
-    return true;
+    return applyBaseFilters(x);
   });
 }
 
@@ -640,19 +704,16 @@ function renderDetail(rows) {
   const specInfo = selectedSku ? DATA.skuClass.find(x=>x.sku===selectedSku) : null;
   const mats = specInfo ? DATA.materials.filter(m=>m.sku===selectedSku && (!specInfo.specCode || m.specCode===specInfo.specCode)) : [];
 
-  // ── Period comparison data ─────────────────────────────────────────────────
-  const customerRows = filteredSalesNoMonth().filter(x => !state.customer || x.customer === state.customer);
-  const rowsA = filterByPeriod(customerRows, cmpPeriodA);
-  const rowsB = filterByPeriod(customerRows, cmpPeriodB);
-  const aggA = aggRows(rowsA), aggB = aggRows(rowsB);
-  const lblA = periodLabel(cmpPeriodA), lblB = periodLabel(cmpPeriodB);
-  const cmpSkus = [...new Set([...rowsA,...rowsB].map(x=>x.sku))];
-  const cmpData = cmpSkus.map(sku => {
-    const aR=rowsA.filter(r=>r.sku===sku), bR=rowsB.filter(r=>r.sku===sku);
-    const A=aR.length?aggRows(aR):{qty:0,revenue:0,marginRub:0};
-    const B=bR.length?aggRows(bR):{qty:0,revenue:0,marginRub:0};
-    return {sku, name:(aR[0]||bR[0])?.productName||sku, A, B, inA:A.revenue>0, inB:B.revenue>0};
-  }).sort((a,b)=>Math.max(b.A.marginRub,b.B.marginRub)-Math.max(a.A.marginRub,a.B.marginRub));
+  // ── Feature B: per-SKU trend items (recent 3 мес. vs prior 3 мес.) ────────
+  const skuNameMap = new Map();
+  allPeriodRows.forEach(r => { if (!skuNameMap.has(r.sku)) skuNameMap.set(r.sku, r.productName || r.sku); });
+  const skuTrendItems = [...skuPeriod.entries()].map(([sku, s]) => {
+    const recent = skuTrendMetric==='qty' ? s.recentQty : s.recentRub;
+    const prior  = skuTrendMetric==='qty' ? s.priorQty  : s.priorRub;
+    const { trend, pct } = skuTrend(sku);
+    return { sku, name: skuNameMap.get(sku)||sku, recent, prior,
+             pct: trend==='lost'?-1 : trend==='new'?1 : pct, kind: trend };
+  }).filter(it => it.recent || it.prior);
 
   // ── Table: current period ──────────────────────────────────────────────────
   const currentTable = `<div class="table" style="max-height:460px"><table>
@@ -678,55 +739,46 @@ function renderDetail(rows) {
     }).join('')}
     </tbody></table></div>`;
 
-  // ── Table: comparison ──────────────────────────────────────────────────────
-  const compareTable = `
+  // ── Feature B block: table + visual SKU comparison chart ───────────────────
+  const currentBlock = `${currentTable}
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 6px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <h2 style="margin:0">Сравнение SKU: рост / падение</h2>
+        <div class="top20-tabs">
+          <button class="tab-btn ${skuTrendMetric==='marginRub'?'active':''}" onclick="setSkuTrendMetric('marginRub')">Маржа руб.</button>
+          <button class="tab-btn ${skuTrendMetric==='qty'?'active':''}" onclick="setSkuTrendMetric('qty')">Штуки</button>
+        </div>
+      </div>
+      <button class="exp-btn" onclick="expandChart('#skuTrendChart','Сравнение SKU: рост / падение')">⤢ Развернуть</button>
+    </div>
+    <div class="hint" style="margin-bottom:6px">Последние 3 мес. против предыдущих 3 мес. Зелёные — растут, красные — проседают, тёмные — продажи прекратились. Наведите на строку для абсолютных чисел.</div>
+    <div id="skuTrendChart">${buildSkuTrendChart(skuTrendItems, skuTrendMetric)}</div>`;
+
+  // ── Feature C: period comparison shell (filled by renderCompareArea) ───────
+  const compareShell = `
     <div class="period-controls">
-      <label>Период А <span class="cmp-a">■</span></label>
-      <select onchange="setCmpPeriod('A',this.value)">${periodOptions(cmpPeriodA)}</select>
-      <label>vs Период Б <span class="cmp-b">■</span></label>
-      <select onchange="setCmpPeriod('B',this.value)">${periodOptions(cmpPeriodB)}</select>
+      <label>Периоды для сравнения</label>
+      <div class="multicheck-wrap" id="periodWrap" style="min-width:230px;max-width:330px;flex:0 0 auto">
+        <div class="multicheck-trigger" id="periodTrigger" onclick="msToggleDrop('period',event)">
+          <span id="periodTrigLabel">Все периоды</span><span style="color:var(--muted);font-size:10px;margin-left:4px">▾</span>
+        </div>
+        <div class="multicheck-panel" id="periodPanel" style="display:none"></div>
+      </div>
+      <div class="top20-tabs">
+        <button class="tab-btn ${cmpMetric==='qty'?'active':''}" onclick="setCmpMetric('qty')">Штуки</button>
+        <button class="tab-btn ${cmpMetric==='revenue'?'active':''}" onclick="setCmpMetric('revenue')">Выручка</button>
+        <button class="tab-btn ${cmpMetric==='marginRub'?'active':''}" onclick="setCmpMetric('marginRub')">Маржа руб.</button>
+      </div>
+      <div class="det-tabs">
+        <button class="det-tab ${cmpView==='chart'?'active':''}" onclick="setCmpView('chart')">График</button>
+        <button class="det-tab ${cmpView==='table'?'active':''}" onclick="setCmpView('table')">Таблица</button>
+      </div>
+      <button class="exp-btn" onclick="expandChart('#cmpContent','Сравнение периодов — '+metricName(cmpMetric),'#cmpLegend')">⤢ Развернуть</button>
     </div>
-    <div class="detail-head" style="margin-bottom:10px">
-      <div class="fact"><span class="cmp-a">${escapeHtml(lblA)} — Штук</span><strong>${fmtNum.format(aggA.qty)}</strong></div>
-      <div class="fact"><span class="cmp-b">${escapeHtml(lblB)} — Штук</span><strong>${fmtNum.format(aggB.qty)}</strong></div>
-      <div class="fact"><span class="cmp-a">${escapeHtml(lblA)} — Выручка</span><strong>${fmtMoney.format(aggA.revenue)}</strong></div>
-      <div class="fact"><span class="cmp-b">${escapeHtml(lblB)} — Выручка</span><strong>${fmtMoney.format(aggB.revenue)}</strong></div>
-      <div class="fact"><span class="cmp-a">${escapeHtml(lblA)} — Маржа</span><strong>${fmtMoney.format(aggA.marginRub)}</strong></div>
-      <div class="fact"><span class="cmp-b">${escapeHtml(lblB)} — Маржа</span><strong>${fmtMoney.format(aggB.marginRub)}</strong></div>
-    </div>
-    <div class="table" style="max-height:500px"><table style="min-width:1060px">
-      <thead>
-        <tr>
-          <th rowspan="2">SKU</th><th rowspan="2">Наименование</th><th rowspan="2">Статус</th>
-          <th colspan="3" class="num" style="color:#2563eb">${escapeHtml(lblA)}</th>
-          <th colspan="3" class="num" style="color:#0d9488">${escapeHtml(lblB)}</th>
-          <th colspan="3" class="num">Изменение А→Б</th>
-        </tr>
-        <tr>
-          <th class="num">Шт.</th><th class="num">Выручка</th><th class="num">Маржа</th>
-          <th class="num">Шт.</th><th class="num">Выручка</th><th class="num">Маржа</th>
-          <th class="num">Δ Шт.</th><th class="num">Δ Выр.</th><th class="num">Δ Маржа</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${cmpData.map(r=>{
-          const rc=!r.inA&&r.inB?'cmp-new-row':r.inA&&!r.inB?'cmp-lost-row':'';
-          return `<tr class="click ${rc} ${state.sku===r.sku?'selected':''}" onclick="selectSku('${jsEsc(r.sku)}')">
-            <td>${escapeHtml(r.sku)}</td><td>${escapeHtml(r.name)}</td>
-            <td>${skuStatusBadge(r.sku)}</td>
-            <td class="num">${r.inA?fmtNum.format(r.A.qty):'—'}</td>
-            <td class="num">${r.inA?fmtMoney.format(r.A.revenue):'—'}</td>
-            <td class="num">${r.inA?fmtMoney.format(r.A.marginRub):'—'}</td>
-            <td class="num">${r.inB?fmtNum.format(r.B.qty):'—'}</td>
-            <td class="num">${r.inB?fmtMoney.format(r.B.revenue):'—'}</td>
-            <td class="num">${r.inB?fmtMoney.format(r.B.marginRub):'—'}</td>
-            <td class="num">${deltaSpan(r.A.qty,r.B.qty,v=>fmtNum.format(Math.round(v)))}</td>
-            <td class="num">${deltaSpan(r.A.revenue,r.B.revenue,v=>fmtMoney.format(Math.round(v)))}</td>
-            <td class="num">${deltaSpan(r.A.marginRub,r.B.marginRub,v=>fmtMoney.format(Math.round(v)))}</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table></div>`;
+    <div class="hint" style="margin-bottom:8px">Выберите несколько периодов (годы / кварталы / текущий срез) — каждый период своим цветом. Наведите на столбец для штук, выручки и маржи.</div>
+    <div id="cmpLegend" class="chart-modal-legend" style="margin-bottom:8px"></div>
+    <div id="cmpSummary" class="detail-head" style="margin-bottom:10px"></div>
+    <div id="cmpContent"></div>`;
 
   // ── Assemble ───────────────────────────────────────────────────────────────
   el.innerHTML = `
@@ -749,7 +801,7 @@ function renderDetail(rows) {
         </div>
         ${state.sku?'<button class="btn" type="button" onclick="clearSkuSelection()">Вернуться к списку SKU</button>':''}
       </div>
-      ${detailMode==='current' ? currentTable : compareTable}
+      ${detailMode==='current' ? currentBlock : compareShell}
     </div>
     ${selectedSku?`<div>
       <h2>Ресурсная спецификация и давальческие строки</h2>
@@ -766,6 +818,69 @@ function renderDetail(rows) {
       </tbody></table></div>
     </div>`:''}
   `;
+  if (detailMode === 'compare') renderCompareArea();
+}
+
+// Period comparison: recompute & fill #cmpSummary / #cmpContent without
+// destroying the open period dropdown (called by period ms + metric/view toggles)
+function renderCompareArea() {
+  const sumEl = q('#cmpSummary'), contEl = q('#cmpContent'), legEl = q('#cmpLegend');
+  if (!sumEl || !contEl) return;
+  const customerRows = filteredSalesNoMonth().filter(x => !state.customer || x.customer === state.customer);
+  const keys = msSelected('period');
+  const periods = keys.map((k,i) => {
+    const rws = filterByPeriod(customerRows, k);
+    return { key:k, label:periodLabel(k), color:CMP_COLORS[i%CMP_COLORS.length], rows:rws, agg:aggRows(rws) };
+  });
+  if (legEl) { legEl.innerHTML = periodLegendHtml(periods); legEl.style.display = periods.length?'flex':'none'; }
+
+  sumEl.innerHTML = periods.length
+    ? periods.map(p => `<div class="fact">
+        <span style="color:${p.color};font-weight:700">${escapeHtml(p.label)}</span>
+        <strong>${metricFmt(cmpMetric)(metricVal(p.agg,cmpMetric))}</strong></div>`).join('')
+    : '';
+
+  const skuSet = [...new Set(periods.flatMap(p => p.rows.map(x => x.sku)))];
+  const items = skuSet.map(sku => {
+    let name = sku; const byPeriod = {};
+    periods.forEach(p => {
+      const rs = p.rows.filter(r => r.sku === sku);
+      if (rs.length && name === sku) name = rs[0].productName || sku;
+      byPeriod[p.key] = rs.length ? aggRows(rs) : {qty:0,revenue:0,marginRub:0,marginPct:0};
+    });
+    return { sku, name, byPeriod };
+  });
+
+  if (cmpView === 'table') {
+    contEl.innerHTML = buildPeriodCompareTable(items, periods, cmpMetric);
+  } else {
+    contEl.innerHTML = buildPeriodCompareChart(items, periods, cmpMetric);
+  }
+}
+
+function buildPeriodCompareTable(items, periods, metric) {
+  if (!periods.length) return '<div class="detail-empty">Выберите хотя бы один период.</div>';
+  if (!items.length)   return '<div class="detail-empty">Нет SKU в выбранных периодах.</div>';
+  const fmt = metricFmt(metric);
+  const data = items.map(it => ({ ...it,
+    _tot: periods.reduce((s,p)=>s+metricVal(it.byPeriod[p.key],metric),0) }))
+    .sort((a,b)=>b._tot-a._tot);
+  const first = periods[0].key, last = periods[periods.length-1].key;
+  const head = `<tr><th>SKU</th><th>Наименование</th>${
+    periods.map(p=>`<th class="num" style="color:${p.color}">${escapeHtml(p.label)}</th>`).join('')
+  }${periods.length>1?`<th class="num">Δ ${escapeHtml(periodLabel(first))}→${escapeHtml(periodLabel(last))}</th>`:''}</tr>`;
+  const body = data.map(it=>{
+    const cells = periods.map(p=>{
+      const v=metricVal(it.byPeriod[p.key],metric);
+      return `<td class="num">${v?fmt(v):'—'}</td>`;
+    }).join('');
+    const dCell = periods.length>1
+      ? `<td class="num">${deltaSpan(metricVal(it.byPeriod[first],metric),metricVal(it.byPeriod[last],metric),v=>fmt(Math.abs(v)))}</td>`
+      : '';
+    return `<tr class="click ${state.sku===it.sku?'selected':''}" onclick="selectSku('${jsEsc(it.sku)}')">
+      <td>${escapeHtml(it.sku)}</td><td>${escapeHtml(it.name)}</td>${cells}${dCell}</tr>`;
+  }).join('');
+  return `<div class="table" style="max-height:520px"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
 }
 
 // ─── MONTH CHECKBOX FILTER ─────────────────────────────────────────────────
@@ -789,7 +904,7 @@ function updateMonthLabel() {
 
 function buildMonthPanel() {
   const panel = q('#monthPanel'); if (!panel) return;
-  const years = multiValues(q('#yearFilter'));
+  const years = msSelected('year');
   const allMonths = uniq(DATA.sales
     .filter(x => !EXCLUDE_CUSTOMERS.has(x.customer) && (!years.length || years.includes(String(x.year))))
     .map(x => x.month)).sort();
@@ -865,91 +980,122 @@ window.mcCheck = el => {
   state = { ...state, month:'' }; render();
 };
 
-// ─── CLIENT CHECKBOX FILTER (multi-select) ─────────────────────────────────
+// ─── GENERIC SEARCHABLE MULTI-SELECT (Excel-style) ─────────────────────────
+// One reusable dropdown used by Годы / Менеджер / Клиент / Бренд / SKU / Схема
+// and by the period comparison selector.
 
-let selectedCustomers = new Set();
-let allCustomers = [];
+const MS = {};               // key -> config
+const MS_CAP = 400;          // max rendered checkboxes per panel (search to narrow)
 
-function getSelectedCustomers() { return selectedCustomers.size > 0 ? [...selectedCustomers] : []; }
-
-function updateCustomerLabel() {
-  const lbl = q('#custTriggerLabel'); if (!lbl) return;
-  if (selectedCustomers.size === 0) { lbl.textContent = 'Все'; return; }
-  if (selectedCustomers.size === 1) { lbl.textContent = [...selectedCustomers][0]; return; }
-  lbl.textContent = `Выбрано: ${selectedCustomers.size}`;
+function msInit(key, values, opts) {
+  opts = opts || {};
+  MS[key] = {
+    all: values.slice(),
+    set: new Set(),
+    allLabel: opts.allLabel || 'Все',
+    placeholder: opts.placeholder || 'Поиск…',
+    labelFn: opts.labelFn || (v => v),
+    onChange: opts.onChange || (() => {}),
+    panelId: opts.panelId || (key + 'Panel'),
+    labelId: opts.labelId || (key + 'TrigLabel'),
+    wrapId: opts.wrapId || (key + 'Wrap'),
+    filter: ''
+  };
+  msTrigLabel(key);
 }
 
-function buildCustomerPanel(filter) {
-  const panel = q('#custPanel'); if (!panel) return;
-  const f = (filter || '').toLowerCase();
-  const list = allCustomers.filter(c => !f || c.toLowerCase().includes(f));
-  const allSel = selectedCustomers.size === 0;
+function msSelected(key) { const m = MS[key]; return m && m.set.size ? [...m.set] : []; }
+// backward-compat helper still used by the customer comparison chart
+function getSelectedCustomers() { return msSelected('customer'); }
+
+function msTrigLabel(key) {
+  const m = MS[key]; if (!m) return;
+  const lbl = q('#' + m.labelId); if (!lbl) return;
+  if (m.set.size === 0) lbl.textContent = m.allLabel;
+  else if (m.set.size === 1) lbl.textContent = m.labelFn([...m.set][0]);
+  else lbl.textContent = `Выбрано: ${m.set.size}`;
+}
+
+function msBuildPanel(key) {
+  const m = MS[key]; if (!m) return;
+  const panel = q('#' + m.panelId); if (!panel) return;
+  const f = m.filter.toLowerCase();
+  const matched = m.all.filter(v => !f || m.labelFn(v).toLowerCase().includes(f));
+  const list = matched.slice(0, MS_CAP);
+  const allSel = m.set.size === 0;
   let html = `<div style="padding:6px 8px">
-    <input id="custSearch" type="text" placeholder="Поиск клиента…" value="${escapeHtml(filter||'')}"
-      oninput="ccSearch(this.value)" onclick="event.stopPropagation()"
+    <input id="${key}Search" type="text" placeholder="${escapeHtml(m.placeholder)}" value="${escapeHtml(m.filter)}"
+      oninput="msSearch('${key}',this.value)" onclick="event.stopPropagation()"
       style="width:100%;height:28px;border:1px solid var(--line);border-radius:5px;padding:0 8px;font-size:12px">
   </div><div class="mc-sep"></div>
   <label class="mc-item" style="font-weight:600">
-    <input type="checkbox" id="ccAll" ${allSel?'checked':''} onchange="ccToggleAll(this)"> Все клиенты
+    <input type="checkbox" ${allSel?'checked':''} onchange="msToggleAll('${key}')"> ${escapeHtml(m.allLabel)}
   </label><div class="mc-sep"></div>`;
-  if (!list.length) html += `<div class="mc-item" style="color:var(--muted)">Ничего не найдено</div>`;
-  for (const c of list) {
-    const checked = selectedCustomers.has(c);
-    html += `<label class="mc-item"><input type="checkbox" value="${escapeHtml(c)}" ${checked?'checked':''}
-      onchange="ccCheck(this)"> ${escapeHtml(c)}</label>`;
+  if (!matched.length) html += `<div class="mc-item" style="color:var(--muted)">Ничего не найдено</div>`;
+  for (const v of list) {
+    const checked = m.set.has(v);
+    html += `<label class="mc-item"><input type="checkbox" value="${escapeHtml(v)}" ${checked?'checked':''}
+      onchange="msCheck('${key}',this)"> ${escapeHtml(m.labelFn(v))}</label>`;
   }
+  if (matched.length > MS_CAP)
+    html += `<div class="mc-item" style="color:var(--muted)">…ещё ${matched.length-MS_CAP}. Уточните поиск.</div>`;
   panel.innerHTML = html;
-  const s = q('#custSearch');
-  if (s && filter) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
+  const s = q('#' + key + 'Search');
+  if (s && m.filter) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
 }
 
-window.toggleCustDrop = ev => {
+window.msToggleDrop = (key, ev) => {
   ev.stopPropagation();
-  const panel = q('#custPanel');
+  const m = MS[key]; if (!m) return;
+  const panel = q('#' + m.panelId);
   const isOpen = panel.style.display !== 'none';
-  if (isOpen) { panel.style.display = 'none'; return; }
-  buildCustomerPanel('');
+  document.querySelectorAll('.multicheck-panel').forEach(p => p.style.display = 'none');
+  if (isOpen) return;
+  m.filter = '';
+  msBuildPanel(key);
   panel.style.display = '';
 };
+
+window.msSearch = (key, v) => { const m = MS[key]; if (!m) return; m.filter = v; msBuildPanel(key); };
+
+window.msToggleAll = key => {
+  const m = MS[key]; if (!m) return;
+  m.set.clear();
+  msBuildPanel(key);
+  msTrigLabel(key);
+  m.onChange();
+};
+
+window.msCheck = (key, el) => {
+  const m = MS[key]; if (!m) return;
+  if (el.checked) m.set.add(el.value); else m.set.delete(el.value);
+  if (m.set.size > 0 && m.set.size === m.all.length) m.set.clear();
+  const allCb = q('#' + m.panelId)?.querySelector('label[style] input[type=checkbox]');
+  if (allCb) allCb.checked = m.set.size === 0;
+  msTrigLabel(key);
+  m.onChange();
+};
+
 document.addEventListener('click', e => {
-  if (!q('#custWrap')?.contains(e.target)) { const p=q('#custPanel'); if(p) p.style.display='none'; }
+  for (const key of Object.keys(MS)) {
+    const m = MS[key];
+    if (!q('#' + m.wrapId)?.contains(e.target)) {
+      const p = q('#' + m.panelId); if (p) p.style.display = 'none';
+    }
+  }
 });
-
-window.ccSearch = v => buildCustomerPanel(v);
-
-function applyCustomerSelection() {
-  const sel = [...selectedCustomers];
-  state = { customer: sel.length === 1 ? sel[0] : '', sku:'', month:'' };
-  render();
-  if (sel.length) q('#customerPanel').scrollIntoView({ behavior:'smooth', block:'start' });
-}
-
-window.ccToggleAll = el => {
-  selectedCustomers.clear();
-  el.checked = true;
-  q('#custPanel').querySelectorAll('input[value]').forEach(cb => cb.checked = false);
-  updateCustomerLabel();
-  applyCustomerSelection();
-};
-
-window.ccCheck = el => {
-  if (el.checked) selectedCustomers.add(el.value); else selectedCustomers.delete(el.value);
-  if (selectedCustomers.size > 0 && selectedCustomers.size === allCustomers.length) selectedCustomers.clear();
-  const ccAll = q('#ccAll'); if (ccAll) ccAll.checked = selectedCustomers.size === 0;
-  updateCustomerLabel();
-  applyCustomerSelection();
-};
 
 // ─── ASSORTMENT STATUS & PERIOD COMPARISON ────────────────────────────────
 
-let detailMode = 'current'; // 'current' | 'compare'
-let cmpPeriodA = 'current';
-let cmpPeriodB = 'y:2024';
+let detailMode = 'current';      // 'current' | 'compare'
+let skuTrendMetric = 'marginRub';// feature B chart metric
+let cmpMetric = 'marginRub';     // feature C chart metric
+let cmpView = 'chart';           // 'chart' | 'table'
 
 function periodLabel(p) {
   if (!p || p==='current') return 'Текущий срез';
   const [t,y,qn] = p.split(':');
-  return t==='y' ? `${y} (год)` : `${y} Q${qn}`;
+  return t==='y' ? `${y} год` : `${y} Q${qn}`;
 }
 
 function filterByPeriod(rows, period) {
@@ -960,17 +1106,6 @@ function filterByPeriod(rows, period) {
   return rows;
 }
 
-function periodOptions(selected) {
-  let o = `<option value="current" ${selected==='current'?'selected':''}>Текущий срез</option>`;
-  ['2024','2025','2026'].forEach(y => {
-    o += `<option value="y:${y}" ${selected===`y:${y}`?'selected':''}>${y} — весь год</option>`;
-    [1,2,3,4].forEach(qn =>
-      o += `<option value="q:${y}:${qn}" ${selected===`q:${y}:${qn}`?'selected':''}>${y} Q${qn}</option>`
-    );
-  });
-  return o;
-}
-
 function deltaSpan(a, b, fmt) {
   if (!a && !b) return '<span class="cmp-neu">—</span>';
   const pct = a ? (b-a)/Math.abs(a) : null;
@@ -979,12 +1114,132 @@ function deltaSpan(a, b, fmt) {
   return `<span class="${cls}">${b>=a?'+':''}${fmt(b-a)}${pctStr}</span>`;
 }
 
+const metricFmt = mt => mt==='qty' ? (v=>fmtNum.format(Math.round(v))+' шт')
+  : mt==='marginPct' ? (v=>fmtPct.format(v))
+  : (v=>fmtMoney.format(Math.round(v))+' руб.');
+const metricVal = (agg, mt) => mt==='qty'?agg.qty : mt==='revenue'?agg.revenue
+  : mt==='marginPct'?agg.marginPct : agg.marginRub;
+const metricName = mt => ({qty:'Штуки',revenue:'Выручка',marginRub:'Маржа руб.',marginPct:'Маржа %'}[mt]||mt);
+
 window.setDetailMode = m => { detailMode = m; renderDetailFromState(); };
-window.setCmpPeriod = (ab, val) => { if(ab==='A') cmpPeriodA=val; else cmpPeriodB=val; renderDetailFromState(); };
+window.setSkuTrendMetric = mt => { skuTrendMetric = mt; renderDetailFromState(); };
+window.setCmpMetric = mt => { cmpMetric = mt; renderDetailFromState(); };
+window.setCmpView = v => { cmpView = v; renderDetailFromState(); };
 
 function renderDetailFromState() {
   const rows = filteredSales();
   renderDetail(rows);
+}
+
+// ─── CHART EXPAND MODAL ────────────────────────────────────────────────────
+window.expandChart = (sel, title, legendSel) => {
+  const src = q(sel); if (!src) return;
+  q('#chartModalTitle').textContent = title || '';
+  const body = q('#chartModalBody');
+  const svg = src.querySelector('svg');
+  body.innerHTML = svg ? svg.outerHTML : src.innerHTML;
+  const leg = q('#chartModalLegend');
+  const legSrc = legendSel ? q(legendSel) : null;
+  leg.innerHTML = legSrc ? legSrc.innerHTML : '';
+  leg.style.display = legSrc && legSrc.innerHTML.trim() ? 'flex' : 'none';
+  q('#chartModal').classList.add('open');
+};
+window.closeChartModal = () => {
+  q('#chartModal').classList.remove('open');
+  q('#chartModalBody').innerHTML = '';
+};
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && q('#chartModal')?.classList.contains('open')) closeChartModal();
+});
+
+// ─── SVG: per-SKU diverging trend bars (feature B) ─────────────────────────
+function buildSkuTrendChart(items, metric) {
+  if (!items.length) return '<div class="detail-empty">Недостаточно истории для сравнения SKU.</div>';
+  const data = items.slice().sort((a,b)=>b.pct-a.pct);
+  const fmt = metricFmt(metric);
+  const rowH = 26, padT = 28, padB = 8, W = 1000, labelW = 250;
+  const H = padT + padB + data.length*rowH;
+  const cx = labelW + (W - labelW - 20) / 2;
+  const half = (W - labelW - 20) / 2 - 6;
+  const capped = v => Math.max(-2, Math.min(2, v));         // clamp ±200%
+  const maxAbs = Math.max(0.25, ...data.map(d=>Math.abs(capped(d.pct))));
+  const colorOf = k => k==='lost'?'#b42318':k==='falling'?'#f04438':k==='new'?'#2563eb':k==='rising'?'#12b76a':'#98a2b3';
+  const rows = data.map((d,i)=>{
+    const y = padT + i*rowH;
+    const len = (Math.abs(capped(d.pct))/maxAbs)*half;
+    const pos = d.pct>=0;
+    const bx = pos ? cx : cx-len, bw = Math.max(1,len);
+    const pctTxt = d.kind==='lost'?'нет продаж':d.kind==='new'?'новый':`${d.pct>=0?'+':''}${Math.round(d.pct*100)}%`;
+    const nm = (d.name||d.sku);
+    const lbl = nm.length>34 ? nm.slice(0,33)+'…' : nm;
+    return `<g class="skucmp-row">
+      <rect class="hit" x="0" y="${y}" width="${W}" height="${rowH}" fill="transparent"/>
+      <title>${escapeHtml(d.sku)} · ${escapeHtml(d.name||'')}
+Прошлые 3 мес.: ${fmt(d.prior)}
+Последние 3 мес.: ${fmt(d.recent)}
+Изменение: ${pctTxt}</title>
+      <text x="8" y="${y+rowH/2+4}" font-size="12" fill="#344054">${escapeHtml(lbl)}</text>
+      <rect x="${bx}" y="${y+5}" width="${bw}" height="${rowH-12}" rx="2" fill="${colorOf(d.kind)}" opacity=".9"/>
+      <text x="${pos?bx+bw+6:bx-6}" y="${y+rowH/2+4}" font-size="11" fill="#475467"
+        text-anchor="${pos?'start':'end'}">${pctTxt}</text>
+    </g>`;
+  }).join('');
+  return `<div class="skucmp-wrap"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;max-height:none">
+    <line x1="${cx}" y1="${padT-6}" x2="${cx}" y2="${H-padB}" stroke="#cbd5e1" stroke-dasharray="3 3"/>
+    <text x="${cx}" y="16" text-anchor="middle" font-size="11" fill="#94a3b8">0%</text>
+    <text x="${labelW}" y="16" text-anchor="start" font-size="11" fill="#f04438">← падение</text>
+    <text x="${W-20}" y="16" text-anchor="end" font-size="11" fill="#12b76a">рост →</text>
+    ${rows}
+  </svg></div>`;
+}
+
+// ─── SVG: per-SKU grouped bars across selected periods (feature C) ─────────
+function buildPeriodCompareChart(items, periods, metric) {
+  if (!periods.length) return '<div class="detail-empty">Выберите хотя бы один период в фильтре выше.</div>';
+  if (!items.length)   return '<div class="detail-empty">Нет SKU в выбранных периодах.</div>';
+  const fmt = metricFmt(metric);
+  const data = items.slice()
+    .map(it => ({ ...it, _tot: periods.reduce((s,p)=>s+metricVal(it.byPeriod[p.key]||{qty:0,revenue:0,marginRub:0,marginPct:0},metric),0) }))
+    .sort((a,b)=>b._tot-a._tot);
+  const CAP = 40, more = data.length-CAP, view = data.slice(0,CAP);
+  const np = periods.length, barH = Math.max(7, 15 - np), grpGap = 12;
+  const grpH = np*barH + grpGap, padT = 10, padB = 6, W = 1000, labelW = 250;
+  const H = padT + padB + view.length*grpH;
+  const chartX = labelW, chartW = W - labelW - 90;
+  const maxV = Math.max(1, ...view.flatMap(it => periods.map(p => metricVal(it.byPeriod[p.key]||{qty:0,revenue:0,marginRub:0,marginPct:0},metric))));
+  const rows = view.map((it,i)=>{
+    const gy = padT + i*grpH;
+    const nm = (it.name||it.sku);
+    const lbl = nm.length>34 ? nm.slice(0,33)+'…' : nm;
+    const bars = periods.map((p,pi)=>{
+      const agg = it.byPeriod[p.key]||{qty:0,revenue:0,marginRub:0,marginPct:0};
+      const v = metricVal(agg, metric);
+      const w = Math.max(0, (v/maxV)*chartW);
+      const by = gy + pi*barH;
+      return `<g><title>${escapeHtml(it.sku)} · ${escapeHtml(it.name||'')}
+${escapeHtml(p.label)}
+Штук: ${fmtNum.format(agg.qty)} · Выручка: ${fmtMoney.format(agg.revenue)} руб.
+Маржа: ${fmtMoney.format(agg.marginRub)} руб. · ${fmtPct.format(agg.marginPct||0)}
+${metricName(metric)}: ${fmt(v)}</title>
+        <rect x="${chartX}" y="${by}" width="${Math.max(1,w)}" height="${barH-1}" fill="${p.color}" opacity=".9"/>
+        <text x="${chartX+w+5}" y="${by+barH-2}" font-size="9" fill="#667085">${v?fmt(v):''}</text>
+      </g>`;
+    }).join('');
+    return `<g class="skucmp-row">
+      <rect class="hit" x="0" y="${gy-2}" width="${W}" height="${grpH}" fill="transparent"/>
+      <text x="8" y="${gy+np*barH/2+3}" font-size="12" fill="#344054">${escapeHtml(lbl)}</text>
+      ${bars}
+    </g>`;
+  }).join('');
+  const note = more>0 ? `<div class="hint" style="padding:6px 8px">Показаны топ-${CAP} SKU по «${metricName(metric)}». Ещё ${more} — уточните фильтры.</div>` : '';
+  return `<div class="skucmp-wrap"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;max-height:none">${rows}</svg></div>${note}`;
+}
+
+function periodLegendHtml(periods) {
+  return periods.map(p =>
+    `<span style="display:inline-flex;align-items:center;gap:5px">
+      <i style="width:11px;height:11px;border-radius:2px;background:${p.color};display:inline-block"></i>
+      ${escapeHtml(p.label)}</span>`).join('');
 }
 
 // ─── CUSTOMER CHART ────────────────────────────────────────────────────────
