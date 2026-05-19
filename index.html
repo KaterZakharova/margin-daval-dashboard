@@ -193,13 +193,18 @@
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px">
       <div>
         <h2>ТОП-20 клиентов — динамика и тренды</h2>
-        <div class="hint">Ранжирование за выбранный период. Красный = снижение, жёлтый = потерян, зелёный = рост. Наведи на строку для выноски, кликни — раскрой до SKU ниже.</div>
+        <div class="hint" id="top20Hint">Тренд по TTM-импульсу: скользящая сумма за 12 мес. против неё же 3 мес. назад — устойчиво к редким/квартальным заказам. Красный = снижение, жёлтый = потерян, зелёный = рост. Клик по строке — раскрытие до SKU ниже.</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="top20-tabs">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="top20-tabs" id="top20MetricTabs">
           <button class="tab-btn active" onclick="setTop20Mode('margin')">По марже</button>
           <button class="tab-btn" onclick="setTop20Mode('revenue')">По выручке</button>
           <button class="tab-btn" onclick="setTop20Mode('qty')">По количеству</button>
+        </div>
+        <div class="top20-tabs" id="top20BasisTabs">
+          <button class="tab-btn active" onclick="setClientTrendMode('ttm')">TTM-импульс</button>
+          <button class="tab-btn" onclick="setClientTrendMode('yoy')">Год к году</button>
+          <button class="tab-btn" onclick="setClientTrendMode('qoq')">Кв. к кварталу</button>
         </div>
         <button class="exp-btn" onclick="expandChart('#top20Chart','ТОП-20 клиентов — '+top20Mode)">⤢ Развернуть</button>
       </div>
@@ -369,6 +374,7 @@ const fmtPct = new Intl.NumberFormat('ru-RU', { style: 'percent', minimumFractio
 let DATA, state = { customer: '', sku: '', month: '' };
 let scenarios = [];
 let top20Mode = 'margin';
+let clientTrendMode = 'ttm';   // 'ttm' (импульс) | 'yoy' (год к году) | 'qoq' (квартал к кварталу)
 
 const EXCLUDE_CUSTOMERS = new Set(['ГАЛЕН ООО (S3)', 'КОСМЕТИК ВИА ООО', 'НЕЙЛ ГУДС ООО (S2)']);
 
@@ -1740,10 +1746,22 @@ window.showTrendTooltip = (event, month, marginPct, qty, marginRub) => {
 
 // ─── TOP-20 CLIENTS ────────────────────────────────────────────────────────
 
+// Окна сравнения тренда клиента в зависимости от режима
+//  ttm  — TTM-импульс: скользящая сумма за 12 мес. vs она же 3 мес. назад
+//  yoy  — год к году: последние 12 мес. vs предыдущие 12 мес.
+//  qoq  — квартал к кварталу: последние 3 мес. vs предыдущие 3 мес.
+function clientTrendWindows(A) {
+  if (clientTrendMode === 'qoq')
+    return { rec:A.slice(-3),  pri:A.slice(-6,-3),   lost:A.slice(-3),  label:'к пред. кварталу' };
+  if (clientTrendMode === 'yoy')
+    return { rec:A.slice(-12), pri:A.slice(-24,-12), lost:A.slice(-12), label:'год к году' };
+  return   { rec:A.slice(-12), pri:A.slice(-15,-3),  lost:A.slice(-12), label:'к 12 мес. назад (TTM-импульс)' };
+}
+
 function computeClientProfiles(allRows) {
   const allMonths = uniq(allRows.map(x => x.month)).sort();
-  const recentMonths = new Set(allMonths.slice(-3));
-  const priorMonths  = new Set(allMonths.slice(-6, -3));
+  const win = clientTrendWindows(allMonths);
+  const recSet = new Set(win.rec), priSet = new Set(win.pri), lostSet = new Set(win.lost);
 
   const clientMap = new Map();
   for (const r of allRows) {
@@ -1751,10 +1769,7 @@ function computeClientProfiles(allRows) {
       clientMap.set(r.customer, {
         customer: r.customer, manager: r.manager || '', scheme: r.scheme,
         months: new Map(), skuSet: new Set(),
-        totalQty:0, totalRevenue:0, totalMarginRub:0,
-        recentQty:0, recentRevenue:0, recentMarginRub:0,
-        priorQty:0,  priorRevenue:0,  priorMarginRub:0,
-        lastMonth: ''
+        totalQty:0, totalRevenue:0, totalMarginRub:0, lastMonth: ''
       });
     }
     const c = clientMap.get(r.customer);
@@ -1764,31 +1779,32 @@ function computeClientProfiles(allRows) {
     if (!c.months.has(r.month)) c.months.set(r.month, {qty:0,revenue:0,marginRub:0});
     const mp = c.months.get(r.month);
     mp.qty += qty; mp.revenue += rev; mp.marginRub += mar;
-    if (recentMonths.has(r.month)) { c.recentQty+=qty; c.recentRevenue+=rev; c.recentMarginRub+=mar; }
-    if (priorMonths.has(r.month))  { c.priorQty+=qty;  c.priorRevenue+=rev;  c.priorMarginRub+=mar; }
     if (r.month > c.lastMonth) c.lastMonth = r.month;
   }
+
+  const fld = top20Mode === 'qty' ? 'qty' : top20Mode === 'revenue' ? 'revenue' : 'marginRub';
+  const sumSet = (c, set, f) => { let s = 0; for (const [m, v] of c.months) if (set.has(m)) s += v[f]; return s; };
 
   return [...clientMap.values()].map(c => {
     c.totalMarginPct = c.totalRevenue ? c.totalMarginRub / c.totalRevenue : 0;
     c.skuCount = c.skuSet.size;
     c.monthSeries = allMonths.map(m => ({ month:m, ...(c.months.get(m)||{qty:0,revenue:0,marginRub:0}) }));
+    c.trendBasis = win.label;
 
-    const metricKey = top20Mode === 'qty' ? 'recentQty' : top20Mode === 'revenue' ? 'recentRevenue' : 'recentMarginRub';
-    const priorKey  = top20Mode === 'qty' ? 'priorQty'  : top20Mode === 'revenue' ? 'priorRevenue'  : 'priorMarginRub';
-    const recentVal = c[metricKey], priorVal = c[priorKey];
-
-    const hasRecent = c.recentRevenue > 0;
-    const hasPrior  = c.priorRevenue  > 0;
-    const hasOlder  = c.totalRevenue > c.recentRevenue + c.priorRevenue + 0.01;
+    const recRev  = sumSet(c, recSet, 'revenue');
+    const priRev  = sumSet(c, priSet, 'revenue');
+    const lostRev = sumSet(c, lostSet, 'revenue');
+    const recVal  = sumSet(c, recSet, fld);
+    const priVal  = sumSet(c, priSet, fld);
+    const hadEarlier = c.totalRevenue > lostRev + 0.01;
 
     let trend, trendPct = 0;
-    if (!hasRecent && (hasPrior || hasOlder)) {
+    if (lostRev <= 0 && hadEarlier) {              // нет продаж за всё окно (≈год для ttm/yoy) — реально потерян
       trend = 'lost'; trendPct = -1;
-    } else if (!hasPrior) {
-      trend = hasRecent ? 'rising' : 'stable';
+    } else if (priRev <= 0) {                      // не с чем сравнивать (новый/вернулся)
+      trend = recRev > 0 ? 'rising' : 'stable';
     } else {
-      trendPct = priorVal ? (recentVal - priorVal) / Math.abs(priorVal) : 0;
+      trendPct = priVal ? (recVal - priVal) / Math.abs(priVal) : 0;
       trend = trendPct < -0.15 ? 'falling' : trendPct > 0.15 ? 'rising' : 'stable';
     }
     c.trend = trend; c.trendPct = trendPct;
@@ -1796,11 +1812,18 @@ function computeClientProfiles(allRows) {
   });
 }
 
+// человекочитаемый %: режем абсурдные значения от деления на крошечную базу
+function pctLabel(pct) {
+  const p = Math.round(pct * 100);
+  if (p > 999)  return '>999%';
+  if (p < -999) return '<−999%';
+  return `${p>=0?'+':'−'}${Math.abs(p)}%`;
+}
 function trendBadge(trend, pct) {
   const cls = {lost:'trend-badge-lost',falling:'trend-badge-fall',rising:'trend-badge-rise',stable:'trend-badge-stable'}[trend]||'trend-badge-stable';
   const lbl = trend==='lost'    ? '⚠ Потерян'
-             : trend==='falling' ? `↓ ${Math.abs(Math.round(pct*100))}%`
-             : trend==='rising'  ? `↑ ${Math.round(pct*100)}%`
+             : trend==='falling' ? `↓ ${pctLabel(pct).replace('−','')}`
+             : trend==='rising'  ? `↑ ${pctLabel(pct).replace('+','')}`
              : '→ Стабильно';
   return `<span class="${cls}">${lbl}</span>`;
 }
@@ -1878,6 +1901,7 @@ function renderTop20Table(top20) {
     const spark  = renderSparkline(c.monthSeries, c.trend, sparkField);
     const tipPayload = JSON.stringify({
       customer: c.customer, manager: c.manager, trend: c.trend, trendPct: c.trendPct,
+      basis: c.trendBasis,
       totalQty: c.totalQty, totalRevenue: c.totalRevenue, totalMarginRub: c.totalMarginRub,
       totalMarginPct: c.totalMarginPct, skuCount: c.skuCount, lastMonth: c.lastMonth
     }).replace(/"/g,'&quot;');
@@ -1908,13 +1932,34 @@ function renderTop20Section() {
   const top20 = [...profiles].sort((a,b) => b[metricKey]-a[metricKey]).slice(0,20);
   renderTop20Chart(top20);
   renderTop20Table(top20);
+  const tc = q('#tcFall');
+  if (tc) {
+    const bad = profiles.filter(p => p.trend === 'lost' || p.trend === 'falling').length;
+    tc.textContent = bad ? bad : '';
+    tc.style.display = bad ? '' : 'none';
+  }
 }
 
 window.setTop20Mode = m => {
   top20Mode = m;
-  document.querySelectorAll('.tab-btn').forEach((btn,i) => {
+  document.querySelectorAll('#top20MetricTabs .tab-btn').forEach((btn,i) => {
     btn.classList.toggle('active', ['margin','revenue','qty'][i] === m);
   });
+  renderTop20Section();
+};
+
+const CLIENT_TREND_HINT = {
+  ttm: 'Тренд по <b>TTM-импульсу</b>: скользящая сумма за 12 мес. против неё же 3 мес. назад — устойчиво к редким/квартальным заказам.',
+  yoy: 'Тренд <b>год к году</b>: последние 12 мес. против предыдущих 12 мес. — сезонность убрана.',
+  qoq: 'Тренд <b>квартал к кварталу</b>: последние 3 мес. против предыдущих 3 мес. — чувствительно, для частых заказов.'
+};
+window.setClientTrendMode = mode => {
+  clientTrendMode = mode;
+  document.querySelectorAll('#top20BasisTabs .tab-btn').forEach((btn,i) => {
+    btn.classList.toggle('active', ['ttm','yoy','qoq'][i] === mode);
+  });
+  const h = q('#top20Hint');
+  if (h) h.innerHTML = CLIENT_TREND_HINT[mode] + ' Красный = снижение, жёлтый = потерян, зелёный = рост. Клик по строке — раскрытие до SKU ниже.';
   renderTop20Section();
 };
 
@@ -1923,11 +1968,12 @@ window.showClientTip = (event, row) => {
   if (!tip) return;
   try {
     const d = JSON.parse(row.dataset.tip.replace(/&quot;/g,'"'));
+    const b = d.basis || 'к пред. периоду';
     const trendDescr = {
-      lost:    `⚠ Потерян — нет продаж в последние 3 мес. Последняя поставка: ${d.lastMonth||'?'}`,
-      falling: `↓ Снижение: −${Math.abs(Math.round(d.trendPct*100))}% к предыдущим 3 мес.`,
-      rising:  `↑ Рост: +${Math.round(d.trendPct*100)}% к предыдущим 3 мес.`,
-      stable:  `→ Стабильно (изменение в пределах ±15%)`
+      lost:    `⚠ Потерян — нет продаж за окно сравнения. Последняя поставка: ${d.lastMonth||'?'}`,
+      falling: `↓ Снижение: ${pctLabel(d.trendPct)} (${b})`,
+      rising:  `↑ Рост: ${pctLabel(d.trendPct)} (${b})`,
+      stable:  `→ Стабильно — изменение в пределах ±15% (${b})`
     }[d.trend]||'';
     const trendColor = d.trend==='rising' ? '#6ee7b7' : d.trend==='stable' ? '#94a3b8' : '#fca5a5';
     tip.innerHTML =
