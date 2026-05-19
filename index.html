@@ -108,7 +108,15 @@
       <h1>Маржинальность, объемы и давальческие схемы</h1>
       <p>Плановая валовая маржа из куба «Факт продаж», раскрытие до SKU и ресурсной спецификации.</p>
     </div>
-    <div class="hint" id="meta"></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <button type="button" id="refreshBtn"
+        style="background:#111827;color:#fff;border:0;border-radius:8px;height:38px;padding:0 18px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.03em;box-shadow:0 2px 8px rgba(17,24,39,.28)"
+        title="Запустить принудительное обновление данных из 1С (GitHub Actions). Данные обновятся через ~3–5 мин и дашборд переразвернётся автоматически."
+        onclick="window.open('https://github.com/KaterZakharova/margin-daval-dashboard/actions/workflows/refresh.yml','_blank','noopener')">
+        ⟳ ОБНОВИТЬ ДАННЫЕ
+      </button>
+      <div class="hint" id="meta"></div>
+    </div>
   </div>
 
   <section class="panel filters">
@@ -185,6 +193,7 @@
     <button class="tab-main" data-pane="overview" onclick="setMainTab('overview')">Обзор</button>
     <button class="tab-main" data-pane="schemes" onclick="setMainTab('schemes')">Схемы обеспечения</button>
     <button class="tab-main" data-pane="forecast" onclick="setMainTab('forecast')">Прогноз</button>
+    <button class="tab-main" data-pane="yoy" onclick="setMainTab('yoy')">Динамика по годам</button>
   </div>
 
   <div class="tabpane active" data-pane="fall">
@@ -361,6 +370,29 @@
   </section>
 
   </div><!-- /pane forecast -->
+
+  <div class="tabpane" data-pane="yoy">
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <div>
+        <h2>Динамика по годам — сравнение год к году</h2>
+        <div class="hint">Линия на каждый год по месяцам (фильтры применяются, кроме года). Пунктиром — коммерческая цель 2026 (реалистичный сценарий). Учитывается S3 Контрактное производство.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="top20-tabs" id="yoyMetricTabs">
+          <button class="tab-btn active" onclick="setYoyMetric('marginRub')">Валовка</button>
+          <button class="tab-btn" onclick="setYoyMetric('revenue')">Выручка</button>
+          <button class="tab-btn" onclick="setYoyMetric('qty')">Штуки</button>
+          <button class="tab-btn" onclick="setYoyMetric('marginPct')">Маржа %</button>
+        </div>
+        <button class="exp-btn" onclick="expandChart('#yoyChart', 'Динамика по годам — '+yoyMetricLabel(), '#yoyLegend')">⤢ Развернуть</button>
+      </div>
+    </div>
+    <div class="chart-modal-legend" id="yoyLegend" style="margin-bottom:6px"></div>
+    <div class="chart" id="yoyChart" style="height:380px;position:relative"></div>
+    <div class="table" style="margin-top:14px"><table id="yoyTable"></table></div>
+  </section>
+  </div><!-- /pane yoy -->
 
   <div class="footer-note" id="ruleNote"></div>
 </main>
@@ -560,6 +592,7 @@ function render() {
   renderTop20Section();
   renderDetail(rows);
   renderForecast();
+  renderYoY();
 }
 
 // ─── TAB SWITCH ────────────────────────────────────────────────────────────
@@ -1599,6 +1632,123 @@ window.setCompareMetric = mt => {
 
 const QYEARS  = [2024, 2025, 2026];
 const QCOLORS = { 2024:'#2563eb', 2025:'#0d9488', 2026:'#d97706' };
+
+// ─── ДИНАМИКА ПО ГОДАМ (YoY) + коммерческая цель 2026 ──────────────────────
+const YOY_MONTHS = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+// коммерческий таргет 2026, реалистичный сценарий (скриншот 37): помесячно
+const COMMERCIAL_TARGET_2026 = {
+  1:{revenue:34000000,marginRub:10440564,qty:441000},
+  2:{revenue:41000000,marginRub:15888284,qty:482000},
+  3:{revenue:36000000,marginRub:15145630,qty:461000},
+  4:{revenue:20000000,marginRub:9000000, qty:350000},
+  5:{revenue:39200000,marginRub:14000000,qty:450000},
+  6:{revenue:39200000,marginRub:14000000,qty:550000},
+  7:{revenue:33600000,marginRub:12000000,qty:390000},
+  8:{revenue:42000000,marginRub:15000000,qty:490000},
+  9:{revenue:42000000,marginRub:15000000,qty:550000},
+  10:{revenue:50400000,marginRub:18000000,qty:600000},
+  11:{revenue:61600000,marginRub:22000000,qty:700000},
+  12:{revenue:53200000,marginRub:19000000,qty:620000}
+};
+const TARGET_COLOR = '#db2777';
+let yoyMetric = 'marginRub';
+function yoyMetricLabel() {
+  return { marginRub:'Валовка, руб.', revenue:'Выручка без НДС, руб.', qty:'Штуки', marginPct:'Маржа %' }[yoyMetric];
+}
+window.setYoyMetric = m => {
+  yoyMetric = m;
+  document.querySelectorAll('#yoyMetricTabs .tab-btn').forEach(b =>
+    b.classList.toggle('active', b.getAttribute('onclick').includes(`'${m}'`)));
+  renderYoY();
+};
+// фильтры как applyBaseFilters, но БЕЗ года (для YoY нужны все годы)
+function applyFiltersNoYear(x) {
+  const managers = msSelected('manager'), customers = msSelected('customer');
+  const brands = msSelected('brand'), skus = msSelected('sku'), schemes = msSelected('scheme');
+  const dav = q('#davFilter').value;
+  if (EXCLUDE_CUSTOMERS.has(x.customer)) return false;
+  if (managers.length && !managers.includes(x.manager))   return false;
+  if (customers.length&& !customers.includes(x.customer)) return false;
+  if (brands.length   && !brands.includes(x.brand))       return false;
+  if (skus.length     && !skus.includes(x.sku))           return false;
+  if (schemes.length  && !schemes.includes(x.scheme))     return false;
+  if (dav === 'raw'   && !x.hasDavRaw)        return false;
+  if (dav === 'mat'   && !x.hasDavMaterials)  return false;
+  if (dav === 'mixed' && !x.isMixed)          return false;
+  if (dav === 'mat2'  && x.davMaterials < 2)  return false;
+  if (dav === 'key'   && x.scheme !== 'Под ключ') return false;
+  return true;
+}
+function renderYoY() {
+  const el = q('#yoyChart'); if (!el || !DATA) return;
+  const rows = DATA.sales.filter(applyFiltersNoYear);
+  const years = [...new Set(rows.map(x => +x.year))].sort();
+  // agg[year][1..12] = {qty,revenue,marginRub}
+  const agg = {};
+  years.forEach(y => { agg[y] = {}; for (let mn=1; mn<=12; mn++) agg[y][mn] = {qty:0,revenue:0,marginRub:0}; });
+  rows.forEach(x => {
+    const y = +x.year, mn = +x.monthNum; if (!agg[y] || !agg[y][mn]) return;
+    agg[y][mn].qty += +x.qty || 0;
+    agg[y][mn].revenue += +x.revenue || 0;
+    agg[y][mn].marginRub += +x.marginRub || 0;
+  });
+  const val = (o) => yoyMetric === 'marginPct' ? (o.revenue ? o.marginRub/o.revenue : 0) : o[yoyMetric];
+  const series = years.map(y => ({
+    name: String(y), color: QCOLORS[y] || '#64748b',
+    vals: Array.from({length:12}, (_,i) => val(agg[y][i+1]))
+  }));
+  // линия цели 2026
+  const tgt = Array.from({length:12}, (_,i) => {
+    const t = COMMERCIAL_TARGET_2026[i+1];
+    return yoyMetric === 'marginPct' ? (t.revenue ? t.marginRub/t.revenue : 0)
+         : yoyMetric === 'qty' ? t.qty : yoyMetric === 'revenue' ? t.revenue : t.marginRub;
+  });
+  const isPct = yoyMetric === 'marginPct';
+  const fmtV = v => isPct ? fmtPct.format(v) : (yoyMetric==='qty' ? fmtNum.format(v) : fmtMoney.format(v));
+  // легенда
+  q('#yoyLegend').innerHTML = series.map(s =>
+    `<span><i style="display:inline-block;width:12px;height:3px;background:${s.color};vertical-align:middle;margin-right:5px"></i>${s.name}</span>`
+  ).join('') + `<span><i style="display:inline-block;width:14px;height:0;border-top:3px dashed ${TARGET_COLOR};vertical-align:middle;margin-right:5px"></i>Цель 2026 (коммерческая)</span>`;
+  svgYearLines(el, series, tgt, fmtV);
+  // таблица под графиком
+  const head = `<tr><th>Год</th>${YOY_MONTHS.map(m=>`<th style="text-align:right">${m}</th>`).join('')}<th style="text-align:right">Итого</th></tr>`;
+  const body = series.map(s => {
+    const tot = isPct ? null : s.vals.reduce((a,b)=>a+b,0);
+    return `<tr><td><b style="color:${s.color}">${s.name}</b></td>${s.vals.map(v=>`<td style="text-align:right">${v?fmtV(v):'—'}</td>`).join('')}<td style="text-align:right"><b>${tot==null?'—':fmtV(tot)}</b></td></tr>`;
+  }).join('');
+  const tgtRow = `<tr><td><b style="color:${TARGET_COLOR}">Цель 2026</b></td>${tgt.map(v=>`<td style="text-align:right;color:${TARGET_COLOR}">${fmtV(v)}</td>`).join('')}<td style="text-align:right;color:${TARGET_COLOR}"><b>${isPct?'—':fmtV(tgt.reduce((a,b)=>a+b,0))}</b></td></tr>`;
+  q('#yoyTable').innerHTML = head + body + tgtRow;
+}
+function svgYearLines(el, series, tgt, fmtV) {
+  const W = el.clientWidth || 900, H = 360;
+  const m = { l:64, r:16, t:16, b:34 };
+  const cW = W - m.l - m.r;
+  const all = series.flatMap(s => s.vals).concat(tgt).filter(v => v > 0);
+  const maxV = Math.max(...all, 0.01);
+  const xM = i => m.l + i * (cW / 11);
+  const yV = v => H - m.b - (v / maxV) * (H - m.t - m.b);
+  const yTicks = [0,.25,.5,.75,1].map(f => {
+    const v = maxV * f, yv = yV(v);
+    return `<line x1="${m.l}" y1="${yv}" x2="${W-m.r}" y2="${yv}" stroke="#eef2f7"/>
+            <text x="${m.l-6}" y="${yv+4}" text-anchor="end" font-size="10" fill="#94a3b8">${fmtV(v)}</text>`;
+  }).join('');
+  const xLabels = YOY_MONTHS.map((mo,i) =>
+    `<text x="${xM(i)}" y="${H-12}" text-anchor="middle" font-size="11" fill="#475467">${mo}</text>`).join('');
+  const lineFor = (vals, color, dash) => {
+    const seg = vals.map((v,i) => v > 0 ? `${xM(i)},${yV(v)}` : null);
+    // рвём линию там где нет данных
+    let path = '', open = false;
+    seg.forEach(p => { if (p===null) { open=false; } else { path += (open?' L':' M')+p.replace(',',' '); open=true; } });
+    const dots = vals.map((v,i)=> v>0 ? `<circle cx="${xM(i)}" cy="${yV(v)}" r="4" fill="${color}" stroke="#fff" stroke-width="1.5"><title>${YOY_MONTHS[i]}: ${fmtV(v)}</title></circle>`:'').join('');
+    return `<path d="${path}" fill="none" stroke="${color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" ${dash?`stroke-dasharray="7 5"`:''} opacity="${dash?.95:.92}"/>${dots}`;
+  };
+  const seriesSvg = series.map(s => lineFor(s.vals, s.color, false)).join('');
+  const tgtSvg = lineFor(tgt, TARGET_COLOR, true);
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:100%">
+    ${yTicks}<line x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}" stroke="#d8dee8"/>
+    ${seriesSvg}${tgtSvg}${xLabels}
+  </svg>`;
+}
 
 function buildQuarterData(rows) {
   const data = {};
