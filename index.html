@@ -40,6 +40,15 @@
     .cmp-a{color:#2563eb;font-weight:700}.cmp-b{color:#0d9488;font-weight:700}.cmp-pos{color:#168a5b;font-weight:700}.cmp-neg{color:#d92d20;font-weight:700}.cmp-neu{color:#94a3b8}.cmp-lost-row td{background:#fffbeb!important}.cmp-new-row td{background:#f0fdf4!important}
     .period-controls{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}.period-controls label{font-size:12px;color:var(--muted);white-space:nowrap}.period-controls select{height:32px;font-size:13px;min-width:160px;width:auto}
     .exp-btn{height:30px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--muted);padding:0 11px;cursor:pointer;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;flex-shrink:0}.exp-btn:hover{background:#f8fafc;border-color:#93c5fd;color:var(--blue)}
+    .tabs-bar{position:sticky;top:0;z-index:200;display:flex;gap:4px;background:var(--bg);padding:10px 0 12px;margin:4px 0 6px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+    .tab-main{height:38px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);padding:0 16px;cursor:pointer;font-size:14px;font-weight:650;display:inline-flex;align-items:center;gap:8px}
+    .tab-main:hover{background:#eef2f7;color:var(--ink)}
+    .tab-main.active{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.28)}
+    .tab-main .tcount{font-size:11px;font-weight:700;background:rgba(255,255,255,.22);border-radius:999px;padding:1px 7px}
+    .tab-main:not(.active) .tcount{background:var(--soft-red);color:var(--red)}
+    .tabpane{display:none}.tabpane.active{display:block;animation:fade .18s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+    .tab-empty{color:var(--muted);padding:30px;text-align:center;border:1px dashed var(--line);border-radius:10px;background:#fff}
     .chart-modal{position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,.62);display:none;align-items:center;justify-content:center;padding:24px}.chart-modal.open{display:flex}
     .chart-modal-box{background:#fff;border-radius:12px;box-shadow:0 24px 60px rgba(15,23,42,.4);width:min(1500px,96vw);height:min(900px,93vh);display:flex;flex-direction:column;padding:18px 22px;position:relative}
     .chart-modal-box h3{margin:0 0 12px;font-size:17px;padding-right:44px}
@@ -171,6 +180,35 @@
     <div class="panel kpi"><div class="label">Доля в марже: давальческие</div><div class="value" id="kpiDavMargin">0%</div><div class="sub">от общей маржи</div></div>
   </section>
 
+  <div class="tabs-bar">
+    <button class="tab-main active" data-pane="fall" onclick="setMainTab('fall')">⚠ Падающие&nbsp;/&nbsp;потерянные <span class="tcount" id="tcFall"></span></button>
+    <button class="tab-main" data-pane="overview" onclick="setMainTab('overview')">Обзор</button>
+    <button class="tab-main" data-pane="schemes" onclick="setMainTab('schemes')">Схемы обеспечения</button>
+    <button class="tab-main" data-pane="forecast" onclick="setMainTab('forecast')">Прогноз</button>
+  </div>
+
+  <div class="tabpane active" data-pane="fall">
+
+  <section class="panel" id="top20Section">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px">
+      <div>
+        <h2>ТОП-20 клиентов — динамика и тренды</h2>
+        <div class="hint">Ранжирование за выбранный период. Красный = снижение, жёлтый = потерян, зелёный = рост. Наведи на строку для выноски, кликни — раскрой до SKU ниже.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="top20-tabs">
+          <button class="tab-btn active" onclick="setTop20Mode('margin')">По марже</button>
+          <button class="tab-btn" onclick="setTop20Mode('revenue')">По выручке</button>
+          <button class="tab-btn" onclick="setTop20Mode('qty')">По количеству</button>
+        </div>
+        <button class="exp-btn" onclick="expandChart('#top20Chart','ТОП-20 клиентов — '+top20Mode)">⤢ Развернуть</button>
+      </div>
+    </div>
+    <div id="top20Chart" style="height:280px;margin-bottom:12px;position:relative"></div>
+    <div class="table" style="max-height:540px"><table id="top20Table"></table></div>
+    <div class="client-tip" id="clientTooltip" style="display:none"></div>
+  </section>
+
   <section class="panel" id="customerPanel" style="display:none">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
       <div><h2 id="customerPanelTitle">Сравнение клиентов</h2><div class="hint" id="customerPanelHint">Каждая линия — отдельный клиент. Переключайте метрику, чтобы увидеть, у кого падение.</div></div>
@@ -210,12 +248,24 @@
     </div>
   </section>
 
+  <section class="panel detail">
+    <div>
+      <h2>Детализация: почему растёт / падает</h2>
+      <div class="hint">Кликни клиента в ТОП-20 выше, затем SKU в таблице — увидишь, что вывели и что просело. Ресурсная спецификация — во вкладке «Схемы обеспечения».</div>
+    </div>
+    <div id="detailBlock" class="detail-empty">Выберите клиента в ТОП-20 выше.</div>
+  </section>
+
+  </div><!-- /pane fall -->
+
+  <div class="tabpane" data-pane="overview">
+
   <section class="panel">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
-      <div><h2>Динамика: количество и валовая маржа %</h2><div class="hint">Синие столбцы — штуки, красная линия — маржа %. Клик по столбцу пересчитывает топ-10 ниже. <span id="activeMonth"></span></div></div>
+      <div><h2>Развитие направления: объём и маржа %</h2><div class="hint">Синие столбцы — штуки, красная линия — маржа %. Клик по столбцу пересчитывает топы. <span id="activeMonth"></span></div></div>
       <div style="display:flex;align-items:center;gap:12px">
         <div class="legend"><span><i class="sw blue"></i>Штук</span><span><i class="sw red"></i>Маржа %</span></div>
-        <button class="exp-btn" onclick="expandChart('#comboChart','Динамика: количество и валовая маржа %')">⤢ Развернуть</button>
+        <button class="exp-btn" onclick="expandChart('#comboChart','Развитие направления: объём и маржа %')">⤢ Развернуть</button>
       </div>
     </div>
     <div class="chart" id="comboChart"></div>
@@ -228,35 +278,15 @@
       <div class="table"><table id="topMarginTable"></table></div>
     </div>
     <div class="panel">
-      <h2>Топ-10 по влиянию на штуки</h2>
-      <div class="hint">Кто формирует основной объем отгрузок.</div>
+      <h2>Топ-10 по объёму</h2>
+      <div class="hint">Кто формирует основной объём отгрузок.</div>
       <div class="table"><table id="topQtyTable"></table></div>
     </div>
   </section>
 
-  <section class="panel" id="top20Section">
-    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px">
-      <div>
-        <h2>ТОП-20 клиентов — динамика и тренды</h2>
-        <div class="hint">Ранжирование за весь выбранный период фильтров. Красный = снижение, жёлтый = потерян, зелёный = рост. Наведи на строку для выноски, кликни — раскрой до SKU.</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="top20-tabs">
-          <button class="tab-btn active" onclick="setTop20Mode('margin')">По марже</button>
-          <button class="tab-btn" onclick="setTop20Mode('revenue')">По выручке</button>
-          <button class="tab-btn" onclick="setTop20Mode('qty')">По количеству</button>
-        </div>
-        <button class="exp-btn" onclick="expandChart('#top20Chart','ТОП-20 клиентов — '+top20Mode)">⤢ Развернуть</button>
-      </div>
-    </div>
-    <div id="top20Chart" style="height:280px;margin-bottom:12px;position:relative"></div>
-    <div class="table" style="max-height:540px"><table id="top20Table"></table></div>
-    <div class="client-tip" id="clientTooltip" style="display:none"></div>
-  </section>
-
   <section class="panel">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
-      <div><h2>Пузырьки клиентов</h2><div class="hint">X — маржа %, Y — штуки, размер — выручка. Клик по пузырьку раскрывает клиента ниже.</div></div>
+      <div><h2>Пузырьки клиентов</h2><div class="hint">X — маржа %, Y — штуки, размер — выручка. Клик по пузырьку — детализация клиента.</div></div>
       <div style="display:flex;align-items:center;gap:12px">
         <div class="legend"><span><i class="sw blue"></i>Под ключ</span><span><i class="sw green"></i>Давальческая</span><span><i class="sw teal"></i>Смешанная</span></div>
         <button class="exp-btn" onclick="expandChart('#bubbleChart','Пузырьки клиентов')">⤢ Развернуть</button>
@@ -266,8 +296,42 @@
   </section>
 
   <section class="panel">
-    <h2>Прогноз загрузки мощности</h2>
-    <div class="hint">Добавляй гипотезы по заказам: можно выбрать клиента/SKU для исторических цены и маржи или оставить ручной сценарий и ввести только объем, цену и маржу.</div>
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
+      <div><h2>ABC-анализ клиентов</h2><div class="hint">A — топ ~80% маржи, B — следующие ~15%, C — последние ~5%. Где сосредоточен результат и кого нельзя терять.</div></div>
+      <button class="exp-btn" onclick="expandChart('#abcChart','ABC-анализ клиентов')">⤢ Развернуть</button>
+    </div>
+    <div class="scenario-kpis" id="abcSummary"></div>
+    <div class="chart" id="abcChart" style="height:240px;position:relative"></div>
+    <div class="table" style="max-height:420px;margin-top:12px"><table id="abcTable"></table></div>
+  </section>
+
+  </div><!-- /pane overview -->
+
+  <div class="tabpane" data-pane="schemes">
+
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
+      <div><h2>Структура по схемам обеспечения</h2><div class="hint">Под ключ / давальческая / смешанная: доли по объёму и марже, средняя маржа %.</div></div>
+      <button class="exp-btn" onclick="expandChart('#schemeChart','Структура по схемам обеспечения')">⤢ Развернуть</button>
+    </div>
+    <div class="scenario-kpis" id="schemeSummary"></div>
+    <div class="chart" id="schemeChart" style="height:240px;position:relative"></div>
+    <div class="table" style="max-height:360px;margin-top:12px"><table id="schemeTable"></table></div>
+  </section>
+
+  <section class="panel">
+    <h2>Ресурсная спецификация и давальческие строки</h2>
+    <div class="hint">Выберите SKU: вкладка «Падающие» → клиент в ТОП-20 → SKU в таблице. РС и давальческие материалы появятся здесь.</div>
+    <div id="schemeDetail" class="detail-empty">SKU не выбран.</div>
+  </section>
+
+  </div><!-- /pane schemes -->
+
+  <div class="tabpane" data-pane="forecast">
+
+  <section class="panel">
+    <h2>Прогноз роста клиента</h2>
+    <div class="hint">Выберите клиента — увидите его динамику за период и проекцию роста по добавленным сценариям: ожидаемый объём, выручка и маржа.</div>
     <div class="scenario-controls">
       <div class="field"><label>Клиент</label><select id="forecastClient"><option value="">Ручной сценарий</option></select></div>
       <div class="field"><label>SKU</label><select id="forecastSku"><option value="">Все SKU клиента</option></select></div>
@@ -279,16 +343,12 @@
       <button class="btn" type="button" onclick="clearScenarios()">Очистить</button>
     </div>
     <div class="scenario-kpis" id="forecastSummary"></div>
+    <div class="chart" id="forecastChart" style="height:300px;position:relative;margin:6px 0 4px"></div>
+    <div id="forecastProjNote" class="hint" style="margin-bottom:8px"></div>
     <div class="table"><table id="forecastTable"></table></div>
   </section>
 
-  <section class="panel detail">
-    <div>
-      <h2>Детализация выбранного клиента / SKU</h2>
-      <div class="hint">Кликни по клиенту в топах или пузырьке, затем по SKU в таблице, чтобы увидеть РС и давальческие строки.</div>
-    </div>
-    <div id="detailBlock" class="detail-empty">Выберите клиента или SKU.</div>
-  </section>
+  </div><!-- /pane forecast -->
 
   <div class="footer-note" id="ruleNote"></div>
 </main>
@@ -482,9 +542,104 @@ function render() {
   renderTopMargin(clients);
   renderTopQty(clients);
   renderBubbles(clients, total);
+  renderABC(clients, total);
+  renderSchemes(rows, total);
   renderTop20Section();
   renderDetail(rows);
   renderForecast();
+}
+
+// ─── TAB SWITCH ────────────────────────────────────────────────────────────
+window.setMainTab = name => {
+  document.querySelectorAll('.tab-main').forEach(b => b.classList.toggle('active', b.dataset.pane === name));
+  document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('active', p.dataset.pane === name));
+  // charts measured 0-width while hidden — re-render for the now-visible pane
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// ─── ABC-АНАЛИЗ КЛИЕНТОВ ───────────────────────────────────────────────────
+function renderABC(clients, total) {
+  const sumEl = q('#abcSummary'), chEl = q('#abcChart'), tbEl = q('#abcTable');
+  if (!sumEl || !chEl || !tbEl) return;
+  const list = clients.filter(c => c.marginRub > 0).sort((a,b) => b.marginRub - a.marginRub);
+  if (!list.length) { sumEl.innerHTML=''; chEl.innerHTML='<div class="detail-empty">Нет данных</div>'; tbEl.innerHTML=''; return; }
+  const totMar = list.reduce((s,c)=>s+c.marginRub,0) || 1;
+  let cum = 0;
+  const rowsA = list.map(c => {
+    cum += c.marginRub;
+    const cumShare = cum / totMar;
+    const cls = cumShare <= 0.8 ? 'A' : cumShare <= 0.95 ? 'B' : 'C';
+    return { ...c, cumShare, abc: cls };
+  });
+  const grp = k => rowsA.filter(r => r.abc === k);
+  const stat = k => { const g = grp(k); return { n:g.length, mar:g.reduce((s,c)=>s+c.marginRub,0), rev:g.reduce((s,c)=>s+c.revenue,0) }; };
+  const A=stat('A'), B=stat('B'), C=stat('C');
+  const cardCol = { A:'#16a34a', B:'#d97706', C:'#94a3b8' };
+  sumEl.innerHTML = ['A','B','C'].map(k => { const s=stat(k);
+    return `<div class="fact"><span style="color:${cardCol[k]};font-weight:700">Группа ${k} — ${s.n} клиентов</span>
+      <strong>${fmtMoney.format(s.mar)} руб.</strong>
+      <span>${fmtPct.format(s.mar/totMar)} маржи · выручка ${fmtMoney.format(s.rev)}</span></div>`; }).join('');
+
+  // Pareto-бар: клиенты по марже + кумулятивная линия, цвет по группе
+  const W = chEl.clientWidth || 1000, H = 240, m = { l:54, r:46, t:14, b:30 };
+  const n = rowsA.length, maxMar = rowsA[0].marginRub || 1;
+  const bw = Math.max(1, (W-m.l-m.r)/n - 1);
+  const xP = i => m.l + i*((W-m.l-m.r)/n);
+  const yB = v => H-m.b - (v/maxMar)*(H-m.t-m.b);
+  const yC = v => H-m.b - v*(H-m.t-m.b);
+  const bars = rowsA.map((r,i) => `<rect x="${xP(i)}" y="${yB(r.marginRub)}" width="${bw}" height="${H-m.b-yB(r.marginRub)}" fill="${cardCol[r.abc]}" opacity=".82"><title>${escapeHtml(r.customer)}\n${fmtMoney.format(r.marginRub)} руб. · ${fmtPct.format(r.marginWeight||r.marginRub/totMar)}\nГруппа ${r.abc}</title></rect>`).join('');
+  const pts = rowsA.map((r,i)=>`${xP(i)+bw/2},${yC(r.cumShare)}`).join(' ');
+  const yticks = [0,.25,.5,.75,1].map(f=>{ const yy=yC(f); return `<line x1="${m.l}" y1="${yy}" x2="${W-m.r}" y2="${yy}" stroke="#eef2f7"/><text x="${W-m.r+6}" y="${yy+4}" font-size="10" fill="#94a3b8">${Math.round(f*100)}%</text>`; }).join('');
+  chEl.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:100%">${yticks}
+    <line x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}" stroke="#d8dee8"/>
+    ${bars}<polyline points="${pts}" fill="none" stroke="#111827" stroke-width="2"/>
+    <line x1="${m.l}" y1="${yC(.8)}" x2="${W-m.r}" y2="${yC(.8)}" stroke="#16a34a" stroke-dasharray="4 3"/>
+    <line x1="${m.l}" y1="${yC(.95)}" x2="${W-m.r}" y2="${yC(.95)}" stroke="#d97706" stroke-dasharray="4 3"/></svg>`;
+
+  tbEl.innerHTML = `<thead><tr><th>#</th><th>Клиент</th><th>ABC</th><th class="num">Маржа руб.</th><th class="num">Доля</th><th class="num">Накоплено</th><th class="num">Выручка</th><th class="num">Маржа %</th></tr></thead><tbody>${
+    rowsA.map((r,i)=>`<tr class="click ${state.customer===r.customer?'selected':''}" onclick="selectCustomer('${jsEsc(r.customer)}')">
+      <td>${i+1}</td><td>${escapeHtml(r.customer)}</td>
+      <td><span class="badge" style="background:${cardCol[r.abc]}1f;color:${cardCol[r.abc]}">${r.abc}</span></td>
+      <td class="num">${fmtMoney.format(r.marginRub)}</td>
+      <td class="num">${fmtPct.format(r.marginRub/totMar)}</td>
+      <td class="num">${fmtPct.format(r.cumShare)}</td>
+      <td class="num">${fmtMoney.format(r.revenue)}</td>
+      <td class="num">${fmtPct.format(r.marginPct)}</td></tr>`).join('')
+  }</tbody>`;
+}
+
+// ─── СХЕМЫ ОБЕСПЕЧЕНИЯ — СТРУКТУРА ─────────────────────────────────────────
+function renderSchemes(rows, total) {
+  const sumEl = q('#schemeSummary'), chEl = q('#schemeChart'), tbEl = q('#schemeTable');
+  if (!sumEl || !chEl || !tbEl) return;
+  const groups = groupBy(rows, x => x.scheme || 'Не задана')
+    .map(g => ({ scheme:g.key, ...aggRows(g.rows) }))
+    .sort((a,b) => b.marginRub - a.marginRub);
+  if (!groups.length) { sumEl.innerHTML=''; chEl.innerHTML='<div class="detail-empty">Нет данных</div>'; tbEl.innerHTML=''; return; }
+  const totMar = total.marginRub || 1, totQty = total.qty || 1, totRev = total.revenue || 1;
+  sumEl.innerHTML = groups.slice(0,4).map(g => `<div class="fact">
+    <span style="color:${schemeColor(g.scheme)};font-weight:700">${escapeHtml(g.scheme)}</span>
+    <strong>${fmtPct.format(g.marginRub/totMar)} маржи</strong>
+    <span>${fmtNum.format(g.qty)} шт · ${fmtPct.format(g.marginPct)} маржа</span></div>`).join('');
+
+  const W = chEl.clientWidth || 1000, H = 240, m = { l:160, r:60, t:10, b:24 };
+  const rowH = Math.min(46, (H-m.t-m.b)/groups.length);
+  const maxMar = Math.max(...groups.map(g=>g.marginRub), 1);
+  const bars = groups.map((g,i) => {
+    const y = m.t + i*rowH, bw = (g.marginRub/maxMar)*(W-m.l-m.r);
+    return `<text x="${m.l-8}" y="${y+rowH/2+3}" text-anchor="end" font-size="12" fill="#344054">${escapeHtml(g.scheme)}</text>
+      <rect x="${m.l}" y="${y+4}" width="${Math.max(1,bw)}" height="${rowH-9}" rx="2" fill="${schemeColor(g.scheme)}" opacity=".85"><title>${escapeHtml(g.scheme)}\nМаржа ${fmtMoney.format(g.marginRub)} (${fmtPct.format(g.marginRub/totMar)})\nОбъём ${fmtNum.format(g.qty)} шт\nМаржа% ${fmtPct.format(g.marginPct)}</title></rect>
+      <text x="${m.l+bw+6}" y="${y+rowH/2+3}" font-size="11" fill="#475467">${fmtPct.format(g.marginRub/totMar)}</text>`;
+  }).join('');
+  chEl.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:100%">${bars}</svg>`;
+
+  tbEl.innerHTML = `<thead><tr><th>Схема</th><th class="num">Штук</th><th class="num">Доля шт.</th><th class="num">Выручка</th><th class="num">Маржа руб.</th><th class="num">Доля маржи</th><th class="num">Маржа %</th></tr></thead><tbody>${
+    groups.map(g=>`<tr><td><span class="badge ${bySchemeClass(g.scheme)}">${escapeHtml(g.scheme)}</span></td>
+      <td class="num">${fmtNum.format(g.qty)}</td><td class="num">${fmtPct.format(g.qty/totQty)}</td>
+      <td class="num">${fmtMoney.format(g.revenue)}</td><td class="num">${fmtMoney.format(g.marginRub)}</td>
+      <td class="num">${fmtPct.format(g.marginRub/totMar)}</td><td class="num">${fmtPct.format(g.marginPct)}</td></tr>`).join('')
+  }</tbody>`;
 }
 
 function renderCombo(rows) {
@@ -585,6 +740,54 @@ function renderForecast() {
   q('#forecastTable').innerHTML = `<thead><tr><th>Клиент</th><th>SKU</th><th>Схема</th><th class="num">Штук</th><th class="num">Цена</th><th class="num">Выручка</th><th class="num">Маржа %</th><th class="num">ВП</th><th class="num">ВП / 1000 шт.</th><th></th></tr></thead><tbody>` +
     (scenarios.length ? scenarios.map(s => `<tr><td>${escapeHtml(s.client)}</td><td>${escapeHtml(s.sku || 'портфель')}</td><td>${escapeHtml(s.scheme)}</td><td class="num">${fmtNum.format(s.qty)}</td><td class="num">${fmtMoney.format(s.price)}</td><td class="num">${fmtMoney.format(s.revenue)}</td><td class="num">${fmtPct.format(s.marginPct)}</td><td class="num">${fmtMoney.format(s.marginRub)}</td><td class="num">${fmtMoney.format(s.qty ? s.marginRub / s.qty * 1000 : 0)}</td><td><button class="btn" type="button" onclick="removeScenario(${s.id})">Убрать</button></td></tr>`).join('') : '<tr><td colspan="10" class="hint">Добавь заказ, чтобы увидеть влияние на загрузку и маржу.</td></tr>') +
     '</tbody>';
+  renderForecastChart(base, added, combined);
+}
+
+// Прогноз роста клиента: история по месяцам + проекция от сценариев
+function renderForecastChart(base, added, combined) {
+  const el = q('#forecastChart'); if (!el) return;
+  const note = q('#forecastProjNote');
+  const client = q('#forecastClient').value;
+  if (!client) {
+    el.innerHTML = '<div class="detail-empty">Выберите клиента в сценарии выше — покажу его динамику и проекцию роста.</div>';
+    if (note) note.textContent = ''; return;
+  }
+  const rows = DATA.sales.filter(x => !EXCLUDE_CUSTOMERS.has(x.customer) && x.customer === client);
+  const hist = groupBy(rows, x => x.month).map(g => ({ month:g.key, ...aggRows(g.rows) }))
+    .sort((a,b) => a.month.localeCompare(b.month));
+  if (!hist.length) { el.innerHTML = '<div class="detail-empty">Нет истории по клиенту</div>'; if(note) note.textContent=''; return; }
+
+  // средний месяц истории vs прогнозный «следующий месяц» = добавлено сценариями
+  const recent = hist.slice(-6);
+  const avgQty = recent.reduce((s,d)=>s+d.qty,0) / recent.length;
+  const projQty = added.qty || 0;
+  const growth = avgQty ? (projQty - avgQty) / avgQty : 0;
+  const series = hist.map(d => ({ label:d.month, qty:d.qty, marginPct:d.marginPct, proj:false }));
+  series.push({ label:'Прогноз', qty:projQty, marginPct:added.marginPct||0, proj:true });
+
+  const W = el.clientWidth || 900, H = 300, m = {l:58,r:56,t:16,b:46};
+  const n = series.length;
+  const maxQty = Math.max(...series.map(d=>d.qty), 1);
+  const maxPct = Math.max(...series.map(d=>d.marginPct), .01);
+  const xP = i => m.l + i*((W-m.l-m.r)/Math.max(1,n));
+  const bw = Math.max(6, (W-m.l-m.r)/n*0.6);
+  const yQ = v => H-m.b - (v/maxQty)*(H-m.t-m.b);
+  const yPct = v => H-m.b - (v/maxPct)*(H-m.t-m.b);
+  const bars = series.map((d,i)=>`<rect x="${xP(i)}" y="${yQ(d.qty)}" width="${bw}" height="${Math.max(0,H-m.b-yQ(d.qty))}" rx="2" fill="${d.proj?'#16a34a':'#2563eb'}" opacity="${d.proj?'.9':'.62'}"><title>${d.label}: ${fmtNum.format(d.qty)} шт · маржа ${fmtPct.format(d.marginPct)}</title></rect>`).join('');
+  const linePts = series.map((d,i)=>`${xP(i)+bw/2},${yPct(d.marginPct)}`).join(' ');
+  const labels = series.map((d,i)=> (i%Math.ceil(n/12)===0 || d.proj) ? `<text x="${xP(i)+bw/2}" y="${H-m.b+16}" text-anchor="end" font-size="9" fill="${d.proj?'#16a34a':'#64748b'}" transform="rotate(-45 ${xP(i)+bw/2} ${H-m.b+16})">${d.label}</text>`:'').join('');
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:100%">
+    <line x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}" stroke="#d8dee8"/>
+    ${bars}<polyline points="${linePts}" fill="none" stroke="var(--red)" stroke-width="2"/>
+    ${labels}
+    <text x="8" y="${m.t+6}" font-size="10" fill="#64748b">шт</text></svg>`;
+  if (note) {
+    const g = Math.round(growth*100);
+    note.innerHTML = `Средний объём за послед. ${recent.length} мес.: <b>${fmtNum.format(Math.round(avgQty))} шт</b> · ` +
+      `прогноз по сценариям: <b>${fmtNum.format(projQty)} шт</b> · ` +
+      `<b class="${growth>=0?'delta-pos':'delta-neg'}">${growth>=0?'+':''}${g}%</b> к среднему · ` +
+      `ожидаемая маржа сценариев <b>${fmtPct.format(added.marginPct||0)}</b>, ВП <b>${fmtMoney.format(added.marginRub||0)} руб.</b>`;
+  }
 }
 
 function renderBubbles(clients, total) {
@@ -817,22 +1020,31 @@ function renderDetail(rows) {
       </div>
       ${detailMode==='current' ? currentBlock : compareShell}
     </div>
-    ${selectedSku?`<div>
-      <h2>Ресурсная спецификация и давальческие строки</h2>
-      <div class="detail-head">
-        <div class="fact"><span>SKU</span><strong>${escapeHtml(selectedSku)}</strong></div>
-        <div class="fact"><span>РС</span><strong>${escapeHtml(specInfo?.specCode||'не найдена')}</strong></div>
-        <div class="fact"><span>Статус РС</span><strong>${escapeHtml(specInfo?.specStatus||'')}</strong></div>
-        <div class="fact"><span>Период РС</span><strong>${escapeHtml([specInfo?.specStart,specInfo?.specEnd].filter(Boolean).join(' → '))}</strong></div>
-        <div class="fact"><span>Дав. сырье</span><strong>${specInfo?.davRaw??0}</strong></div>
-        <div class="fact"><span>Дав. материалы</span><strong>${specInfo?.davMaterials??0}</strong></div>
-      </div>
-      <div class="table"><table><thead><tr><th>№</th><th>Артикул материала</th><th>Материал</th><th>Тип</th><th>Папка</th><th class="num">Кол-во в РС</th><th>Способ получения</th></tr></thead><tbody>
-        ${mats.length?mats.map(m=>`<tr><td>${m.lineNumber}</td><td>${escapeHtml(m.materialArticle)}</td><td>${escapeHtml(m.materialName)}</td><td>${escapeHtml(m.materialClass)}</td><td>${escapeHtml(m.parentFolder)}</td><td class="num">${fmtNum.format(m.quantityInSpec)}</td><td>${escapeHtml(m.supplyMethod)}</td></tr>`).join(''):'<tr><td colspan="7" class="hint">Давальческие строки РС не найдены.</td></tr>'}
-      </tbody></table></div>
-    </div>`:''}
   `;
   if (detailMode === 'compare') renderCompareArea();
+
+  // Ресурсная спецификация и давальческие строки → вкладка «Схемы обеспечения»
+  const schEl = q('#schemeDetail');
+  if (schEl) {
+    if (selectedSku) {
+      schEl.className = 'detail';
+      schEl.innerHTML = `
+        <div class="detail-head">
+          <div class="fact"><span>Клиент</span><strong>${escapeHtml(state.customer||'—')}</strong></div>
+          <div class="fact"><span>SKU</span><strong>${escapeHtml(selectedSku)}</strong></div>
+          <div class="fact"><span>РС</span><strong>${escapeHtml(specInfo?.specCode||'не найдена')}</strong></div>
+          <div class="fact"><span>Статус РС</span><strong>${escapeHtml(specInfo?.specStatus||'')}</strong></div>
+          <div class="fact"><span>Дав. сырье</span><strong>${specInfo?.davRaw??0}</strong></div>
+          <div class="fact"><span>Дав. материалы</span><strong>${specInfo?.davMaterials??0}</strong></div>
+        </div>
+        <div class="table"><table><thead><tr><th>№</th><th>Артикул материала</th><th>Материал</th><th>Тип</th><th>Папка</th><th class="num">Кол-во в РС</th><th>Способ получения</th></tr></thead><tbody>
+          ${mats.length?mats.map(m=>`<tr><td>${m.lineNumber}</td><td>${escapeHtml(m.materialArticle)}</td><td>${escapeHtml(m.materialName)}</td><td>${escapeHtml(m.materialClass)}</td><td>${escapeHtml(m.parentFolder)}</td><td class="num">${fmtNum.format(m.quantityInSpec)}</td><td>${escapeHtml(m.supplyMethod)}</td></tr>`).join(''):'<tr><td colspan="7" class="hint">Давальческие строки РС не найдены.</td></tr>'}
+        </tbody></table></div>`;
+    } else {
+      schEl.className = 'detail-empty';
+      schEl.innerHTML = 'SKU не выбран. Вкладка «Падающие» → клиент в ТОП-20 → SKU в таблице.';
+    }
+  }
 }
 
 // Period comparison: recompute & fill #cmpSummary / #cmpContent without
