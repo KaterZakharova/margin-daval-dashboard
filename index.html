@@ -379,6 +379,9 @@
         <div class="hint">Линия на каждый год по месяцам (фильтры применяются, кроме года). Пунктиром — коммерческая цель 2026 (реалистичный сценарий). Учитывается S3 Контрактное производство.</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="hint" style="font-weight:600">Годы:</span>
+        <div class="top20-tabs" id="yoyYearTabs"></div>
+        <span style="width:1px;height:22px;background:var(--line)"></span>
         <div class="top20-tabs" id="yoyMetricTabs">
           <button class="tab-btn active" onclick="setYoyMetric('marginRub')">Валовка</button>
           <button class="tab-btn" onclick="setYoyMetric('revenue')">Выручка</button>
@@ -1661,6 +1664,13 @@ window.setYoyMetric = m => {
     b.classList.toggle('active', b.getAttribute('onclick').includes(`'${m}'`)));
   renderYoY();
 };
+let yoyYears = null; // Set активных годов; null = инициализировать всеми при первом рендере
+window.setYoyYear = y => {
+  if (!yoyYears) return;
+  if (yoyYears.has(y)) { if (yoyYears.size > 1) yoyYears.delete(y); } // не даём убрать последний
+  else yoyYears.add(y);
+  renderYoY();
+};
 // фильтры как applyBaseFilters, но БЕЗ года (для YoY нужны все годы)
 function applyFiltersNoYear(x) {
   const managers = msSelected('manager'), customers = msSelected('customer');
@@ -1683,9 +1693,18 @@ function renderYoY() {
   const el = q('#yoyChart'); if (!el || !DATA) return;
   const rows = DATA.sales.filter(applyFiltersNoYear);
   const years = [...new Set(rows.map(x => +x.year))].sort();
+  if (!yoyYears) yoyYears = new Set(years);              // первый рендер — все годы
+  // кнопки-переключатели годов
+  q('#yoyYearTabs').innerHTML = years.map(y => {
+    const on = yoyYears.has(y);
+    return `<button class="tab-btn${on?' active':''}" onclick="setYoyYear(${y})"
+      style="${on?`background:${QCOLORS[y]||'#64748b'};border-color:${QCOLORS[y]||'#64748b'};color:#fff`:''}">${y}</button>`;
+  }).join('');
+  const shownYears = years.filter(y => yoyYears.has(y));
+  const show2026 = yoyYears.has(2026);
   // agg[year][1..12] = {qty,revenue,marginRub}
   const agg = {};
-  years.forEach(y => { agg[y] = {}; for (let mn=1; mn<=12; mn++) agg[y][mn] = {qty:0,revenue:0,marginRub:0}; });
+  shownYears.forEach(y => { agg[y] = {}; for (let mn=1; mn<=12; mn++) agg[y][mn] = {qty:0,revenue:0,marginRub:0}; });
   rows.forEach(x => {
     const y = +x.year, mn = +x.monthNum; if (!agg[y] || !agg[y][mn]) return;
     agg[y][mn].qty += +x.qty || 0;
@@ -1693,22 +1712,22 @@ function renderYoY() {
     agg[y][mn].marginRub += +x.marginRub || 0;
   });
   const val = (o) => yoyMetric === 'marginPct' ? (o.revenue ? o.marginRub/o.revenue : 0) : o[yoyMetric];
-  const series = years.map(y => ({
+  const series = shownYears.map(y => ({
     name: String(y), color: QCOLORS[y] || '#64748b',
     vals: Array.from({length:12}, (_,i) => val(agg[y][i+1]))
   }));
-  // линия цели 2026
-  const tgt = Array.from({length:12}, (_,i) => {
+  // линия коммерческой цели — только когда выбран 2026
+  const tgt = show2026 ? Array.from({length:12}, (_,i) => {
     const t = COMMERCIAL_TARGET_2026[i+1];
     return yoyMetric === 'marginPct' ? (t.revenue ? t.marginRub/t.revenue : 0)
          : yoyMetric === 'qty' ? t.qty : yoyMetric === 'revenue' ? t.revenue : t.marginRub;
-  });
+  }) : null;
   const isPct = yoyMetric === 'marginPct';
   const fmtV = v => isPct ? fmtPct.format(v) : (yoyMetric==='qty' ? fmtNum.format(v) : fmtMoney.format(v));
   // легенда
   q('#yoyLegend').innerHTML = series.map(s =>
     `<span><i style="display:inline-block;width:12px;height:3px;background:${s.color};vertical-align:middle;margin-right:5px"></i>${s.name}</span>`
-  ).join('') + `<span><i style="display:inline-block;width:14px;height:0;border-top:3px dashed ${TARGET_COLOR};vertical-align:middle;margin-right:5px"></i>Цель 2026 (коммерческая)</span>`;
+  ).join('') + (tgt ? `<span><i style="display:inline-block;width:14px;height:0;border-top:3px dashed ${TARGET_COLOR};vertical-align:middle;margin-right:5px"></i>Цель 2026 (коммерческая)</span>` : '');
   svgYearLines(el, series, tgt, fmtV);
   // таблица под графиком
   const head = `<tr><th>Год</th>${YOY_MONTHS.map(m=>`<th style="text-align:right">${m}</th>`).join('')}<th style="text-align:right">Итого</th></tr>`;
@@ -1716,14 +1735,14 @@ function renderYoY() {
     const tot = isPct ? null : s.vals.reduce((a,b)=>a+b,0);
     return `<tr><td><b style="color:${s.color}">${s.name}</b></td>${s.vals.map(v=>`<td style="text-align:right">${v?fmtV(v):'—'}</td>`).join('')}<td style="text-align:right"><b>${tot==null?'—':fmtV(tot)}</b></td></tr>`;
   }).join('');
-  const tgtRow = `<tr><td><b style="color:${TARGET_COLOR}">Цель 2026</b></td>${tgt.map(v=>`<td style="text-align:right;color:${TARGET_COLOR}">${fmtV(v)}</td>`).join('')}<td style="text-align:right;color:${TARGET_COLOR}"><b>${isPct?'—':fmtV(tgt.reduce((a,b)=>a+b,0))}</b></td></tr>`;
+  const tgtRow = tgt ? `<tr><td><b style="color:${TARGET_COLOR}">Цель 2026</b></td>${tgt.map(v=>`<td style="text-align:right;color:${TARGET_COLOR}">${fmtV(v)}</td>`).join('')}<td style="text-align:right;color:${TARGET_COLOR}"><b>${isPct?'—':fmtV(tgt.reduce((a,b)=>a+b,0))}</b></td></tr>` : '';
   q('#yoyTable').innerHTML = head + body + tgtRow;
 }
 function svgYearLines(el, series, tgt, fmtV) {
   const W = el.clientWidth || 900, H = 360;
   const m = { l:64, r:16, t:16, b:34 };
   const cW = W - m.l - m.r;
-  const all = series.flatMap(s => s.vals).concat(tgt).filter(v => v > 0);
+  const all = series.flatMap(s => s.vals).concat(tgt || []).filter(v => v > 0);
   const maxV = Math.max(...all, 0.01);
   const xM = i => m.l + i * (cW / 11);
   const yV = v => H - m.b - (v / maxV) * (H - m.t - m.b);
@@ -1743,7 +1762,7 @@ function svgYearLines(el, series, tgt, fmtV) {
     return `<path d="${path}" fill="none" stroke="${color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" ${dash?`stroke-dasharray="7 5"`:''} opacity="${dash?.95:.92}"/>${dots}`;
   };
   const seriesSvg = series.map(s => lineFor(s.vals, s.color, false)).join('');
-  const tgtSvg = lineFor(tgt, TARGET_COLOR, true);
+  const tgtSvg = tgt ? lineFor(tgt, TARGET_COLOR, true) : '';
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:100%">
     ${yTicks}<line x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}" stroke="#d8dee8"/>
     ${seriesSvg}${tgtSvg}${xLabels}
