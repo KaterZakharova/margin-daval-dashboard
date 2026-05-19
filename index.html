@@ -316,7 +316,7 @@
 
   <section class="panel">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
-      <div><h2>Структура по схемам обеспечения</h2><div class="hint">Под ключ / давальческая / смешанная: доли по объёму и марже, средняя маржа %.</div></div>
+      <div><h2>Структура по схемам обеспечения</h2><div class="hint">Кликни по схеме (карточка или строка) — ниже раскроется список SKU: кто так работает и сколько давальческого.</div></div>
       <button class="exp-btn" onclick="expandChart('#schemeChart','Структура по схемам обеспечения')">⤢ Развернуть</button>
     </div>
     <div class="scenario-kpis" id="schemeSummary"></div>
@@ -325,9 +325,16 @@
   </section>
 
   <section class="panel">
-    <h2>Ресурсная спецификация и давальческие строки</h2>
-    <div class="hint">Выберите SKU: вкладка «Падающие» → клиент в ТОП-20 → SKU в таблице. РС и давальческие материалы появятся здесь.</div>
-    <div id="schemeDetail" class="detail-empty">SKU не выбран.</div>
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
+      <div><h2 id="schemeDrillTitle">SKU по схеме</h2><div class="hint" id="schemeDrillHint">Выберите схему выше, чтобы увидеть SKU, клиентов и объём давальческого.</div></div>
+    </div>
+    <div id="schemeDrill" class="detail-empty">Схема не выбрана.</div>
+  </section>
+
+  <section class="panel">
+    <h2>Ресурсная спецификация и давальческие материалы</h2>
+    <div class="hint">Кликни SKU в таблице выше — здесь появятся РС, давальческие строки и кто из клиентов так работает.</div>
+    <div id="schemeMats" class="detail-empty">SKU не выбран.</div>
   </section>
 
   </div><!-- /pane schemes -->
@@ -624,8 +631,9 @@ function renderSchemes(rows, total) {
     .sort((a,b) => b.marginRub - a.marginRub);
   if (!groups.length) { sumEl.innerHTML=''; chEl.innerHTML='<div class="detail-empty">Нет данных</div>'; tbEl.innerHTML=''; return; }
   const totMar = total.marginRub || 1, totQty = total.qty || 1, totRev = total.revenue || 1;
-  sumEl.innerHTML = groups.slice(0,4).map(g => `<div class="fact">
-    <span style="color:${schemeColor(g.scheme)};font-weight:700">${escapeHtml(g.scheme)}</span>
+  const selBorder = g => selectedScheme===g ? 'outline:2px solid var(--blue);outline-offset:-1px' : '';
+  sumEl.innerHTML = groups.slice(0,4).map(g => `<div class="fact" style="cursor:pointer;${selBorder(g.scheme)}" onclick="selectScheme('${jsEsc(g.scheme)}')">
+    <span style="color:${schemeColor(g.scheme)};font-weight:700">${escapeHtml(g.scheme)} ▾</span>
     <strong>${fmtPct.format(g.marginRub/totMar)} маржи</strong>
     <span>${fmtNum.format(g.qty)} шт · ${fmtPct.format(g.marginPct)} маржа</span></div>`).join('');
 
@@ -641,11 +649,98 @@ function renderSchemes(rows, total) {
   chEl.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:100%">${bars}</svg>`;
 
   tbEl.innerHTML = `<thead><tr><th>Схема</th><th class="num">Штук</th><th class="num">Доля шт.</th><th class="num">Выручка</th><th class="num">Маржа руб.</th><th class="num">Доля маржи</th><th class="num">Маржа %</th></tr></thead><tbody>${
-    groups.map(g=>`<tr><td><span class="badge ${bySchemeClass(g.scheme)}">${escapeHtml(g.scheme)}</span></td>
+    groups.map(g=>`<tr class="click ${selectedScheme===g.scheme?'selected':''}" onclick="selectScheme('${jsEsc(g.scheme)}')"><td><span class="badge ${bySchemeClass(g.scheme)}">${escapeHtml(g.scheme)}</span></td>
       <td class="num">${fmtNum.format(g.qty)}</td><td class="num">${fmtPct.format(g.qty/totQty)}</td>
       <td class="num">${fmtMoney.format(g.revenue)}</td><td class="num">${fmtMoney.format(g.marginRub)}</td>
       <td class="num">${fmtPct.format(g.marginRub/totMar)}</td><td class="num">${fmtPct.format(g.marginPct)}</td></tr>`).join('')
   }</tbody>`;
+
+  renderSchemeDrill(rows);
+}
+
+let selectedScheme = '', schemeSku = '';
+window.selectScheme = s => { selectedScheme = (selectedScheme === s ? '' : s); schemeSku = ''; render(); };
+window.selectSchemeSku = s => { schemeSku = (schemeSku === s ? '' : s); render();
+  const el = q('#schemeMats'); if (el) el.scrollIntoView({ behavior:'smooth', block:'center' }); };
+
+// Схема → список SKU (кто так работает + сколько давальческого)
+function renderSchemeDrill(rows) {
+  const el = q('#schemeDrill'); if (!el) return;
+  const ttl = q('#schemeDrillTitle'), hnt = q('#schemeDrillHint');
+  if (!selectedScheme) {
+    el.className = 'detail-empty'; el.innerHTML = 'Схема не выбрана — кликни карточку или строку схемы выше.';
+    if (ttl) ttl.textContent = 'SKU по схеме';
+    if (hnt) hnt.textContent = 'Выберите схему выше, чтобы увидеть SKU, клиентов и объём давальческого.';
+    q('#schemeMats').className='detail-empty'; q('#schemeMats').innerHTML='SKU не выбран.';
+    return;
+  }
+  const sr = rows.filter(x => (x.scheme||'Не задана') === selectedScheme);
+  const agg = aggRows(sr);
+  const bySku = groupBy(sr, x => x.sku).map(g => {
+    const a = aggRows(g.rows);
+    const clients = uniq(g.rows.map(x => x.customer));
+    const r0 = g.rows[0];
+    return { sku:g.key, name:r0.productName||g.key, clients, nClients:clients.length,
+             davRaw:+r0.davRaw||0, davMaterials:+r0.davMaterials||0, ...a };
+  }).sort((a,b) => b.marginRub - a.marginRub);
+
+  if (ttl) ttl.innerHTML = `Схема: <span style="color:${schemeColor(selectedScheme)}">${escapeHtml(selectedScheme)}</span> — ${bySku.length} SKU`;
+  if (hnt) hnt.textContent = 'Кликни SKU — ниже появятся точные давальческие материалы и список клиентов.';
+  el.className = 'detail';
+  el.innerHTML = `
+    <div class="detail-head" style="margin-bottom:10px">
+      <div class="fact"><span>Схема</span><strong>${escapeHtml(selectedScheme)}</strong></div>
+      <div class="fact"><span>SKU</span><strong>${bySku.length}</strong></div>
+      <div class="fact"><span>Клиентов</span><strong>${uniq(sr.map(x=>x.customer)).length}</strong></div>
+      <div class="fact"><span>Штук</span><strong>${fmtNum.format(agg.qty)}</strong></div>
+      <div class="fact"><span>Выручка</span><strong>${fmtMoney.format(agg.revenue)}</strong></div>
+      <div class="fact"><span>Маржа · %</span><strong>${fmtMoney.format(agg.marginRub)} · ${fmtPct.format(agg.marginPct)}</strong></div>
+    </div>
+    <div class="table" style="max-height:460px"><table>
+      <thead><tr><th>SKU</th><th>Наименование</th><th class="num">Клиентов</th><th>Кто так работает</th>
+        <th class="num">Штук</th><th class="num">Выручка</th><th class="num">Маржа руб.</th><th class="num">Маржа %</th>
+        <th class="num">Дав. сырьё</th><th class="num">Дав. мат.</th></tr></thead><tbody>
+      ${bySku.map(r=>{
+        const top = r.clients.slice(0,2).join(', ') + (r.clients.length>2?` +${r.clients.length-2}`:'');
+        return `<tr class="click ${schemeSku===r.sku?'selected':''}" onclick="selectSchemeSku('${jsEsc(r.sku)}')">
+          <td>${escapeHtml(r.sku)}</td><td>${escapeHtml(r.name)}</td>
+          <td class="num">${r.nClients}</td><td style="max-width:240px">${escapeHtml(top)}</td>
+          <td class="num">${fmtNum.format(r.qty)}</td><td class="num">${fmtMoney.format(r.revenue)}</td>
+          <td class="num">${fmtMoney.format(r.marginRub)}</td><td class="num">${fmtPct.format(r.marginPct)}</td>
+          <td class="num">${r.davRaw}</td><td class="num">${r.davMaterials}</td></tr>`;
+      }).join('')}
+      </tbody></table></div>`;
+  renderSchemeMats(sr);
+}
+
+// SKU (в рамках выбранной схемы) → точные давальческие материалы + клиенты
+function renderSchemeMats(schemeRows) {
+  const el = q('#schemeMats'); if (!el) return;
+  if (!schemeSku) {
+    el.className = 'detail-empty';
+    el.innerHTML = 'SKU не выбран — кликни строку SKU в таблице выше.';
+    return;
+  }
+  const skuRows = schemeRows.filter(x => x.sku === schemeSku);
+  const clients = uniq(skuRows.map(x => x.customer));
+  const spec = DATA.skuClass.find(x => x.sku === schemeSku);
+  const mats = spec ? DATA.materials.filter(m => m.sku === schemeSku && (!spec.specCode || m.specCode === spec.specCode)) : [];
+  const a = aggRows(skuRows);
+  el.className = 'detail';
+  el.innerHTML = `
+    <div class="detail-head" style="margin-bottom:10px">
+      <div class="fact"><span>SKU</span><strong>${escapeHtml(schemeSku)}</strong></div>
+      <div class="fact"><span>Схема</span><strong>${escapeHtml(selectedScheme)}</strong></div>
+      <div class="fact"><span>РС</span><strong>${escapeHtml(spec?.specCode||'не найдена')}</strong></div>
+      <div class="fact"><span>Дав. сырьё / мат.</span><strong>${spec?.davRaw??0} / ${spec?.davMaterials??0}</strong></div>
+      <div class="fact"><span>Объём · маржа</span><strong>${fmtNum.format(a.qty)} шт · ${fmtPct.format(a.marginPct)}</strong></div>
+      <div class="fact"><span>Клиентов</span><strong>${clients.length}</strong></div>
+    </div>
+    <div style="margin-bottom:10px"><div class="hint" style="margin-bottom:4px">Кто так работает (${clients.length}):</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${clients.map(c=>`<span class="badge key" style="cursor:default">${escapeHtml(c)}</span>`).join('')}</div></div>
+    <div class="table"><table><thead><tr><th>№</th><th>Артикул материала</th><th>Материал</th><th>Тип</th><th>Папка</th><th class="num">Кол-во в РС</th><th>Способ получения</th></tr></thead><tbody>
+      ${mats.length?mats.map(m=>`<tr><td>${m.lineNumber}</td><td>${escapeHtml(m.materialArticle)}</td><td>${escapeHtml(m.materialName)}</td><td>${escapeHtml(m.materialClass)}</td><td>${escapeHtml(m.parentFolder)}</td><td class="num">${fmtNum.format(m.quantityInSpec)}</td><td>${escapeHtml(m.supplyMethod)}</td></tr>`).join(''):'<tr><td colspan="7" class="hint">Давальческие строки РС не найдены для этого SKU.</td></tr>'}
+    </tbody></table></div>`;
 }
 
 function renderCombo(rows) {
