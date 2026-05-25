@@ -815,7 +815,7 @@ function renderTopQty(clients) {
 function jsEsc(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 window.selectMonth = m => { state.month = state.month === m ? '' : m; state.customer = ''; state.sku = ''; render(); };
 window.hideTrendTooltip = () => { const tip = q('#trendTooltip'); if (tip) tip.style.display = 'none'; };
-window.selectCustomer = c => { state.customer = c; state.sku = ''; render(); document.querySelector('.detail').scrollIntoView({behavior:'smooth',block:'start'}); };
+window.selectCustomer = c => { state.customer = c; state.sku = ''; pickedSkus.clear(); render(); document.querySelector('.detail').scrollIntoView({behavior:'smooth',block:'start'}); };
 window.selectSku = s => { state.sku = s; render(); document.querySelector('.detail').scrollIntoView({behavior:'smooth',block:'start'}); };
 window.clearSkuSelection = () => { state.sku = ''; render(); document.querySelector('.detail').scrollIntoView({behavior:'smooth',block:'start'}); };
 
@@ -951,6 +951,23 @@ function renderBubbles(clients, total) {
   </svg>`;
 }
 
+// Выбор интересующих SKU чекбоксами — подитог по выбранным
+let pickedSkus = new Set();
+window.togglePickSku = (sku, ev) => {
+  if (ev) ev.stopPropagation();
+  if (pickedSkus.has(sku)) pickedSkus.delete(sku); else pickedSkus.add(sku);
+  renderDetailFromState();
+};
+window.togglePickAll = (cb) => {
+  cb && (cb.checked ? null : null);
+  if (pickedSkus.size > 0) { pickedSkus.clear(); }
+  else {
+    document.querySelectorAll('.sku-pick[data-sku]').forEach(x => pickedSkus.add(x.dataset.sku));
+  }
+  renderDetailFromState();
+};
+window.clearPicks = () => { pickedSkus.clear(); renderDetailFromState(); };
+
 function renderDetail(rows) {
   const el = q('#detailBlock');
   let base = rows;
@@ -959,6 +976,10 @@ function renderDetail(rows) {
   if (!state.customer && !state.sku) { el.className='detail-empty'; el.innerHTML='Выберите клиента или SKU.'; return; }
   el.className = 'detail';
   const total = aggRows(base);
+  // подитог по выделенным галочками SKU
+  const pickN = pickedSkus.size;
+  const pickedBase = pickN ? base.filter(x => pickedSkus.has(x.sku)) : base;
+  const totalShown = pickN ? aggRows(pickedBase) : total;
   const title = state.sku ? `${state.customer || ''} · ${state.sku}` : state.customer;
   // compute per-SKU monthly trend using all-period data for this customer
   const allPeriodRows = state.customer ? filteredSalesNoMonth().filter(x => x.customer === state.customer) : [];
@@ -1065,16 +1086,21 @@ function renderDetail(rows) {
   }).filter(it => (it.recent || it.prior) && stMatch(it.sku));
 
   // ── Table: current period ──────────────────────────────────────────────────
+  const visibleSku = skuRows.filter(r => stMatch(r.sku));
+  const allChecked = visibleSku.length > 0 && visibleSku.every(r => pickedSkus.has(r.sku));
   const currentTable = `<div class="table" style="max-height:460px"><table>
     <thead><tr>
+      <th style="width:36px;text-align:center" title="Отметить все видимые / снять"><input type="checkbox" ${allChecked?'checked':''} onclick="togglePickAll(this)" style="width:14px;height:14px;cursor:pointer;accent-color:var(--blue)"></th>
       <th>SKU</th><th>Наименование</th><th>Статус</th>
       <th class="num">Штук</th><th class="num">Маржа %</th><th class="num">Вес в марже</th>
       <th>Схема</th><th class="num">Сырье</th><th class="num">Мат.</th><th>РС</th><th>Тренд (6 мес.)</th>
     </tr></thead><tbody>
-    ${skuRows.filter(r=>stMatch(r.sku)).map(r=>{
+    ${visibleSku.map(r=>{
       const {trend}=skuTrend(r.sku);
-      const bg=trend==='falling'||trend==='lost'?'background:#fff8f8':trend==='rising'?'background:#f0fdf4':'';
+      const isPicked = pickedSkus.has(r.sku);
+      const bg = isPicked ? 'background:#eff6ff' : trend==='falling'||trend==='lost'?'background:#fff8f8':trend==='rising'?'background:#f0fdf4':'';
       return `<tr class="click ${state.sku===r.sku?'selected':''}" style="${bg}" onclick="selectSku('${jsEsc(r.sku)}')">
+        <td style="text-align:center"><input type="checkbox" class="sku-pick" data-sku="${jsEsc(r.sku)}" ${isPicked?'checked':''} onclick="togglePickSku('${jsEsc(r.sku)}',event)" style="width:14px;height:14px;cursor:pointer;accent-color:var(--blue)"></td>
         <td>${escapeHtml(r.sku)}</td><td>${escapeHtml(r.productName)}</td>
         <td>${skuStatusBadge(r.sku)}</td>
         <td class="num">${fmtNum.format(r.qty)}</td>
@@ -1137,21 +1163,24 @@ function renderDetail(rows) {
   // ── Assemble ───────────────────────────────────────────────────────────────
   el.innerHTML = `
     <div class="detail-head">
-      <div class="fact"><span>Выбор</span><strong>${escapeHtml(title)}</strong></div>
-      <div class="fact"><span>Штук</span><strong>${fmtNum.format(total.qty)}</strong></div>
-      <div class="fact"><span>Выручка</span><strong>${fmtMoney.format(total.revenue)}</strong></div>
-      <div class="fact"><span>Маржа</span><strong>${fmtMoney.format(total.marginRub)}</strong></div>
-      <div class="fact"><span>Маржа %</span><strong>${fmtPct.format(total.marginPct)}</strong></div>
-      <div class="fact"><span>SKU в срезе</span><strong>${skuRows.length}</strong></div>
+      <div class="fact" style="${pickN?'outline:2px solid var(--blue);outline-offset:-1px':''}">
+        <span>${pickN?`Подитог · выбрано ${pickN} из ${skuRows.length} SKU`:'Выбор'}</span>
+        <strong>${pickN?'✔ '+pickN+' SKU':escapeHtml(title)}</strong></div>
+      <div class="fact"><span>Штук${pickN?' (выбр.)':''}</span><strong>${fmtNum.format(totalShown.qty)}</strong></div>
+      <div class="fact"><span>Выручка${pickN?' (выбр.)':''}</span><strong>${fmtMoney.format(totalShown.revenue)}</strong></div>
+      <div class="fact"><span>Маржа${pickN?' (выбр.)':''}</span><strong>${fmtMoney.format(totalShown.marginRub)}</strong></div>
+      <div class="fact"><span>Маржа %${pickN?' (выбр.)':''}</span><strong>${fmtPct.format(totalShown.marginPct)}</strong></div>
+      <div class="fact"><span>SKU в срезе</span><strong>${pickN?pickN+' / '+skuRows.length:skuRows.length}</strong></div>
     </div>
     <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <h2 style="margin:0">Ассортимент клиента</h2>
           <div class="det-tabs">
             <button class="det-tab ${detailMode==='current'?'active':''}" onclick="setDetailMode('current')">Текущий период</button>
             <button class="det-tab ${detailMode==='compare'?'active':''}" onclick="setDetailMode('compare')">Сравнение периодов</button>
           </div>
+          ${pickN?`<button class="btn primary" type="button" onclick="clearPicks()">✕ Сбросить выбор (${pickN})</button>`:''}
         </div>
         ${state.sku?'<button class="btn" type="button" onclick="clearSkuSelection()">Вернуться к списку SKU</button>':''}
       </div>
