@@ -1211,7 +1211,9 @@ let skuAnalysisSort = 'marginRub';            // 'marginRub' | 'qty' | 'revenue'
 let skuAnalysisStatus = 'all';                // 'all' | 'new' | 'core' | 'exit'
 let skuAnalysisPicked = new Set();            // ключ = "sku|customer"
 let skuAnalysisClientFilter = null;           // null = все клиенты
+let skuAnalysisSelected = null;               // выбранный SKU для drill — "sku|customer"
 let __skuAnalysisSnapshot = null;
+let __skuAnalysisPairs = new Map();           // pair-key → объект для drill
 
 window.setSkuAnalysisSort = (m) => {
   skuAnalysisSort = m;
@@ -1244,6 +1246,22 @@ window.togglePickAnalysisAll = (cb) => {
   if (skuAnalysisPicked.size > 0) skuAnalysisPicked.clear();
   else document.querySelectorAll('.ana-pick[data-key]').forEach(x => skuAnalysisPicked.add(x.dataset.key));
   renderSkuAnalysis();
+};
+window.selectAnalysisSku = (key, ev) => {
+  if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+  skuAnalysisSelected = (skuAnalysisSelected === key) ? null : key;
+  renderSkuAnalysisDrill();
+  // выделить строку и проскроллить к графику
+  document.querySelectorAll('#skuAnalysisTable tbody tr').forEach(tr =>
+    tr.classList.toggle('ana-selected', tr.dataset.key === skuAnalysisSelected));
+  if (skuAnalysisSelected) {
+    setTimeout(() => q('#skuAnalysisDrill').scrollIntoView({ behavior:'smooth', block:'start' }), 50);
+  }
+};
+window.closeAnalysisSkuDrill = () => {
+  skuAnalysisSelected = null;
+  renderSkuAnalysisDrill();
+  document.querySelectorAll('#skuAnalysisTable tbody tr.ana-selected').forEach(tr => tr.classList.remove('ana-selected'));
 };
 window.toggleXlsxAnalysisMenu = (ev) => {
   if (ev) ev.stopPropagation();
@@ -1390,14 +1408,16 @@ function renderSkuAnalysis() {
                     : p.trend==='new'     ? `<span class="trend-badge-rise">✦ Новый</span>`
                     : `<span class="trend-badge-stable">→</span>`;
       const weight = totalMar ? p.marginRub / totalMar : 0;
-      const bg = isPicked ? 'background:#eff6ff'
+      const isSel = skuAnalysisSelected === k;
+      const bg = isSel ? 'background:#dbeafe'
+              : isPicked ? 'background:#eff6ff'
               : p.trend==='falling'||p.trend==='lost' ? 'background:#fff8f8'
               : p.trend==='rising' ? 'background:#f0fdf4' : '';
-      return `<tr style="${bg}">
-        <td style="text-align:center"><input type="checkbox" class="ana-pick" data-key="${escapeHtml(k)}" ${isPicked?'checked':''} onclick="togglePickAnalysis('${jsEsc(k)}', event)" style="width:14px;height:14px;cursor:pointer;accent-color:var(--blue)"></td>
+      return `<tr class="click ${isSel?'ana-selected':''}" data-key="${escapeHtml(k)}" style="${bg};cursor:pointer" onclick="selectAnalysisSku('${jsEsc(k)}', event)">
+        <td style="text-align:center" onclick="event.stopPropagation()"><input type="checkbox" class="ana-pick" data-key="${escapeHtml(k)}" ${isPicked?'checked':''} onclick="togglePickAnalysis('${jsEsc(k)}', event)" style="width:14px;height:14px;cursor:pointer;accent-color:var(--blue)"></td>
         <td>${escapeHtml(p.sku)}</td>
         <td>${escapeHtml(p.productName)}</td>
-        <td><a href="#" onclick="event.preventDefault();selectSkuAnalysisClient('${jsEsc(p.customer)}')" style="color:var(--blue);text-decoration:none;font-size:12px">${escapeHtml(p.customer)}</a></td>
+        <td onclick="event.stopPropagation()"><a href="#" onclick="event.preventDefault();selectSkuAnalysisClient('${jsEsc(p.customer)}')" style="color:var(--blue);text-decoration:none;font-size:12px">${escapeHtml(p.customer)}</a></td>
         <td>${stBadge}</td>
         <td style="white-space:nowrap;color:var(--muted);font-size:12px">${fmtMonthCode(p.firstShip)}</td>
         <td class="num">${fmtNum.format(p.qty)}</td>
@@ -1420,6 +1440,104 @@ function renderSkuAnalysis() {
   }
 
   __skuAnalysisSnapshot = { filtered, totalMar, totalRev, totalQty };
+  // храним все пары (даже скрытые фильтром) для drill — на случай если selected уже не в filtered
+  __skuAnalysisPairs = pairMap;
+  renderSkuAnalysisDrill();
+}
+
+// ── drill-график выбранного SKU: динамика по месяцам с tooltip ─────────────
+function renderSkuAnalysisDrill() {
+  const el = q('#skuAnalysisDrill');
+  if (!el) return;
+  if (!skuAnalysisSelected) { el.innerHTML = ''; return; }
+  const p = __skuAnalysisPairs.get(skuAnalysisSelected);
+  if (!p) { el.innerHTML = `<div class="panel"><div class="detail-empty">SKU не найден в текущей выборке. <a href="#" onclick="event.preventDefault();closeAnalysisSkuDrill()">Закрыть</a></div></div>`; return; }
+
+  // месяцы с первой отгрузки этого SKU у этого клиента → до последнего месяца данных
+  const allMonths = uniq(DATA.sales.filter(x=>!EXCLUDE_CUSTOMERS.has(x.customer)).map(x=>x.month)).sort();
+  const lastDataM = allMonths[allMonths.length-1] || p.lastShip;
+  const months = allMonths.filter(m => m >= p.firstShip && m <= lastDataM);
+  if (!months.length) months.push(p.firstShip);
+
+  // полная серия данных по месяцам (отгружено + место для заказов в будущем)
+  const series = months.map(m => {
+    const s = p.series.get(m) || { qty:0, marginRub:0 };
+    // оригинальные строки этого месяца чтобы посчитать выручку (в series не сохранили)
+    const rows = DATA.sales.filter(r =>
+      !EXCLUDE_CUSTOMERS.has(r.customer) && r.customer === p.customer && r.sku === p.sku && r.month === m);
+    const revenue = rows.reduce((a,r) => a + (+r.revenue||0), 0);
+    return { month:m, qty:s.qty, marginRub:s.marginRub, revenue, kind:'shipped' };
+  });
+  // TODO когда подключим OData «Заказ Давальца» — добавить заказы как kind:'ordered' в хвост (#16)
+
+  const maxQ = Math.max(1, ...series.map(s => s.qty));
+  const W = 1100, H = 320, m = { l:60, r:24, t:30, b:60 };
+  const chartW = W - m.l - m.r, chartH = H - m.t - m.b;
+  const n = series.length;
+  const slot = chartW / n;
+  const bw = Math.max(4, Math.min(36, slot * 0.7));
+
+  const bars = series.map((s, i) => {
+    const h = Math.max(1, (s.qty / maxQ) * chartH);
+    const x = m.l + i*slot + (slot - bw)/2;
+    const y = m.t + chartH - h;
+    const isOrdered = s.kind === 'ordered';
+    const col = isOrdered ? '#94a3b8' : '#2563eb';
+    const tip = isOrdered
+      ? `${escapeHtml(fmtMonthCode(s.month))}\nЗАКАЗ (ещё не отгружен)\nШтук: ${fmtNum.format(s.qty)}`
+      : `${escapeHtml(fmtMonthCode(s.month))}\nОтгружено: ${fmtNum.format(s.qty)} шт\nВыручка: ${fmtMoney.format(s.revenue)} ₽\nМаржа: ${fmtMoney.format(s.marginRub)} ₽`;
+    return `<g class="dr-bar">
+      <rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${col}" opacity="${isOrdered?0.55:0.92}" rx="2" stroke="${isOrdered?'#64748b':'none'}" stroke-dasharray="${isOrdered?'3 2':'none'}"/>
+      <title>${tip}</title>
+    </g>`;
+  }).join('');
+
+  // оси: подписи месяцев — раз в 1-3 (зависит от плотности), горизонтальные линии шкалы
+  const everyN = n > 36 ? 6 : n > 18 ? 3 : n > 9 ? 2 : 1;
+  const xLabels = series.map((s, i) => {
+    if (i % everyN !== 0 && i !== n-1) return '';
+    const x = m.l + i*slot + slot/2;
+    return `<text x="${x}" y="${H - m.b + 16}" text-anchor="middle" font-size="10.5" fill="#64748b" transform="rotate(-35 ${x} ${H - m.b + 16})">${escapeHtml(fmtMonthCode(s.month))}</text>`;
+  }).join('');
+
+  const yTicks = [0,.25,.5,.75,1].map(t => {
+    const v = maxQ * t;
+    const y = m.t + chartH - t*chartH;
+    return `<line x1="${m.l}" y1="${y}" x2="${W-m.r}" y2="${y}" stroke="#eef2f7" stroke-dasharray="2 4"/>
+            <text x="${m.l-6}" y="${y+4}" text-anchor="end" font-size="10" fill="#94a3b8">${fmtNum.format(Math.round(v))}</text>`;
+  }).join('');
+
+  // итоги
+  const totQ = series.reduce((a,s)=>a+s.qty,0);
+  const totR = series.reduce((a,s)=>a+s.revenue,0);
+  const totM = series.reduce((a,s)=>a+s.marginRub,0);
+
+  el.innerHTML = `<section class="panel" style="border:2px solid var(--blue);background:#fafbff">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;flex-wrap:wrap">
+      <div>
+        <h2 style="margin:0 0 4px">${escapeHtml(p.sku)} · ${escapeHtml(p.productName)}</h2>
+        <div class="hint" style="margin:0">
+          Клиент: <b>${escapeHtml(p.customer)}</b> ·
+          1-я отгрузка: <b>${fmtMonthCode(p.firstShip)}</b> ·
+          Последняя: <b>${fmtMonthCode(p.lastShip)}</b> ·
+          Всего: <b>${fmtNum.format(totQ)} шт</b> · <b>${fmtMoney.format(totR)} ₽</b> выручки · <b>${fmtMoney.format(totM)} ₽</b> маржи
+        </div>
+      </div>
+      <button class="btn" type="button" onclick="closeAnalysisSkuDrill()">✕ Закрыть</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:var(--muted);margin-bottom:8px">
+      <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:12px;height:12px;background:#2563eb;border-radius:2px;display:inline-block"></i>Отгружено (наведите для деталей)</span>
+      <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:12px;height:12px;background:#94a3b8;border:1px dashed #64748b;border-radius:2px;display:inline-block"></i>Заказ давальца (план, ещё не отгружен)</span>
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block">
+      ${yTicks}
+      <line x1="${m.l}" y1="${m.t}" x2="${m.l}" y2="${H-m.b}" stroke="#d8dee8"/>
+      <line x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}" stroke="#d8dee8"/>
+      ${bars}
+      ${xLabels}
+      <text x="${m.l-8}" y="${m.t-10}" font-size="10" fill="#94a3b8">Штук</text>
+    </svg>
+  </section>`;
 }
 
 window.openSkuAnalysisInNewTab = () => {
