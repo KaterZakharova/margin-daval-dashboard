@@ -289,7 +289,27 @@
       </div>
       <div id="skuAnalysisHead" class="detail-head" style="margin-bottom:12px"></div>
       <div id="skuAnalysisFilterChip" style="margin-bottom:10px"></div>
-      <div id="skuAnalysisQuarterBar" style="margin-bottom:10px"></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">ГОДЫ</label>
+          <div class="multicheck-wrap" id="skuAnaYearWrap" style="min-width:150px">
+            <div class="multicheck-trigger" id="skuAnaYearTrigger" onclick="msToggleDrop('skuAnaYear',event)">
+              <span id="skuAnaYearTrigLabel">Все годы</span><span style="color:var(--muted);font-size:10px;margin-left:4px">▾</span>
+            </div>
+            <div class="multicheck-panel" id="skuAnaYearPanel" style="display:none"></div>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">КВАРТАЛЫ</label>
+          <div class="multicheck-wrap" id="skuAnaQWrap" style="min-width:150px">
+            <div class="multicheck-trigger" id="skuAnaQTrigger" onclick="msToggleDrop('skuAnaQ',event)">
+              <span id="skuAnaQTrigLabel">Все кварталы</span><span style="color:var(--muted);font-size:10px;margin-left:4px">▾</span>
+            </div>
+            <div class="multicheck-panel" id="skuAnaQPanel" style="display:none"></div>
+          </div>
+        </div>
+        <button class="btn" id="skuAnaResetBtn" type="button" onclick="resetSkuAnalysisAll()" style="display:none;height:36px">✕ Сбросить всё</button>
+      </div>
       <div style="display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap">
         <span style="font-size:12px;color:var(--muted);font-weight:600">СТАТУС:</span>
         <div class="top20-tabs" id="skuAnalysisStatusTabs">
@@ -1212,10 +1232,24 @@ let skuAnalysisSort = 'marginRub';            // 'marginRub' | 'qty' | 'revenue'
 let skuAnalysisStatus = 'all';                // 'all' | 'new' | 'core' | 'exit'
 let skuAnalysisPicked = new Set();            // ключ = "sku|customer"
 let skuAnalysisClientFilter = null;           // null = все клиенты
-let skuAnalysisQuarters = new Set();          // выбранные кварталы "YYYY-Q" (пусто = все)
 let skuAnalysisSelected = null;               // выбранный SKU для drill — "sku|customer"
 let __skuAnalysisSnapshot = null;
 let __skuAnalysisPairs = new Map();           // pair-key → объект для drill
+
+// Инициализация дропдаунов «Годы» и «Кварталы» для вкладки SKU
+function initSkuAnalysisFilters() {
+  if (!q('#skuAnaYearPanel')) return;
+  if (MS['skuAnaYear'] && MS['skuAnaQ']) return;  // уже инициализированы
+  const years = uniq(DATA.sales.filter(x=>!EXCLUDE_CUSTOMERS.has(x.customer)).map(x=>String(x.year))).sort();
+  msInit('skuAnaYear', years, {
+    allLabel: 'Все годы', placeholder: 'Поиск года…',
+    onChange: () => renderSkuAnalysis()
+  });
+  msInit('skuAnaQ', ['Q1','Q2','Q3','Q4'], {
+    allLabel: 'Все кварталы', placeholder: 'Поиск…',
+    onChange: () => renderSkuAnalysis()
+  });
+}
 
 window.setSkuAnalysisSort = (m) => {
   skuAnalysisSort = m;
@@ -1238,17 +1272,21 @@ window.clearSkuAnalysisClientFilter = () => {
   skuAnalysisClientFilter = null;
   renderSkuAnalysis();
 };
-window.toggleSkuQuarter = (q) => {
-  if (skuAnalysisQuarters.has(q)) skuAnalysisQuarters.delete(q);
-  else skuAnalysisQuarters.add(q);
+// "2025-03" → "2025", "Q1"
+function monthYear(m)    { return Number(m.split('-')[0]); }
+function monthQuarter(m) { return 'Q' + Math.ceil(Number(m.split('-')[1])/3); }
+
+window.resetSkuAnalysisAll = () => {
+  skuAnalysisStatus = 'all';
+  skuAnalysisClientFilter = null;
+  skuAnalysisPicked.clear();
+  skuAnalysisSelected = null;
+  if (MS['skuAnaYear']) { MS['skuAnaYear'].set.clear(); msTrigLabel('skuAnaYear'); msBuildPanel('skuAnaYear'); }
+  if (MS['skuAnaQ'])    { MS['skuAnaQ'].set.clear();    msTrigLabel('skuAnaQ');    msBuildPanel('skuAnaQ'); }
+  document.querySelectorAll('#skuAnalysisStatusTabs .tab-btn').forEach((b,i) =>
+    b.classList.toggle('active', i === 0));
   renderSkuAnalysis();
 };
-window.clearSkuQuarters = () => { skuAnalysisQuarters.clear(); renderSkuAnalysis(); };
-// "2025-03" → "2025-Q1"
-function monthToQuarter(m) {
-  const [y, mm] = m.split('-').map(Number);
-  return `${y}-Q${Math.ceil(mm/3)}`;
-}
 window.togglePickAnalysis = (key, ev) => {
   if (ev) ev.stopPropagation();
   if (skuAnalysisPicked.has(key)) skuAnalysisPicked.delete(key);
@@ -1297,11 +1335,20 @@ function renderSkuAnalysis() {
   if (!tblEl) return;
 
   // источник — отфильтрованные по глобальным фильтрам + локальный фильтр клиента
-  // + локальный фильтр кварталов
+  // + локальные дропдауны «Годы» / «Кварталы»
+  initSkuAnalysisFilters();
+  const selYears = new Set(msSelected('skuAnaYear').map(Number));
+  const selQs    = new Set(msSelected('skuAnaQ'));
+  const matchPeriod = m => {
+    if (!selYears.size && !selQs.size) return true;
+    if (selYears.size && !selYears.has(monthYear(m))) return false;
+    if (selQs.size    && !selQs.has(monthQuarter(m))) return false;
+    return true;
+  };
   const baseAll = filteredSalesNoMonth().filter(x =>
     !EXCLUDE_CUSTOMERS.has(x.customer) &&
     (!skuAnalysisClientFilter || x.customer === skuAnalysisClientFilter) &&
-    (skuAnalysisQuarters.size === 0 || skuAnalysisQuarters.has(monthToQuarter(x.month)))
+    matchPeriod(x.month)
   );
   if (!baseAll.length) {
     tblEl.innerHTML = '<div class="detail-empty">Нет данных по выбранным фильтрам.</div>';
@@ -1376,27 +1423,16 @@ function renderSkuAnalysis() {
     ? `<button class="btn primary" type="button" onclick="clearSkuAnalysisClientFilter()" style="font-size:12px">✕ Фильтр: ${escapeHtml(skuAnalysisClientFilter)} (снять)</button>`
     : '';
 
-  // ── Квартал-фильтр: рендерим все кварталы по всем данным (не зависит от
-  //    текущей выборки чтобы не схлопывался при отметке) ──────────────────
-  const qBar = q('#skuAnalysisQuarterBar');
-  if (qBar) {
-    const allMonthsGlobal = uniq(DATA.sales.filter(x=>!EXCLUDE_CUSTOMERS.has(x.customer)).map(x=>x.month)).sort();
-    const allQuarters = uniq(allMonthsGlobal.map(monthToQuarter)).sort();
-    const quartLast8 = allQuarters.slice(-8);    // показываем последние 8 кварталов
-    const more = allQuarters.length - quartLast8.length;
-    const chips = quartLast8.map(qq => {
-      const active = skuAnalysisQuarters.has(qq);
-      const lbl = qq.replace('-','&nbsp;');
-      return `<button type="button" onclick="toggleSkuQuarter('${qq}')" class="tab-btn ${active?'active':''}" style="margin:0">${lbl}</button>`;
-    }).join('');
-    const reset = skuAnalysisQuarters.size > 0
-      ? `<button type="button" onclick="clearSkuQuarters()" class="btn" style="height:28px;font-size:12px;padding:0 10px">✕ Сбросить (${skuAnalysisQuarters.size})</button>` : '';
-    qBar.innerHTML = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <span style="font-size:12px;color:var(--muted);font-weight:600">КВАРТАЛЫ:</span>
-      <div class="top20-tabs" style="flex-wrap:wrap">${chips}</div>
-      ${more>0?`<span style="font-size:11px;color:var(--muted)">(+ ${more} ранее)</span>`:''}
-      ${reset}
-    </div>`;
+  // показывать/прятать кнопку «✕ Сбросить всё»
+  const resetBtn = q('#skuAnaResetBtn');
+  if (resetBtn) {
+    const anyActive = skuAnalysisStatus !== 'all'
+      || skuAnalysisClientFilter
+      || skuAnalysisPicked.size > 0
+      || skuAnalysisSelected
+      || (MS['skuAnaYear'] && MS['skuAnaYear'].set.size > 0)
+      || (MS['skuAnaQ']    && MS['skuAnaQ'].set.size > 0);
+    resetBtn.style.display = anyActive ? '' : 'none';
   }
 
   // спарк
@@ -1448,21 +1484,16 @@ function renderSkuAnalysis() {
                     : `<span class="trend-badge-stable">→</span>`;
       const weight = totalMar ? p.marginRub / totalMar : 0;
       const isSel = skuAnalysisSelected === k;
-      // ТОП-3 имеет приоритет над трендовой подсветкой; sel/pick всё ещё перебивают
-      const topBg = topRank === 1 ? 'background:#fef3c7'
-                  : topRank === 2 ? 'background:#f1f5f9'
-                  : topRank === 3 ? 'background:#fef2eb' : '';
+      // ТОП-3 в видимой выборке — единая зелёная подсветка
+      const isTop3 = topRank > 0;
       const bg = isSel ? 'background:#dbeafe'
               : isPicked ? 'background:#eff6ff'
-              : topBg ? topBg
+              : isTop3   ? 'background:#dcfce7'
               : p.trend==='falling'||p.trend==='lost' ? 'background:#fff8f8'
               : p.trend==='rising' ? 'background:#f0fdf4' : '';
-      const rankBadge = topRank
-        ? `<span title="ТОП-${topRank} по выбранной сортировке" style="display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;font-size:10px;font-weight:700;border-radius:4px;margin-right:6px;color:#fff;background:${topRank===1?'#d97706':topRank===2?'#64748b':'#a16207'}">${topRank}</span>`
-        : '';
-      return `<tr class="click ${isSel?'ana-selected':''}" data-key="${escapeHtml(k)}" style="${bg};cursor:pointer" onclick="selectAnalysisSku('${jsEsc(k)}', event)">
+      return `<tr class="click ${isSel?'ana-selected':''}" data-key="${escapeHtml(k)}" style="${bg};cursor:pointer" title="${isTop3?'ТОП-'+topRank+' в видимой выборке по выбранной сортировке':''}" onclick="selectAnalysisSku('${jsEsc(k)}', event)">
         <td style="text-align:center" onclick="event.stopPropagation()"><input type="checkbox" class="ana-pick" data-key="${escapeHtml(k)}" ${isPicked?'checked':''} onclick="togglePickAnalysis('${jsEsc(k)}', event)" style="width:14px;height:14px;cursor:pointer;accent-color:var(--blue)"></td>
-        <td>${rankBadge}${escapeHtml(p.sku)}</td>
+        <td>${escapeHtml(p.sku)}</td>
         <td>${escapeHtml(p.productName)}</td>
         <td onclick="event.stopPropagation()"><a href="#" onclick="event.preventDefault();selectSkuAnalysisClient('${jsEsc(p.customer)}')" style="color:var(--blue);text-decoration:none;font-size:12px">${escapeHtml(p.customer)}</a></td>
         <td>${stBadge}</td>
