@@ -425,7 +425,7 @@ if ($orderEntity) {
                     if ($items.Count -lt $page) { break }
                     $offset += $page
                 }
-                Write-Host "    $cat: read=$totalRead, resolved=$found"
+                Write-Host "    ${cat}: read=$totalRead, resolved=$found"
                 if ($custMap.Count -eq $custKeys.Count) { break }
             }
             Write-Host "  partner names resolved: $($custMap.Count) / $($custKeys.Count)"
