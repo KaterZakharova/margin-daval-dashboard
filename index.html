@@ -1567,46 +1567,113 @@ document.addEventListener('keydown', e => {
 // ─── SVG: per-SKU diverging trend bars (feature B) ─────────────────────────
 function buildSkuTrendChart(items, metric) {
   if (!items.length) return '<div class="detail-empty">Недостаточно истории для сравнения SKU.</div>';
-  const data = items.slice().sort((a,b)=>b.pct-a.pct);
-  const fmt = metricFmt(metric);
-  const rowH = 26, padT = 28, padB = 8, W = 1000, labelW = 330;
-  const H = padT + padB + data.length*rowH;
-  const cx = labelW + (W - labelW - 20) / 2;
-  const half = (W - labelW - 20) / 2 - 6;
-  const capped = v => Math.max(-2, Math.min(2, v));         // clamp ±200%
-  const maxAbs = Math.max(0.25, ...data.map(d=>Math.abs(capped(d.pct))));
-  const colorOf = k => k==='lost'?'#b42318':k==='falling'?'#f04438':k==='new'?'#2563eb':k==='rising'?'#12b76a':'#98a2b3';
-  const stMeta = s => s==='new' ? {t:'✦ Новинка',c:'#16a34a'} : s==='exit' ? {t:'↓ Выводится',c:'#d97706'} : {t:'Основной',c:'#64748b'};
-  const rows = data.map((d,i)=>{
-    const y = padT + i*rowH;
-    const len = (Math.abs(capped(d.pct))/maxAbs)*half;
-    const pos = d.pct>=0;
-    const bx = pos ? cx : cx-len, bw = Math.max(1,len);
-    const pctTxt = d.kind==='lost'?'нет продаж':d.kind==='new'?'новый':`${d.pct>=0?'+':''}${Math.round(d.pct*100)}%`;
-    const nm = (d.name||d.sku);
-    const lbl = nm.length>32 ? nm.slice(0,31)+'…' : nm;
-    const sm = stMeta(d.status);
-    return `<g class="skucmp-row">
-      <rect class="hit" x="0" y="${y}" width="${W}" height="${rowH}" fill="transparent"/>
-      <title>${escapeHtml(d.sku)} · ${escapeHtml(d.name||'')}
-Статус: ${sm.t.replace(/[✦↓]\s*/,'')}
-Прошлые 6 мес.: ${fmt(d.prior)}
-Последние 6 мес.: ${fmt(d.recent)}
-Изменение: ${pctTxt}</title>
-      <text x="8" y="${y+rowH/2+4}" font-size="12" fill="#344054">${escapeHtml(lbl)}</text>
-      <text x="${labelW-8}" y="${y+rowH/2+4}" font-size="10.5" fill="${sm.c}" text-anchor="end" font-weight="600">${sm.t}</text>
-      <rect x="${bx}" y="${y+5}" width="${bw}" height="${rowH-12}" rx="2" fill="${colorOf(d.kind)}" opacity=".9"/>
-      <text x="${pos?bx+bw+6:bx-6}" y="${y+rowH/2+4}" font-size="11" fill="#475467"
-        text-anchor="${pos?'start':'end'}">${pctTxt}</text>
-    </g>`;
+  const fmt    = metricFmt(metric);
+  const fmtAbs = v => {
+    const s = fmt(v);
+    // компактный формат для крупных чисел: 1 234 567 → 1.2 М
+    if (metric !== 'qty' && metric !== 'marginPct' && Math.abs(v) >= 1_000_000)
+      return (v/1_000_000).toFixed(v >= 10_000_000 ? 0 : 1).replace('.', ',') + ' М';
+    if (metric !== 'qty' && metric !== 'marginPct' && Math.abs(v) >= 10_000)
+      return Math.round(v/1000) + ' тыс';
+    return s.replace(/\s*руб\.?/,'');
+  };
+  const W = 1100, labelW = 290, rightLabelW = 220;
+  const rowH = 24, groupHeadH = 28, groupGapH = 8;
+  const padT = 30, padB = 12;
+  const chartL = labelW;
+  const chartR = W - rightLabelW;
+  const chartW = chartR - chartL;
+  const maxV = Math.max(1, ...items.map(d => Math.max(d.prior||0, d.recent||0)));
+  const x = v => chartL + (Math.max(0, v)/maxV) * chartW;
+
+  // 5 групп
+  const GROUPS = [
+    { key:'rising',  title:'РАСТУТ',     accent:'#12b76a', sort:(a,b)=>b.pct-a.pct,
+      hint:'последние ${W} мес. больше предыдущих на >20%' },
+    { key:'stable',  title:'СТАБИЛЬНЫ',  accent:'#64748b', sort:(a,b)=>b.recent-a.recent,
+      hint:'изменение в пределах ±20%' },
+    { key:'falling', title:'ПАДАЮТ',     accent:'#f04438', sort:(a,b)=>a.pct-b.pct,
+      hint:'последние ${W} мес. меньше предыдущих более чем на 20%' },
+    { key:'new',     title:'НОВИНКИ',    accent:'#2563eb', sort:(a,b)=>b.recent-a.recent,
+      hint:'продаж в прошлом окне не было — сравнивать не с чем' },
+    { key:'lost',    title:'ПРЕКРАТИЛИ', accent:'#b42318', sort:(a,b)=>b.prior-a.prior,
+      hint:'продажи в текущем окне отсутствуют' }
+  ];
+
+  let y = padT;
+  const visibleGroups = [];
+  for (const g of GROUPS) {
+    const rows = items.filter(it => it.kind === g.key).sort(g.sort);
+    if (!rows.length) continue;
+    visibleGroups.push({ g, rows, yStart: y });
+    y += groupHeadH + rows.length*rowH + groupGapH;
+  }
+  const H = y + padB;
+  if (!visibleGroups.length) return '<div class="detail-empty">Нет данных для сравнения.</div>';
+
+  // ось сверху: 0, 25%, 50%, 75%, 100% — короткие подписи
+  const grid = [0, .25, .5, .75, 1].map(t => {
+    const gx = chartL + t*chartW;
+    return `<line x1="${gx}" y1="${padT-4}" x2="${gx}" y2="${H-padB+2}" stroke="#eef2f7" stroke-dasharray="2 4"/>
+            <text x="${gx}" y="${padT-8}" text-anchor="middle" font-size="10" fill="#94a3b8">${t===0?'0':fmtAbs(maxV*t)}</text>`;
   }).join('');
-  return `<div class="skucmp-wrap"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;max-height:none">
-    <line x1="${cx}" y1="${padT-6}" x2="${cx}" y2="${H-padB}" stroke="#cbd5e1" stroke-dasharray="3 3"/>
-    <text x="${cx}" y="16" text-anchor="middle" font-size="11" fill="#94a3b8">0%</text>
-    <text x="${labelW}" y="16" text-anchor="start" font-size="11" fill="#f04438">← падение</text>
-    <text x="${W-20}" y="16" text-anchor="end" font-size="11" fill="#12b76a">рост →</text>
-    ${rows}
-  </svg></div>`;
+
+  const groupBlocks = visibleGroups.map(({g, rows, yStart}) => {
+    const headY = yStart + groupHeadH - 8;
+    const head = `<g>
+      <rect x="0" y="${yStart}" width="${W}" height="${groupHeadH-4}" fill="#f8fafc"/>
+      <rect x="0" y="${yStart}" width="6" height="${groupHeadH-4}" fill="${g.accent}"/>
+      <text x="14" y="${headY}" font-size="12.5" font-weight="700" fill="#1e293b">${g.title}</text>
+      <text x="14" y="${headY+12}" font-size="10.5" fill="#94a3b8">${rows.length} SKU</text>
+    </g>`;
+    const dataRows = rows.map((d,i) => {
+      const ry = yStart + groupHeadH + i*rowH;
+      const cy = ry + rowH/2;
+      const x1 = x(d.prior), x2 = x(d.recent);
+      const lineX0 = Math.min(x1, x2), lineX1 = Math.max(x1, x2);
+      const isNewOnly  = d.kind === 'new';
+      const isLostOnly = d.kind === 'lost';
+      const pctTxt = d.kind==='lost' ? 'нет продаж'
+                  : d.kind==='new'  ? `новый: ${fmtAbs(d.recent)}`
+                  : `${d.pct>=0?'+':''}${Math.round(d.pct*100)}%`;
+      const lineColor = g.accent + 'cc';
+      const nm = d.name||d.sku;
+      const lbl = nm.length>34 ? nm.slice(0,33)+'…' : nm;
+      const tipBody = isLostOnly ? `${fmtAbs(d.prior)} → 0`
+                    : isNewOnly  ? `0 → ${fmtAbs(d.recent)}`
+                    : `${fmtAbs(d.prior)} → ${fmtAbs(d.recent)}  (Δ ${pctTxt})`;
+      // dot для prior (если есть) — серый контур; recent — цветной залитый
+      const priorDot  = (d.prior > 0)  ? `<circle cx="${x1}" cy="${cy}" r="4" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/>` : '';
+      const recentDot = (d.recent > 0) ? `<circle cx="${x2}" cy="${cy}" r="5" fill="${g.accent}"/>` : '';
+      const conn = (d.prior > 0 && d.recent > 0)
+        ? `<line x1="${x1}" y1="${cy}" x2="${x2}" y2="${cy}" stroke="${lineColor}" stroke-width="2.5" stroke-linecap="round"/>`
+        : '';
+      return `<g class="skucmp-row">
+        <rect class="hit" x="0" y="${ry}" width="${W}" height="${rowH}" fill="transparent"/>
+        <title>${escapeHtml(d.sku)} · ${escapeHtml(d.name||'')}
+${tipBody}</title>
+        <text x="12" y="${cy+4}" font-size="12" fill="#344054">${escapeHtml(lbl)}</text>
+        ${conn}${priorDot}${recentDot}
+        <text x="${chartR+8}" y="${cy+4}" font-size="11.5" fill="${g.accent}" font-weight="600">${pctTxt}</text>
+      </g>`;
+    }).join('');
+    return head + dataRows;
+  }).join('');
+
+  const scaleLabel = ({margin:'маржа, ₽',marginRub:'маржа, ₽',revenue:'выручка, ₽',qty:'штук'})[metric]||metric;
+  // легенда сверху над SVG: HTML вместо позиционирования в SVG
+  const legendHtml = `<div style="display:flex;align-items:center;gap:18px;padding:6px 12px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)">
+    <span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="4" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/></svg>прошлое окно</span>
+    <span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="#64748b"/></svg>текущее окно</span>
+    <span style="margin-left:auto">шкала: <b style="color:var(--ink)">${scaleLabel}</b></span>
+  </div>`;
+
+  return `<div class="skucmp-wrap" style="background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+    ${legendHtml}
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;max-height:none;display:block">
+      ${grid}
+      ${groupBlocks}
+    </svg></div>`;
 }
 
 // ─── SVG: per-SKU grouped bars across selected periods (feature C) ─────────
