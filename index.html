@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Маржинальность и давальческие схемы</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg:#f4f6f8; --panel:#fff; --text:#182230; --muted:#667085; --line:#d8dee8;
@@ -37,6 +38,7 @@
     .multicheck-wrap{position:relative;width:100%}.multicheck-trigger{display:flex;align-items:center;justify-content:space-between;height:36px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:0 9px;cursor:pointer;font-size:13px;color:var(--text);user-select:none}.multicheck-trigger:hover{border-color:#93c5fd}.multicheck-panel{position:absolute;top:calc(100% + 3px);left:0;min-width:200px;right:0;z-index:300;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 24px rgba(15,23,42,.14);max-height:310px;overflow-y:auto;padding:4px 0}.mc-item{display:flex;align-items:center;gap:8px;padding:5px 10px;cursor:pointer;font-size:13px;color:var(--text)}.mc-item:hover{background:#f7fbff}.mc-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}.mc-sep{height:1px;background:var(--line);margin:3px 0}.mc-year-hdr{font-size:11px;color:var(--muted);padding:5px 10px 2px;font-weight:700;display:flex;justify-content:space-between;align-items:center;background:#f8fafc}.mc-year-link{color:var(--blue);cursor:pointer;font-size:11px;font-weight:400}
     .sku-new{background:#dcfce7;color:#166534;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:650;white-space:nowrap}.sku-core{background:#f1f5f9;color:#475467;border-radius:999px;padding:2px 8px;font-size:11px;white-space:nowrap}.sku-exit{background:#fef3c7;color:#92400e;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:650;white-space:nowrap}
     .det-tabs{display:flex;gap:6px;margin-bottom:10px}.det-tab{height:28px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--muted);padding:0 12px;cursor:pointer;font-size:13px;font-weight:600}.det-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+    .xlsx-mi:hover:not([disabled]){background:#f1f5f9}
     .cmp-a{color:#2563eb;font-weight:700}.cmp-b{color:#0d9488;font-weight:700}.cmp-pos{color:#168a5b;font-weight:700}.cmp-neg{color:#d92d20;font-weight:700}.cmp-neu{color:#94a3b8}.cmp-lost-row td{background:#fffbeb!important}.cmp-new-row td{background:#f0fdf4!important}
     .period-controls{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}.period-controls label{font-size:12px;color:var(--muted);white-space:nowrap}.period-controls select{height:32px;font-size:13px;min-width:160px;width:auto}
     .exp-btn{height:30px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--muted);padding:0 11px;cursor:pointer;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;flex-shrink:0}.exp-btn:hover{background:#f8fafc;border-color:#93c5fd;color:var(--blue)}
@@ -980,6 +982,171 @@ window.togglePickAll = (cb) => {
 };
 window.clearPicks = () => { pickedSkus.clear(); renderDetailFromState(); };
 
+// ──────────────────────────────────────────────────────────────────────────
+// «📥 Excel ▾» dropdown + «⤢ Раскрыть в новой вкладке»
+// ──────────────────────────────────────────────────────────────────────────
+window.toggleXlsxMenu = (ev) => {
+  if (ev) ev.stopPropagation();
+  const m = q('#xlsxMenu');
+  if (!m) return;
+  const opening = m.style.display !== 'block';
+  m.style.display = opening ? 'block' : 'none';
+  if (opening) {
+    setTimeout(() => document.addEventListener('click', closeXlsxMenuOnce), 0);
+  }
+};
+function closeXlsxMenuOnce() {
+  const m = q('#xlsxMenu');
+  if (m) m.style.display = 'none';
+  document.removeEventListener('click', closeXlsxMenuOnce);
+}
+
+window.openSkuTableInNewTab = () => {
+  const tbl = document.querySelector('.detail table');
+  if (!tbl) { alert('Сначала выберите клиента — таблица не отрисована.'); return; }
+  const heads = q('.detail .detail-head');
+  const title = `Ассортимент клиента — ${state.customer || ''}${state.sku?' · '+state.sku:''}`;
+  // строим автономный HTML-документ — без интерактива, чисто для просмотра/печати/скриншота
+  const headsHtml = heads ? heads.outerHTML : '';
+  const tblHtml = tbl.outerHTML
+    .replace(/<input[^>]*type=["']checkbox["'][^>]*>/g, '')        // убираем чекбоксы
+    .replace(/onclick="[^"]*"/g, '');                              // отрубаем все handlers
+  const css = `
+    body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff;color:#182230;padding:24px;margin:0}
+    h1{font-size:20px;margin:0 0 4px}.sub{color:#667085;font-size:13px;margin-bottom:18px}
+    table{border-collapse:collapse;width:100%;font-size:13px}
+    th,td{border:1px solid #e2e8f0;padding:6px 9px;text-align:left;vertical-align:middle}
+    th{background:#f8fafc;font-weight:700;color:#334155;font-size:12px;text-transform:uppercase;letter-spacing:.02em}
+    td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+    tr:hover{background:#f8fafc}
+    .badge,.sku-new,.sku-exit,.sku-core,[class^="trend-badge"]{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
+    .sku-new{background:#dcfce7;color:#166534}.sku-exit{background:#fef3c7;color:#92400e}.sku-core{background:#e2e8f0;color:#475569}
+    .trend-badge-fall{background:#fee2e2;color:#991b1b}.trend-badge-rise{background:#dcfce7;color:#166534}
+    .trend-badge-lost{background:#fef3c7;color:#92400e}.trend-badge-stable{background:#f1f5f9;color:#64748b}
+    .badge.dav{background:#dcfce7;color:#166534}.badge.mix{background:#cffafe;color:#155e75}.badge.zip{background:#dbeafe;color:#1e40af}
+    .detail-head{display:flex;gap:10px;margin:18px 0;flex-wrap:wrap}
+    .detail-head .fact{flex:1;min-width:140px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px}
+    .detail-head .fact span{display:block;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+    .detail-head .fact strong{display:block;color:#0f172a;font-size:17px;font-weight:700;margin-top:4px}
+    @media print{body{padding:0}}
+    .toolbar{margin-bottom:14px}
+    .toolbar button{background:#2563eb;color:#fff;border:0;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px}
+  `;
+  const html = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>${css}</style></head><body>
+    <h1>${escapeHtml(title)}</h1>
+    <div class="sub">Снимок таблицы на ${fmtMeta(new Date().toISOString())}. Источник: дашборд маржинальности.</div>
+    <div class="toolbar"><button onclick="window.print()">🖨 Печать</button><button onclick="window.close()">✕ Закрыть</button></div>
+    ${headsHtml}${tblHtml}
+  </body></html>`;
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank', 'noopener');
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+};
+
+window.exportSkuExcel = (mode) => {
+  if (typeof XLSX === 'undefined') { alert('Библиотека Excel ещё не загружена (нет интернета?). Попробуйте через несколько секунд.'); return; }
+  closeXlsxMenuOnce();
+  if (!state.customer) { alert('Выберите клиента сначала.'); return; }
+
+  const customer = state.customer;
+  const allRows = DATA.sales.filter(x => !EXCLUDE_CUSTOMERS.has(x.customer) && x.customer === customer);
+  if (!allRows.length) { alert('Нет данных для выгрузки.'); return; }
+
+  // ── режим выбора SKU ──────────────────────────────────────────────────────
+  let targetSet = null;
+  if (mode === 'picked') {
+    if (pickedSkus.size === 0) { alert('Не отмечено ни одного SKU.'); return; }
+    targetSet = pickedSkus;
+  } else if (mode === 'current') {
+    // взять SKU из видимых строк таблицы
+    const visibleSkus = [...document.querySelectorAll('.detail tbody tr')]
+      .map(tr => tr.querySelector('td:nth-child(2)')?.innerText.trim())
+      .filter(Boolean);
+    targetSet = new Set(visibleSkus);
+  }
+  // mode === 'full' → targetSet = null (все)
+
+  const filtered = targetSet ? allRows.filter(r => targetSet.has(r.sku)) : allRows;
+  if (!filtered.length) { alert('Нет данных по выбранным SKU.'); return; }
+
+  // ── режим 'current': один лист с тем, что в таблице ──────────────────────
+  if (mode === 'current') {
+    const tbl = document.querySelector('.detail table');
+    if (!tbl) { alert('Таблица не найдена.'); return; }
+    // sheet_from_table выгружает HTML-таблицу как есть
+    const ws = XLSX.utils.table_to_sheet(tbl, { raw: false });
+    // удаляем первую колонку с чекбоксами
+    XLSX.utils.sheet_add_aoa(ws, [[]], { origin: 'A1' });   // no-op чтобы инициализировать
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    // снимаем колонку 0 — пересобираем массив
+    const data = XLSX.utils.sheet_to_json(ws, { header:1 });
+    const dataNoCb = data.map(row => row.slice(1));
+    const ws2 = XLSX.utils.aoa_to_sheet(dataNoCb);
+    ws2['!cols'] = [{wch:14},{wch:48},{wch:14},{wch:12},{wch:10},{wch:10},{wch:12},{wch:22},{wch:8},{wch:8},{wch:12},{wch:18}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws2, 'Ассортимент (как видно)');
+    const fname = `SKU_${customer.replace(/[^\wа-яА-Я]+/gu,'_').slice(0,40)}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    XLSX.writeFile(wb, fname);
+    return;
+  }
+
+  // ── режим 'full' и 'picked': плоский лист (SKU×месяц) + сводная ──────────
+  const months = uniq(filtered.map(r => r.month)).sort();
+  const skuMap = new Map();
+  for (const r of filtered) {
+    const k = r.sku;
+    if (!skuMap.has(k)) skuMap.set(k, { sku:k, name:r.productName||k, byM: new Map() });
+    const s = skuMap.get(k);
+    const m = s.byM.get(r.month) || { qty:0, revenue:0, marginRub:0 };
+    m.qty += +r.qty||0; m.revenue += +r.revenue||0; m.marginRub += +r.marginRub||0;
+    s.byM.set(r.month, m);
+  }
+  // первая отгрузка по каждому SKU — глобально по этому клиенту
+  const firstShip = new Map();
+  for (const r of allRows) {
+    if (!firstShip.has(r.sku) || r.month < firstShip.get(r.sku)) firstShip.set(r.sku, r.month);
+  }
+  // ── Лист 1: ПЛОСКИЙ — строка = SKU × месяц ───────────────────────────────
+  const flatRows = [['SKU','Наименование','Месяц','Штук','Выручка ₽','Маржа ₽','Маржа %','1-я отгрузка']];
+  for (const s of [...skuMap.values()].sort((a,b)=>a.sku.localeCompare(b.sku))) {
+    for (const m of months) {
+      const v = s.byM.get(m);
+      if (!v) continue;
+      flatRows.push([
+        s.sku, s.name, m,
+        Math.round(v.qty), Math.round(v.revenue), Math.round(v.marginRub),
+        v.revenue ? +(v.marginRub/v.revenue*100).toFixed(2) : 0,
+        firstShip.get(s.sku) || ''
+      ]);
+    }
+  }
+  const wsFlat = XLSX.utils.aoa_to_sheet(flatRows);
+  wsFlat['!cols'] = [{wch:14},{wch:48},{wch:10},{wch:10},{wch:14},{wch:14},{wch:10},{wch:12}];
+
+  // ── Лист 2: СВОДНАЯ — SKU в строках, месяцы в колонках (3 метрики) ───────
+  const pivotHead = ['SKU','Наименование','1-я отгрузка'];
+  for (const m of months) pivotHead.push(`${m} Шт`,`${m} Маржа ₽`,`${m} Выручка ₽`);
+  const pivotRows = [pivotHead];
+  for (const s of [...skuMap.values()].sort((a,b)=>a.sku.localeCompare(b.sku))) {
+    const row = [s.sku, s.name, firstShip.get(s.sku) || ''];
+    for (const m of months) {
+      const v = s.byM.get(m) || { qty:0, revenue:0, marginRub:0 };
+      row.push(Math.round(v.qty), Math.round(v.marginRub), Math.round(v.revenue));
+    }
+    pivotRows.push(row);
+  }
+  const wsPivot = XLSX.utils.aoa_to_sheet(pivotRows);
+  wsPivot['!cols'] = [{wch:14},{wch:48},{wch:12}, ...months.flatMap(()=>[{wch:9},{wch:13},{wch:13}])];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, wsFlat,  'Плоский (SKU × Месяц)');
+  XLSX.utils.book_append_sheet(wb, wsPivot, 'Сводная');
+  const tag = mode === 'picked' ? 'выбранные' : 'все';
+  const fname = `SKU_${customer.replace(/[^\wа-яА-Я]+/gu,'_').slice(0,40)}_${tag}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, fname);
+};
+
 function renderDetail(rows) {
   const el = q('#detailBlock');
   let base = rows;
@@ -1200,7 +1367,18 @@ function renderDetail(rows) {
           </div>
           ${pickN?`<button class="btn primary" type="button" onclick="clearPicks()">✕ Сбросить выбор (${pickN})</button>`:''}
         </div>
-        ${state.sku?'<button class="btn" type="button" onclick="clearSkuSelection()">Вернуться к списку SKU</button>':''}
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          ${state.sku?'<button class="btn" type="button" onclick="clearSkuSelection()">Вернуться к списку SKU</button>':''}
+          <button class="btn" type="button" onclick="openSkuTableInNewTab()" title="Открывает текущую таблицу SKU в новой вкладке браузера — удобно скриншотить или печатать">⤢ Раскрыть в новой вкладке</button>
+          <div class="xlsx-drop" style="position:relative">
+            <button class="btn primary" type="button" onclick="toggleXlsxMenu(event)">📥 Excel ▾</button>
+            <div id="xlsxMenu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.12);z-index:50;min-width:280px;padding:6px">
+              <button class="xlsx-mi" type="button" onclick="exportSkuExcel('current')" style="display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--ink)">📄 <b>Текущая таблица</b> — как на экране, с фильтрами</button>
+              <button class="xlsx-mi" type="button" onclick="exportSkuExcel('full')" style="display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--ink)">📊 <b>Полная динамика</b> — все SKU клиента, помесячно (плоский + сводная)</button>
+              <button class="xlsx-mi" type="button" onclick="exportSkuExcel('picked')" ${pickN?'':'disabled'} style="display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:6px;cursor:${pickN?'pointer':'not-allowed'};font-size:13px;color:${pickN?'var(--ink)':'var(--muted)'}">☑ <b>Только выделенные галочками</b> ${pickN?`(${pickN})`:'— ничего не отмечено'}</button>
+            </div>
+          </div>
+        </div>
       </div>
       ${detailMode==='current' ? currentBlock : compareShell}
     </div>
