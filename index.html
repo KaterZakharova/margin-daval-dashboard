@@ -1186,17 +1186,19 @@ window.exportSkuExcel = (mode) => {
     if (!firstShip.has(r.sku) || r.month < firstShip.get(r.sku)) firstShip.set(r.sku, r.month);
   }
   // ── Лист 1: ПЛОСКИЙ — строка = SKU × месяц ───────────────────────────────
-  // карта заказов: sku → month → qty
+  // карта заказов: sku → month → qty (только незакрытые, FIFO-фильтрация)
   const ordersBySkuMonth = new Map();
-  for (const o of (DATA.orders || [])) {
-    if (!skuMap.has(o.sku)) continue;
-    if (targetSet && !targetSet.has(o.sku)) continue;
-    if (o.customer !== customer) continue;
-    const mk = o.month || (o.date ? o.date.slice(0,7) : '');
-    if (!mk) continue;
-    if (!ordersBySkuMonth.has(o.sku)) ordersBySkuMonth.set(o.sku, new Map());
-    const mm = ordersBySkuMonth.get(o.sku);
-    mm.set(mk, (mm.get(mk) || 0) + (+o.qty || 0));
+  for (const sku of [...skuMap.keys()]) {
+    if (targetSet && !targetSet.has(sku)) continue;
+    const open = effectiveOrders(sku, customer);
+    if (!open.length) continue;
+    const mm = new Map();
+    for (const o of open) {
+      const mk = o.month || (o.date ? o.date.slice(0,7) : '');
+      if (!mk) continue;
+      mm.set(mk, (mm.get(mk) || 0) + (+o.remaining || 0));
+    }
+    if (mm.size) ordersBySkuMonth.set(sku, mm);
   }
   // объединяем месяцы отгрузок и месяцы заказов (для строк с заказами в будущем)
   const orderMonths = [...new Set([...ordersBySkuMonth.values()].flatMap(m => [...m.keys()]))];
@@ -1544,6 +1546,33 @@ function renderSkuAnalysis() {
   renderSkuAnalysisDrill();
 }
 
+// ── эффективные (не отгруженные) заказы по паре (sku, customer):
+//    FIFO-сопоставление с продажами. Если по паре после даты заказа уже
+//    были отгрузки на это количество — заказ считается выполненным.
+function effectiveOrders(sku, customer) {
+  const all = (DATA.orders || [])
+    .filter(o => o.sku === sku && o.customer === customer && (+o.qty || 0) > 0)
+    .map(o => ({ ...o, remaining: +o.qty || 0 }))
+    .sort((a, b) => (a.date || a.month || '').localeCompare(b.date || b.month || ''));
+  if (!all.length) return all;
+  // отгрузки по этой паре с месяца самого раннего заказа
+  const firstM = (all[0].month || (all[0].date || '').slice(0,7));
+  let shipped = 0;
+  for (const r of DATA.sales) {
+    if (EXCLUDE_CUSTOMERS.has(r.customer)) continue;
+    if (r.sku !== sku || r.customer !== customer) continue;
+    if (r.month < firstM) continue;
+    shipped += (+r.qty || 0);
+  }
+  // FIFO: гасим заказы от старых к новым
+  for (const o of all) {
+    if (shipped <= 0) break;
+    if (shipped >= o.remaining) { shipped -= o.remaining; o.remaining = 0; }
+    else { o.remaining -= shipped; shipped = 0; }
+  }
+  return all.filter(o => o.remaining > 0);
+}
+
 // ── drill-график выбранного SKU: динамика по месяцам с tooltip ─────────────
 function renderSkuAnalysisDrill() {
   const el = q('#skuAnalysisDrill');
@@ -1558,16 +1587,14 @@ function renderSkuAnalysisDrill() {
   const months = allMonths.filter(m => m >= p.firstShip && m <= lastDataM);
   if (!months.length) months.push(p.firstShip);
 
-  // подбираем заказы давальца (план, ещё не отгружено) для этой пары SKU×клиент
-  const ordersForPair = (DATA.orders || []).filter(o =>
-    o.sku === p.sku && o.customer === p.customer
-  );
-  // группируем заказы по месяцам — суммируем qty (одно SKU в одном месяце может быть несколько заказов)
+  // ТОЛЬКО незакрытые заказы (отгруженные FIFO-сопоставлением исключены)
+  const ordersForPair = effectiveOrders(p.sku, p.customer);
+  // группируем по месяцам остатки
   const ordersByMonth = new Map();
   for (const o of ordersForPair) {
     const k = o.month || (o.date ? o.date.slice(0,7) : '');
     if (!k) continue;
-    ordersByMonth.set(k, (ordersByMonth.get(k) || 0) + (+o.qty || 0));
+    ordersByMonth.set(k, (ordersByMonth.get(k) || 0) + (+o.remaining || 0));
   }
   // добавляем будущие месяцы заказов (после последнего месяца данных), если есть
   const futureOrderMonths = [...ordersByMonth.keys()].filter(m => m > lastDataM).sort();

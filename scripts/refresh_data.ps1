@@ -327,32 +327,51 @@ if ($orderEntity) {
     $headers = if ($hdrR) { @($hdrR.value) } else { @() }
     Write-Host "  orders headers: $($headers.Count)"
 
-    # Имя табличной части — берём ВСЕ дочерние коллекции из OData service document
-    # и пробуем каждую, ищем такую где есть строки с Номенклатурой и непустым артикулом.
+    # Имя табличной части — берём ВСЕ дочерние коллекции из OData service document.
+    # Выбираем ту, у которой SKU максимально пересекаются с SKU продаж — это
+    # реальная готовая продукция (а не материалы/упаковка/услуги).
+    $salesSkuSet = New-Object System.Collections.Generic.HashSet[string]
+    foreach ($s in $sales) { [void]$salesSkuSet.Add([string]$s.sku) }
+
     $tabEntities = @()
     try {
         $svcUri = "$ODataUrl/odata/?`$format=json"
         $svc = Invoke-RestMethod -Method Get -Uri $svcUri -Headers $ODataHeaders -TimeoutSec 30 -ErrorAction Stop
         if ($svc -and $svc.value) {
             $children = @($svc.value | Where-Object { $_.name -like "${orderEntity}_*" } | ForEach-Object { $_.name } | Sort-Object -Unique)
-            Write-Host "  child collections of ${orderEntity}:"
+            Write-Host "  child collections of ${orderEntity} ($($children.Count)):"
             foreach ($cn in $children) { Write-Host "    - $cn" }
             $tabEntities = $children
         }
     } catch {
         Write-Host "  service document not available, falling back to guesses"
-        $tabEntities = @("${orderEntity}_Товары","${orderEntity}_СписокНоменклатуры","${orderEntity}_Номенклатура","${orderEntity}_Состав","${orderEntity}_СписокТоваров","${orderEntity}_Изделия","${orderEntity}_Продукция","${orderEntity}_Запасы","${orderEntity}_Спецификация")
+        $tabEntities = @("${orderEntity}_Товары","${orderEntity}_СписокНоменклатуры","${orderEntity}_Номенклатура","${orderEntity}_Состав","${orderEntity}_СписокТоваров","${orderEntity}_Изделия","${orderEntity}_Продукция","${orderEntity}_Запасы","${orderEntity}_Спецификация","${orderEntity}_Материалы")
     }
-    # выбираем первый кандидат, у которого есть поле Номенклатура_Key
-    $tabEntity = $null
+
+    # Для каждого кандидата берём первые 200 строк с Номенклатурой → считаем
+    # пересечение артикулов с sales. Та коллекция что даёт больше всего совпадений —
+    # это готовая продукция (то что заказывает давалец на производство).
+    $best = $null
     foreach ($t in $tabEntities) {
-        $probe = Invoke-OData $t "`$top=1&`$expand=Номенклатура" 25
-        if ($probe -ne $null -and @($probe.value).Count -gt 0) {
-            $first = @($probe.value)[0]
-            $hasNom = ($first.PSObject.Properties.Name -contains "Номенклатура_Key") -or ($first.PSObject.Properties.Name -contains "Номенклатура")
-            if ($hasNom) { $tabEntity = $t; Write-Host "  matched line entity: $tabEntity"; break }
+        $probe = Invoke-OData $t "`$top=200&`$expand=Номенклатура" 30
+        if ($probe -eq $null -or @($probe.value).Count -eq 0) { Write-Host "    probe $t : пусто"; continue }
+        $first = @($probe.value)[0]
+        $hasNom = ($first.PSObject.Properties.Name -contains "Номенклатура_Key") -or ($first.PSObject.Properties.Name -contains "Номенклатура")
+        if (-not $hasNom) { Write-Host "    probe $t : нет поля Номенклатура"; continue }
+        $hits = 0
+        foreach ($line in @($probe.value)) {
+            $nom = $line.Номенклатура
+            if (-not $nom) { continue }
+            $art = ([string]$nom.Артикул).Trim()
+            if ([string]::IsNullOrEmpty($art)) { continue }
+            if ($salesSkuSet.Contains($art)) { $hits++ }
         }
+        Write-Host "    probe $t : $($probe.value.Count) строк, $hits совпадений с sales SKU"
+        if (-not $best -or $hits -gt $best.hits) { $best = @{ entity = $t; hits = $hits } }
     }
+    $tabEntity = if ($best -and $best.hits -gt 0) { $best.entity } else { $null }
+    if ($tabEntity) { Write-Host "  matched line entity: $tabEntity (по пересечению SKU с продажами: $($best.hits))" }
+    else            { Write-Host "  could not find table with sales-matching SKU among children" }
 
     if ($tabEntity -and $headers.Count -gt 0) {
         # Имя контрагента: тянем сразу из Catalog_Контрагенты (один раз)
