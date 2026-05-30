@@ -327,9 +327,12 @@ if ($orderEntity) {
         $first = @($sample.value)[0]
         $allProps = $first.PSObject.Properties.Name | Sort-Object
         Write-Host "  header fields: $($allProps -join ', ')"
-        # ищем поле для контрагента/клиента/партнёра (любое *_Key содержащее ключевые слова)
-        $candidates = $allProps | Where-Object { $_ -match '_Key$' -and $_ -match '(Контрагент|Клиент|Партнер|Партнёр|Покупатель|Заказчик|Давалец)' }
-        if ($candidates) { $partnerField = $candidates[0]; Write-Host "  partner field detected: $partnerField" }
+        # явный приоритет — точные имена полей (не regex, чтоб не схватить
+        # БанковскийСчетКонтрагента и подобное)
+        $priorityFields = @("Контрагент_Key","Партнер_Key","Клиент_Key","Покупатель_Key","Заказчик_Key","Давалец_Key")
+        foreach ($pf in $priorityFields) {
+            if ($allProps -contains $pf) { $partnerField = $pf; Write-Host "  partner field detected: $partnerField"; break }
+        }
     }
     if (-not $partnerField) { $partnerField = "Контрагент_Key" }
 
