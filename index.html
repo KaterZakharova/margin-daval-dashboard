@@ -1331,25 +1331,16 @@ function renderDetail(rows) {
     }).join('')}
     </tbody></table></div>`;
 
-  // ── Feature B block: table + visual SKU comparison chart ───────────────────
+  // ── Фильтр статуса ассортимента (Все / Новинка / Основной / Выводится) ────
   const stBtn = (v,t) => `<button class="tab-btn ${skuStatusFilter===v?'active':''}" onclick="setSkuStatusFilter('${v}')">${t}</button>`;
-  const currentBlock = `${currentTable}
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 6px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <h2 style="margin:0">Сравнение SKU: рост / падение</h2>
-        <div class="top20-tabs">
-          <button class="tab-btn ${skuTrendMetric==='marginRub'?'active':''}" onclick="setSkuTrendMetric('marginRub')">Маржа руб.</button>
-          <button class="tab-btn ${skuTrendMetric==='qty'?'active':''}" onclick="setSkuTrendMetric('qty')">Штуки</button>
-        </div>
-        <span style="font-size:12px;color:var(--muted)">Статус:</span>
-        <div class="top20-tabs">
-          ${stBtn('all','Все')}${stBtn('new','✦ Новинка')}${stBtn('core','Основной')}${stBtn('exit','↓ Выводится')}
-        </div>
+  const currentBlock = `
+    <div style="display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--muted);font-weight:600">СТАТУС:</span>
+      <div class="top20-tabs">
+        ${stBtn('all','Все')}${stBtn('new','✦ Новинка')}${stBtn('core','Основной')}${stBtn('exit','↓ Выводится')}
       </div>
-      <button class="exp-btn" onclick="expandChart('#skuTrendChart','Сравнение SKU: рост / падение')">⤢ Развернуть</button>
     </div>
-    <div class="hint" id="skuTrendHint" style="margin-bottom:6px"><b>${(allMonthsSorted.length ? `${fmtMonthCode(allMonthsSorted.slice(-TREND_WIN)[0]||'')} — ${fmtMonthCode(allMonthsSorted.slice(-1)[0]||'')} vs ${fmtMonthCode(allMonthsSorted.slice(-2*TREND_WIN, -TREND_WIN)[0]||'')} — ${fmtMonthCode(allMonthsSorted.slice(-TREND_WIN-1, -TREND_WIN)[0]||'')}` : '')}</b>. Зелёные — растут, красные — проседают, тёмные — продажи прекратились. Порог ±20 %. Статус ассортимента — рядом с названием.</div>
-    <div id="skuTrendChart">${buildSkuTrendChart(skuTrendItems, skuTrendMetric)}</div>`;
+    ${currentTable}`;
 
   // ── Feature C: period comparison shell (filled by renderCompareArea) ───────
   const compareShell = `
@@ -1773,118 +1764,6 @@ window.closeChartModal = () => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && q('#chartModal')?.classList.contains('open')) closeChartModal();
 });
-
-// ─── SVG: per-SKU diverging trend bars (feature B) ─────────────────────────
-function buildSkuTrendChart(items, metric) {
-  if (!items.length) return '<div class="detail-empty">Недостаточно истории для сравнения SKU.</div>';
-  const fmt    = metricFmt(metric);
-  const fmtAbs = v => {
-    const s = fmt(v);
-    // компактный формат для крупных чисел: 1 234 567 → 1.2 М
-    if (metric !== 'qty' && metric !== 'marginPct' && Math.abs(v) >= 1_000_000)
-      return (v/1_000_000).toFixed(v >= 10_000_000 ? 0 : 1).replace('.', ',') + ' М';
-    if (metric !== 'qty' && metric !== 'marginPct' && Math.abs(v) >= 10_000)
-      return Math.round(v/1000) + ' тыс';
-    return s.replace(/\s*руб\.?/,'');
-  };
-  const W = 1100, labelW = 290, rightLabelW = 220;
-  const rowH = 24, groupHeadH = 28, groupGapH = 8;
-  const padT = 30, padB = 12;
-  const chartL = labelW;
-  const chartR = W - rightLabelW;
-  const chartW = chartR - chartL;
-  const maxV = Math.max(1, ...items.map(d => Math.max(d.prior||0, d.recent||0)));
-  const x = v => chartL + (Math.max(0, v)/maxV) * chartW;
-
-  // 5 групп
-  const GROUPS = [
-    { key:'rising',  title:'РАСТУТ',     accent:'#12b76a', sort:(a,b)=>b.pct-a.pct,
-      hint:'последние ${W} мес. больше предыдущих на >20%' },
-    { key:'stable',  title:'СТАБИЛЬНЫ',  accent:'#64748b', sort:(a,b)=>b.recent-a.recent,
-      hint:'изменение в пределах ±20%' },
-    { key:'falling', title:'ПАДАЮТ',     accent:'#f04438', sort:(a,b)=>a.pct-b.pct,
-      hint:'последние ${W} мес. меньше предыдущих более чем на 20%' },
-    { key:'new',     title:'НОВИНКИ',    accent:'#2563eb', sort:(a,b)=>b.recent-a.recent,
-      hint:'продаж в прошлом окне не было — сравнивать не с чем' },
-    { key:'lost',    title:'ПРЕКРАТИЛИ', accent:'#b42318', sort:(a,b)=>b.prior-a.prior,
-      hint:'продажи в текущем окне отсутствуют' }
-  ];
-
-  let y = padT;
-  const visibleGroups = [];
-  for (const g of GROUPS) {
-    const rows = items.filter(it => it.kind === g.key).sort(g.sort);
-    if (!rows.length) continue;
-    visibleGroups.push({ g, rows, yStart: y });
-    y += groupHeadH + rows.length*rowH + groupGapH;
-  }
-  const H = y + padB;
-  if (!visibleGroups.length) return '<div class="detail-empty">Нет данных для сравнения.</div>';
-
-  // ось сверху: 0, 25%, 50%, 75%, 100% — короткие подписи
-  const grid = [0, .25, .5, .75, 1].map(t => {
-    const gx = chartL + t*chartW;
-    return `<line x1="${gx}" y1="${padT-4}" x2="${gx}" y2="${H-padB+2}" stroke="#eef2f7" stroke-dasharray="2 4"/>
-            <text x="${gx}" y="${padT-8}" text-anchor="middle" font-size="10" fill="#94a3b8">${t===0?'0':fmtAbs(maxV*t)}</text>`;
-  }).join('');
-
-  const groupBlocks = visibleGroups.map(({g, rows, yStart}) => {
-    const headY = yStart + groupHeadH - 8;
-    const head = `<g>
-      <rect x="0" y="${yStart}" width="${W}" height="${groupHeadH-4}" fill="#f8fafc"/>
-      <rect x="0" y="${yStart}" width="6" height="${groupHeadH-4}" fill="${g.accent}"/>
-      <text x="14" y="${headY}" font-size="12.5" font-weight="700" fill="#1e293b">${g.title}</text>
-      <text x="14" y="${headY+12}" font-size="10.5" fill="#94a3b8">${rows.length} SKU</text>
-    </g>`;
-    const dataRows = rows.map((d,i) => {
-      const ry = yStart + groupHeadH + i*rowH;
-      const cy = ry + rowH/2;
-      const x1 = x(d.prior), x2 = x(d.recent);
-      const lineX0 = Math.min(x1, x2), lineX1 = Math.max(x1, x2);
-      const isNewOnly  = d.kind === 'new';
-      const isLostOnly = d.kind === 'lost';
-      const pctTxt = d.kind==='lost' ? 'нет продаж'
-                  : d.kind==='new'  ? `новый: ${fmtAbs(d.recent)}`
-                  : `${d.pct>=0?'+':''}${Math.round(d.pct*100)}%`;
-      const lineColor = g.accent + 'cc';
-      const nm = d.name||d.sku;
-      const lbl = nm.length>34 ? nm.slice(0,33)+'…' : nm;
-      const tipBody = isLostOnly ? `${fmtAbs(d.prior)} → 0`
-                    : isNewOnly  ? `0 → ${fmtAbs(d.recent)}`
-                    : `${fmtAbs(d.prior)} → ${fmtAbs(d.recent)}  (Δ ${pctTxt})`;
-      // dot для prior (если есть) — серый контур; recent — цветной залитый
-      const priorDot  = (d.prior > 0)  ? `<circle cx="${x1}" cy="${cy}" r="4" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/>` : '';
-      const recentDot = (d.recent > 0) ? `<circle cx="${x2}" cy="${cy}" r="5" fill="${g.accent}"/>` : '';
-      const conn = (d.prior > 0 && d.recent > 0)
-        ? `<line x1="${x1}" y1="${cy}" x2="${x2}" y2="${cy}" stroke="${lineColor}" stroke-width="2.5" stroke-linecap="round"/>`
-        : '';
-      return `<g class="skucmp-row">
-        <rect class="hit" x="0" y="${ry}" width="${W}" height="${rowH}" fill="transparent"/>
-        <title>${escapeHtml(d.sku)} · ${escapeHtml(d.name||'')}
-${tipBody}</title>
-        <text x="12" y="${cy+4}" font-size="12" fill="#344054">${escapeHtml(lbl)}</text>
-        ${conn}${priorDot}${recentDot}
-        <text x="${chartR+8}" y="${cy+4}" font-size="11.5" fill="${g.accent}" font-weight="600">${pctTxt}</text>
-      </g>`;
-    }).join('');
-    return head + dataRows;
-  }).join('');
-
-  const scaleLabel = ({margin:'маржа, ₽',marginRub:'маржа, ₽',revenue:'выручка, ₽',qty:'штук'})[metric]||metric;
-  // легенда сверху над SVG: HTML вместо позиционирования в SVG
-  const legendHtml = `<div style="display:flex;align-items:center;gap:18px;padding:6px 12px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)">
-    <span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="4" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/></svg>прошлое окно</span>
-    <span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="#64748b"/></svg>текущее окно</span>
-    <span style="margin-left:auto">шкала: <b style="color:var(--ink)">${scaleLabel}</b></span>
-  </div>`;
-
-  return `<div class="skucmp-wrap" style="background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden">
-    ${legendHtml}
-    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;max-height:none;display:block">
-      ${grid}
-      ${groupBlocks}
-    </svg></div>`;
-}
 
 // ─── SVG: per-SKU grouped bars across selected periods (feature C) ─────────
 function buildPeriodCompareChart(items, periods, metric) {
@@ -2404,6 +2283,11 @@ function computeClientProfiles(allRows) {
       trend = trendPct < -TREND_DEAD_BAND ? 'falling' : trendPct > TREND_DEAD_BAND ? 'rising' : 'stable';
     }
     c.trend = trend; c.trendPct = trendPct;
+    // сохраняем агрегаты по окнам для бар-графика «было vs стало»
+    c.recVal = recVal; c.priVal = priVal;
+    c.windowLabel = win.label;
+    c.recRange = win.rec.length ? [win.rec[0], win.rec[win.rec.length-1]] : null;
+    c.priRange = win.pri.length ? [win.pri[0], win.pri[win.pri.length-1]] : null;
     return c;
   });
 }
@@ -2444,33 +2328,81 @@ function renderSparkline(monthSeries, trend, field) {
 function renderTop20Chart(top20) {
   const el = q('#top20Chart');
   if (!top20.length) { el.innerHTML = '<div class="detail-empty">Нет данных</div>'; return; }
-  const metricKey = top20Mode==='qty' ? 'totalQty' : top20Mode==='revenue' ? 'totalRevenue' : 'totalMarginRub';
-  const metricFmt = v => top20Mode==='qty' ? fmtNum.format(v) : fmtMoney.format(v);
+  const metricFmt = v => top20Mode==='qty' ? fmtNum.format(Math.round(v)) : fmtMoney.format(Math.round(v));
+  const fmtCompact = v => {
+    const av = Math.abs(v);
+    if (av >= 1_000_000) return (v/1_000_000).toFixed(av >= 10_000_000 ? 0 : 1).replace('.', ',') + ' М';
+    if (av >= 10_000)    return Math.round(v/1000) + ' к';
+    return metricFmt(v);
+  };
 
-  const W = el.clientWidth || 900, H = 278;
-  const m = {l:224, r:100, t:14, b:14};
+  // высота динамическая: 2 бара на клиента
+  const W = el.clientWidth || 900;
+  const m = {l:230, r:110, t:36, b:30};
+  const rowH = 38;                                 // выс. одного клиента (две полоски + зазор)
+  const barH = 13;
+  const H = m.t + m.b + top20.length * rowH;
+  el.style.height = H + 'px';
   const chartW = W - m.l - m.r;
-  const maxVal = Math.max(...top20.map(c => c[metricKey]), 1);
-  const rowH = (H - m.t - m.b) / top20.length;
-  const barH = Math.min(20, Math.max(10, rowH * 0.62));
 
-  const rows = top20.map((c, i) => {
-    const y = m.t + i * rowH + (rowH - barH) / 2;
-    const w = Math.max(2, (c[metricKey] / maxVal) * chartW);
-    const barCol = c.trend==='lost' ? '#d97706' : c.trend==='falling' ? '#d92d20' : c.trend==='rising' ? '#168a5b' : '#2563eb';
-    const nameCol = (c.trend==='falling'||c.trend==='lost') ? '#d92d20' : '#263445';
-    const name = c.customer.length > 30 ? c.customer.slice(0,29)+'…' : c.customer;
-    return `
-      <text x="${m.l-6}" y="${y+barH/2+4}" text-anchor="end" font-size="10.5" fill="${nameCol}">${escapeHtml(name)}</text>
-      <rect x="${m.l}" y="${y}" width="${w}" height="${barH}" fill="${barCol}" opacity="0.83" rx="2"
-        style="cursor:pointer" onclick="selectCustomer('${jsEsc(c.customer)}')"/>
-      <text x="${m.l+w+5}" y="${y+barH/2+4}" font-size="10" fill="${barCol}">${metricFmt(c[metricKey])}</text>`;
+  // общий максимум по обоим окнам — чтобы шкала была единой
+  const maxVal = Math.max(1, ...top20.flatMap(c => [c.priVal || 0, c.recVal || 0]));
+  const x = v => Math.max(0, (v || 0) / maxVal) * chartW;
+
+  // подписи периодов из первого клиента (одинаковы для всех)
+  const ref = top20.find(c => c.recRange || c.priRange);
+  const recLbl = ref?.recRange ? `${fmtMonthCode(ref.recRange[0])} — ${fmtMonthCode(ref.recRange[1])}` : 'текущий период';
+  const priLbl = ref?.priRange ? `${fmtMonthCode(ref.priRange[0])} — ${fmtMonthCode(ref.priRange[1])}` : 'прошлый период';
+
+  // X-grid (4 значения)
+  const grid = [0.25, .5, .75, 1].map(t => {
+    const gx = m.l + t*chartW;
+    return `<line x1="${gx}" y1="${m.t-4}" x2="${gx}" y2="${H-m.b+2}" stroke="#eef2f7" stroke-dasharray="2 4"/>
+            <text x="${gx}" y="${m.t-8}" text-anchor="middle" font-size="10" fill="#94a3b8">${fmtCompact(maxVal*t)}</text>`;
   }).join('');
 
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:100%">
-    <line x1="${m.l}" y1="${m.t}" x2="${m.l}" y2="${H-m.b}" stroke="#d8dee8"/>
+  const rows = top20.map((c, i) => {
+    const baseY = m.t + i * rowH + 4;
+    const priY = baseY;
+    const recY = baseY + barH + 2;
+    const priW = x(c.priVal);
+    const recW = x(c.recVal);
+    const arrow = c.trend === 'rising' ? '↑' : c.trend === 'falling' ? '↓' : c.trend === 'lost' ? '⚠' : '→';
+    const arrowCol = c.trend === 'rising' ? '#16a34a' : c.trend === 'falling' ? '#d92d20' : c.trend === 'lost' ? '#d97706' : '#94a3b8';
+    const recCol = c.trend === 'falling' ? '#d92d20' : c.trend === 'lost' ? '#d97706' : c.trend === 'rising' ? '#16a34a' : '#2563eb';
+    const nameCol = (c.trend==='falling'||c.trend==='lost') ? '#d92d20' : '#263445';
+    const nameWeight = (c.trend==='falling'||c.trend==='lost') ? 700 : 500;
+    const name = c.customer.length > 30 ? c.customer.slice(0,29)+'…' : c.customer;
+    const pctTxt = c.trend === 'lost' ? 'нет продаж'
+                : (!c.priVal && c.recVal) ? 'новый'
+                : `${c.trendPct >= 0 ? '+' : ''}${Math.round(c.trendPct * 100)}%`;
+    return `<g class="t20-row" style="cursor:pointer" onclick="selectCustomer('${jsEsc(c.customer)}')">
+      <rect x="0" y="${baseY-3}" width="${W}" height="${rowH-4}" fill="transparent"/>
+      <text x="${m.l-6}" y="${baseY + rowH/2 - 2}" text-anchor="end" font-size="11" font-weight="${nameWeight}" fill="${nameCol}">${escapeHtml(name)}</text>
+      <!-- прошлый период (серый) -->
+      <rect x="${m.l}" y="${priY}" width="${Math.max(1,priW)}" height="${barH}" fill="#cbd5e1" rx="2"/>
+      <text x="${m.l + priW + 5}" y="${priY + barH - 2}" font-size="9.5" fill="#64748b">${fmtCompact(c.priVal||0)}</text>
+      <!-- текущий период (цвет тренда) -->
+      <rect x="${m.l}" y="${recY}" width="${Math.max(1,recW)}" height="${barH}" fill="${recCol}" rx="2"/>
+      <text x="${m.l + recW + 5}" y="${recY + barH - 2}" font-size="9.5" fill="${recCol}" font-weight="600">${fmtCompact(c.recVal||0)}</text>
+      <!-- стрелка тренда справа -->
+      <text x="${W - 6}" y="${baseY + rowH/2 + 3}" text-anchor="end" font-size="11" font-weight="700" fill="${arrowCol}">${arrow} ${pctTxt}</text>
+      <title>${escapeHtml(c.customer)}\nПрошлый период: ${metricFmt(c.priVal||0)}\nТекущий период: ${metricFmt(c.recVal||0)}\nИзменение: ${pctTxt}</title>
+    </g>`;
+  }).join('');
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block">
+    <!-- легенда сверху -->
+    <g>
+      <rect x="${m.l}" y="6" width="14" height="9" fill="#cbd5e1" rx="2"/>
+      <text x="${m.l+18}" y="14" font-size="11" fill="#64748b">${escapeHtml(priLbl)}</text>
+      <rect x="${m.l+200}" y="6" width="14" height="9" fill="#2563eb" rx="2"/>
+      <text x="${m.l+218}" y="14" font-size="11" fill="#64748b">${escapeHtml(recLbl)}</text>
+      <text x="${W - m.r + 4}" y="14" font-size="10" fill="#94a3b8">шкала: ${top20Mode==='qty'?'штук':top20Mode==='revenue'?'выручка ₽':'маржа ₽'}</text>
+    </g>
+    <line x1="${m.l}" y1="${m.t-4}" x2="${m.l}" y2="${H-m.b+2}" stroke="#d8dee8"/>
+    ${grid}
     ${rows}
-    <text x="${W/2}" y="${H-2}" text-anchor="middle" font-size="10" fill="#94a3b8">красный — снижение · жёлтый — потерян · зелёный — рост</text>
   </svg>`;
 }
 
