@@ -327,11 +327,31 @@ if ($orderEntity) {
     $headers = if ($hdrR) { @($hdrR.value) } else { @() }
     Write-Host "  orders headers: $($headers.Count)"
 
-    # Имя табличной части (товары) — пробуем кандидаты
+    # Имя табличной части — берём ВСЕ дочерние коллекции из OData service document
+    # и пробуем каждую, ищем такую где есть строки с Номенклатурой и непустым артикулом.
+    $tabEntities = @()
+    try {
+        $svcUri = "$ODataUrl/odata/?`$format=json"
+        $svc = Invoke-RestMethod -Method Get -Uri $svcUri -Headers $ODataHeaders -TimeoutSec 30 -ErrorAction Stop
+        if ($svc -and $svc.value) {
+            $children = @($svc.value | Where-Object { $_.name -like "${orderEntity}_*" } | ForEach-Object { $_.name } | Sort-Object -Unique)
+            Write-Host "  child collections of ${orderEntity}:"
+            foreach ($cn in $children) { Write-Host "    - $cn" }
+            $tabEntities = $children
+        }
+    } catch {
+        Write-Host "  service document not available, falling back to guesses"
+        $tabEntities = @("${orderEntity}_Товары","${orderEntity}_СписокНоменклатуры","${orderEntity}_Номенклатура","${orderEntity}_Состав","${orderEntity}_СписокТоваров","${orderEntity}_Изделия","${orderEntity}_Продукция","${orderEntity}_Запасы","${orderEntity}_Спецификация")
+    }
+    # выбираем первый кандидат, у которого есть поле Номенклатура_Key
     $tabEntity = $null
-    foreach ($t in @("${orderEntity}_Товары","${orderEntity}_СписокНоменклатуры","${orderEntity}_Номенклатура","${orderEntity}_Состав","${orderEntity}_СписокТоваров")) {
-        $probe = Invoke-OData $t "`$top=1" 25
-        if ($probe -ne $null) { $tabEntity = $t; Write-Host "  matched line entity: $tabEntity"; break }
+    foreach ($t in $tabEntities) {
+        $probe = Invoke-OData $t "`$top=1&`$expand=Номенклатура" 25
+        if ($probe -ne $null -and @($probe.value).Count -gt 0) {
+            $first = @($probe.value)[0]
+            $hasNom = ($first.PSObject.Properties.Name -contains "Номенклатура_Key") -or ($first.PSObject.Properties.Name -contains "Номенклатура")
+            if ($hasNom) { $tabEntity = $t; Write-Host "  matched line entity: $tabEntity"; break }
+        }
     }
 
     if ($tabEntity -and $headers.Count -gt 0) {
