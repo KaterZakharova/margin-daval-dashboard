@@ -967,6 +967,9 @@ function renderBubbles(clients, total) {
 
 // Выбор интересующих SKU чекбоксами — подитог по выбранным
 let pickedSkus = new Set();
+// снапшот данных, видимых в SKU-таблице — для «current»-выгрузки в Excel
+// записывается в конце renderDetail
+let __currentSkuSnapshot = null;
 window.togglePickSku = (sku, ev) => {
   if (ev) ev.stopPropagation();
   if (pickedSkus.has(sku)) pickedSkus.delete(sku); else pickedSkus.add(sku);
@@ -1072,20 +1075,31 @@ window.exportSkuExcel = (mode) => {
 
   // ── режим 'current': один лист с тем, что в таблице ──────────────────────
   if (mode === 'current') {
-    const tbl = document.querySelector('.detail table');
-    if (!tbl) { alert('Таблица не найдена.'); return; }
-    // sheet_from_table выгружает HTML-таблицу как есть
-    const ws = XLSX.utils.table_to_sheet(tbl, { raw: false });
-    // удаляем первую колонку с чекбоксами
-    XLSX.utils.sheet_add_aoa(ws, [[]], { origin: 'A1' });   // no-op чтобы инициализировать
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    // снимаем колонку 0 — пересобираем массив
-    const data = XLSX.utils.sheet_to_json(ws, { header:1 });
-    const dataNoCb = data.map(row => row.slice(1));
-    const ws2 = XLSX.utils.aoa_to_sheet(dataNoCb);
-    ws2['!cols'] = [{wch:14},{wch:48},{wch:14},{wch:12},{wch:10},{wch:10},{wch:12},{wch:22},{wch:8},{wch:8},{wch:12},{wch:18}];
+    const snap = __currentSkuSnapshot;
+    if (!snap || snap.customer !== customer || !snap.rows.length) {
+      alert('Таблица ещё не отрисована — выберите клиента и попробуйте снова.'); return;
+    }
+    const statusRu = s => s==='new'?'Новинка': s==='exit'?'Выводится':'Основной';
+    const head = ['SKU','Наименование','Статус','1-я отгрузка','Штук','Маржа %','Вес в марже','Схема','Сырьё','Материалов','РС','Тренд'];
+    const aoa = [head];
+    // SheetJS Community не сохраняет cell.z в .xlsx → пишем проценты как числа
+    // в форме «процент» (30.6 а не 0.306), чтобы пользователь видел те же значения
+    // что и на экране без танцев с форматами
+    for (const r of snap.rows) {
+      aoa.push([
+        r.sku, r.name, statusRu(r.status), r.firstShip || '',
+        Math.round(r.qty),
+        +(r.marginPct*100).toFixed(2),
+        +(r.weight*100).toFixed(2),
+        r.scheme, r.davRaw, r.davMaterials, r.specCode, r.trendLbl
+      ]);
+    }
+    aoa[0][5] = 'Маржа, %';
+    aoa[0][6] = 'Вес в марже, %';
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{wch:14},{wch:48},{wch:11},{wch:12},{wch:10},{wch:10},{wch:13},{wch:22},{wch:8},{wch:11},{wch:12},{wch:14}];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws2, 'Ассортимент (как видно)');
+    XLSX.utils.book_append_sheet(wb, ws, 'Ассортимент (как видно)');
     const fname = `SKU_${customer.replace(/[^\wа-яА-Я]+/gu,'_').slice(0,40)}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(wb, fname);
     return;
@@ -1108,7 +1122,7 @@ window.exportSkuExcel = (mode) => {
     if (!firstShip.has(r.sku) || r.month < firstShip.get(r.sku)) firstShip.set(r.sku, r.month);
   }
   // ── Лист 1: ПЛОСКИЙ — строка = SKU × месяц ───────────────────────────────
-  const flatRows = [['SKU','Наименование','Месяц','Штук','Выручка ₽','Маржа ₽','Маржа %','1-я отгрузка']];
+  const flatRows = [['SKU','Наименование','Месяц','Штук','Выручка ₽','Маржа ₽','Маржа, %','1-я отгрузка']];
   for (const s of [...skuMap.values()].sort((a,b)=>a.sku.localeCompare(b.sku))) {
     for (const m of months) {
       const v = s.byM.get(m);
@@ -1116,7 +1130,7 @@ window.exportSkuExcel = (mode) => {
       flatRows.push([
         s.sku, s.name, m,
         Math.round(v.qty), Math.round(v.revenue), Math.round(v.marginRub),
-        v.revenue ? +(v.marginRub/v.revenue*100).toFixed(2) : 0,
+        v.revenue ? +(v.marginRub/v.revenue*100).toFixed(2) : 0,   // как процент-число (30.6)
         firstShip.get(s.sku) || ''
       ]);
     }
@@ -1271,6 +1285,24 @@ function renderDetail(rows) {
 
   // ── Table: current period ──────────────────────────────────────────────────
   const visibleSku = skuRows.filter(r => stMatch(r.sku));
+  // снапшот для Excel «current» — реальные числа, не текст из ячеек таблицы
+  __currentSkuSnapshot = {
+    customer: state.customer,
+    totalMarginRub: total.marginRub || 0,
+    rows: visibleSku.map(r => {
+      const tr = skuTrend(r.sku);
+      const trendLbl = tr.trend==='lost'?'⚠ Нет': tr.trend==='falling'?`↓ ${Math.round(Math.abs(tr.pct)*100)}%`
+                     : tr.trend==='rising'?`↑ ${Math.round(tr.pct*100)}%` : tr.trend==='new'?'✦ Новый':'→ Стабильно';
+      return {
+        sku: r.sku, name: r.productName, status: skuStatus(r.sku),
+        firstShip: skuFirst.get(r.sku) || '',
+        qty: r.qty, marginPct: r.marginPct,
+        weight: total.marginRub ? r.marginRub/total.marginRub : 0,
+        scheme: r.scheme, davRaw: r.davRaw, davMaterials: r.davMaterials,
+        specCode: r.specCode || '', trendLbl
+      };
+    })
+  };
   const allChecked = visibleSku.length > 0 && visibleSku.every(r => pickedSkus.has(r.sku));
   const currentTable = `<div class="table" style="max-height:460px"><table>
     <thead><tr>
