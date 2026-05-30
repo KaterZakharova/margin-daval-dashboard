@@ -295,6 +295,98 @@ $salesEnriched = @($sales | ForEach-Object {
     }
 })
 
+function Invoke-OData($entity, $query, $timeout = 60) {
+    $uri = "$ODataUrl/odata/$([uri]::EscapeDataString($entity))?`$format=json&$query"
+    try { return Invoke-RestMethod -Method Get -Uri $uri -Headers $ODataHeaders -TimeoutSec $timeout -ErrorAction Stop }
+    catch { return $null }
+}
+
+# ── Заказы давальца — не отгруженные позиции из 1С ───────────────────────────
+# Документ называется «Заказ Давальца 2.5», но имя в OData может варьироваться
+# (точка/пробел нормализуются в подчёркивание). Пробуем несколько кандидатов.
+Write-Host "Fetching customer orders (Заказ Давальца 2.5)..."
+$orderEntity = $null
+$candidates = @(
+    "Document_ЗаказДавальца2_5",
+    "Document_Заказ_Давальца_2_5",
+    "Document_ЗаказДавальца25",
+    "Document_ЗаказДавальца",
+    "Document_Заказ_Давальца"
+)
+foreach ($cand in $candidates) {
+    $probe = Invoke-OData $cand "`$top=1" 25
+    if ($probe -ne $null) { $orderEntity = $cand; Write-Host "  matched entity: $orderEntity"; break }
+}
+$customerOrders = @()
+if ($orderEntity) {
+    # Заголовки заказов за последние 12 мес., только проведённые и не помеченные на удаление
+    $sinceDate = (Get-Date).AddMonths(-12).ToString("yyyy-MM-ddTHH:mm:ss")
+    $hdrFilter = [uri]::EscapeDataString("Date ge datetime'$sinceDate' and Posted eq true and DeletionMark eq false")
+    $hdrSelect = [uri]::EscapeDataString("Ref_Key,Number,Date,Контрагент_Key")
+    $hdrR = Invoke-OData $orderEntity "`$select=$hdrSelect&`$filter=$hdrFilter&`$top=5000&`$orderby=Date desc" 180
+    $headers = if ($hdrR) { @($hdrR.value) } else { @() }
+    Write-Host "  orders headers: $($headers.Count)"
+
+    # Имя табличной части (товары) — пробуем кандидаты
+    $tabEntity = $null
+    foreach ($t in @("${orderEntity}_Товары","${orderEntity}_СписокНоменклатуры","${orderEntity}_Номенклатура","${orderEntity}_Состав","${orderEntity}_СписокТоваров")) {
+        $probe = Invoke-OData $t "`$top=1" 25
+        if ($probe -ne $null) { $tabEntity = $t; Write-Host "  matched line entity: $tabEntity"; break }
+    }
+
+    if ($tabEntity -and $headers.Count -gt 0) {
+        # Имя контрагента: тянем сразу из Catalog_Контрагенты (один раз)
+        $custMap = @{}
+        $custKeys = @($headers | ForEach-Object { [string]$_.Контрагент_Key } | Where-Object { $_ -and $_ -ne "00000000-0000-0000-0000-000000000000" } | Select-Object -Unique)
+        if ($custKeys.Count -gt 0) {
+            # пакетами по 50
+            for ($i = 0; $i -lt $custKeys.Count; $i += 50) {
+                $batch = $custKeys[$i..([Math]::Min($i+49,$custKeys.Count-1))]
+                $orParts = $batch | ForEach-Object { "Ref_Key eq guid'$_'" }
+                $f = [uri]::EscapeDataString( ($orParts -join " or ") )
+                $sel = [uri]::EscapeDataString("Ref_Key,Description")
+                $r = Invoke-OData "Catalog_Контрагенты" "`$select=$sel&`$filter=$f&`$top=200" 60
+                if ($r) { foreach ($c in @($r.value)) { $custMap[[string]$c.Ref_Key] = [string]$c.Description } }
+            }
+        }
+
+        # Идём по каждому заказу и тянем строки
+        $i = 0; $tot = $headers.Count
+        foreach ($h in $headers) {
+            $i++; if ($i % 50 -eq 0) { Write-Host "    orders $i/$tot" }
+            $lf = [uri]::EscapeDataString("Ref_Key eq guid'$($h.Ref_Key)'")
+            $lr = Invoke-OData $tabEntity "`$expand=Номенклатура&`$filter=$lf&`$top=500" 60
+            if (-not $lr) { continue }
+            $custName = $custMap[[string]$h.Контрагент_Key]
+            if (-not $custName) { $custName = "" }
+            $dateStr = ([datetime]$h.Date).ToString("yyyy-MM-dd")
+            $monthStr = ([datetime]$h.Date).ToString("yyyy-MM")
+            foreach ($line in @($lr.value)) {
+                $nom = $line.Номенклатура
+                if (-not $nom) { continue }
+                $sku = ([string]$nom.Артикул)
+                if ([string]::IsNullOrWhiteSpace($sku)) { continue }
+                $qty = 0.0
+                try { if ($null -ne $line.Количество) { $qty = [double]$line.Количество } } catch {}
+                if ($qty -le 0) { continue }
+                $customerOrders += [pscustomobject]@{
+                    sku       = $sku
+                    customer  = $custName
+                    qty       = [math]::Round($qty, 3)
+                    date      = $dateStr
+                    month     = $monthStr
+                    docNumber = [string]$h.Number
+                }
+            }
+        }
+        Write-Host "  orders rows: $($customerOrders.Count)"
+    } else {
+        Write-Host "  could not find table entity for $orderEntity — skipping"
+    }
+} else {
+    Write-Host "  Заказ Давальца entity not found in OData — skipping (try fixing entity name in script)"
+}
+
 $payload = [ordered]@{
     meta = [ordered]@{
         generatedAt      = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
@@ -305,14 +397,17 @@ $payload = [ordered]@{
         marginMeasure    = "Валовая маржа плановая"
         davThreshold     = $DavThreshold
         rule             = "0-1 дав. материал = Под ключ; 2+ дав. материалов = Давальческая схема; дав. сырье фильтруется отдельно; сырье+2+ материалов = Смешанная схема"
+        orderEntity      = $orderEntity
+        ordersCount      = $customerOrders.Count
     }
     sales         = $salesEnriched
     skuClass      = $skuClassRows
     resourceSpecs = $rsRows
     materials     = $materialRows
+    orders        = $customerOrders
 }
 
 Write-Host "Writing data.json ($DataPath)..."
 $json = $payload | ConvertTo-Json -Depth 12
 [System.IO.File]::WriteAllText($DataPath, $json, [System.Text.UTF8Encoding]::new($false))
-Write-Host "Done. sales=$($sales.Count) skuClass=$($skuClassRows.Count) specs=$($rsRows.Count) materials=$($materialRows.Count)"
+Write-Host "Done. sales=$($sales.Count) skuClass=$($skuClassRows.Count) specs=$($rsRows.Count) materials=$($materialRows.Count) orders=$($customerOrders.Count)"
