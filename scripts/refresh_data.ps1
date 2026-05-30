@@ -397,23 +397,36 @@ if ($orderEntity) {
         $custKeys = @($headers | ForEach-Object { [string]$_.$partnerField } | Where-Object { $_ -and $_ -ne "00000000-0000-0000-0000-000000000000" } | Select-Object -Unique)
         Write-Host "  unique partner keys in orders: $($custKeys.Count) (field=$partnerField)"
         if ($custKeys.Count -gt 0) {
-            # Подбираем правильный каталог: пробуем несколько кандидатов
+            $needSet = New-Object System.Collections.Generic.HashSet[string]
+            foreach ($k in $custKeys) { [void]$needSet.Add($k) }
+            # Подбираем правильный каталог. В 1С YO!Cake длинные OR-цепочки в filter
+            # часто игнорируются → лучше выгрузить весь каталог одним запросом
+            # с пагинацией (по 1000) и матчить локально.
             $partnerCatalogs = @("Catalog_Контрагенты","Catalog_Партнеры","Catalog_Клиенты","Catalog_Покупатели","Catalog_Заказчики","Catalog_Давальцы")
             foreach ($cat in $partnerCatalogs) {
                 $probe = Invoke-OData $cat "`$top=1" 20
                 if ($probe -eq $null) { continue }
-                Write-Host "    catalog $cat exists, batching $($custKeys.Count) lookups..."
-                $found = 0
-                for ($i = 0; $i -lt $custKeys.Count; $i += 50) {
-                    $batch = $custKeys[$i..([Math]::Min($i+49,$custKeys.Count-1))]
-                    $orParts = $batch | ForEach-Object { "Ref_Key eq guid'$_'" }
-                    $f = [uri]::EscapeDataString( ($orParts -join " or ") )
+                Write-Host "    catalog $cat — bulk download..."
+                $offset = 0; $page = 1000; $totalRead = 0; $found = 0
+                while ($true) {
                     $sel = [uri]::EscapeDataString("Ref_Key,Description")
-                    $r = Invoke-OData $cat "`$select=$sel&`$filter=$f&`$top=200" 60
-                    if ($r) { foreach ($c in @($r.value)) { if (-not $custMap.ContainsKey([string]$c.Ref_Key)) { $custMap[[string]$c.Ref_Key] = [string]$c.Description; $found++ } } }
+                    $r = Invoke-OData $cat "`$select=$sel&`$top=$page&`$skip=$offset" 120
+                    if (-not $r) { break }
+                    $items = @($r.value)
+                    if ($items.Count -eq 0) { break }
+                    $totalRead += $items.Count
+                    foreach ($c in $items) {
+                        $rk = [string]$c.Ref_Key
+                        if ($needSet.Contains($rk) -and -not $custMap.ContainsKey($rk)) {
+                            $custMap[$rk] = [string]$c.Description
+                            $found++
+                        }
+                    }
+                    if ($items.Count -lt $page) { break }
+                    $offset += $page
                 }
-                Write-Host "    $cat resolved: $found"
-                if ($custMap.Count -eq $custKeys.Count) { break }    # все нашли — хватит
+                Write-Host "    $cat: read=$totalRead, resolved=$found"
+                if ($custMap.Count -eq $custKeys.Count) { break }
             }
             Write-Host "  partner names resolved: $($custMap.Count) / $($custKeys.Count)"
         }
