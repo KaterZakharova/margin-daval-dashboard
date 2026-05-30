@@ -108,14 +108,9 @@
       <h1>Маржинальность, объемы и давальческие схемы</h1>
       <p>Плановая валовая маржа из куба «Факт продаж», раскрытие до SKU и ресурсной спецификации.</p>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-      <button type="button" id="refreshBtn"
-        style="background:#111827;color:#fff;border:0;border-radius:8px;height:38px;padding:0 18px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.03em;box-shadow:0 2px 8px rgba(17,24,39,.28)"
-        title="Запустить принудительное обновление данных из 1С (GitHub Actions). Данные обновятся через ~3–5 мин и дашборд переразвернётся автоматически."
-        onclick="window.open('https://github.com/KaterZakharova/margin-daval-dashboard/actions/workflows/refresh.yml','_blank','noopener')">
-        ⟳ ОБНОВИТЬ ДАННЫЕ
-      </button>
-      <div class="hint" id="meta"></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+      <div id="meta" style="background:#f1f5f9;border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--ink);font-weight:600;line-height:1.3" title="Данные обновляются автоматически 1 раз в сутки из 1С/MS SQL"></div>
+      <div style="font-size:11px;color:var(--muted)">авто-обновление 1×/сут</div>
     </div>
   </div>
 
@@ -189,20 +184,21 @@
   </section>
 
   <div class="tabs-bar">
-    <button class="tab-main active" data-pane="fall" onclick="setMainTab('fall')">⚠ Падающие&nbsp;/&nbsp;потерянные <span class="tcount" id="tcFall"></span></button>
-    <button class="tab-main" data-pane="overview" onclick="setMainTab('overview')">Обзор</button>
+    <button class="tab-main active" data-pane="overview" onclick="setMainTab('overview')">Обзор</button>
+    <button class="tab-main" data-pane="yoy" onclick="setMainTab('yoy')">Динамика</button>
+    <button class="tab-main" data-pane="fall" onclick="setMainTab('fall')">⚠ Падающие&nbsp;/&nbsp;растущие <span class="tcount" id="tcFall"></span></button>
     <button class="tab-main" data-pane="schemes" onclick="setMainTab('schemes')">Схемы обеспечения</button>
     <button class="tab-main" data-pane="forecast" onclick="setMainTab('forecast')">Прогноз</button>
-    <button class="tab-main" data-pane="yoy" onclick="setMainTab('yoy')">Динамика по годам</button>
   </div>
 
-  <div class="tabpane active" data-pane="fall">
+  <div class="tabpane" data-pane="fall">
 
   <section class="panel" id="top20Section">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px">
       <div>
         <h2>ТОП-20 клиентов — динамика и тренды</h2>
-        <div class="hint" id="top20Hint">Тренд по TTM-импульсу: скользящая сумма за 12 мес. против неё же 3 мес. назад — устойчиво к редким/квартальным заказам. Красный = снижение, жёлтый = потерян, зелёный = рост. Клик по строке — раскрытие до SKU ниже.</div>
+        <div class="hint" id="top20Hint">Клик по строке — раскрытие до SKU ниже. <a href="#" onclick="event.preventDefault();toggleHelp('helpTrend')" style="color:var(--blue);text-decoration:none;font-weight:600">ℹ Как это считается</a></div>
+        <div id="helpTrend" style="display:none;margin-top:8px;padding:12px 14px;background:#f8fafc;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:6px;font-size:13px;color:var(--ink);line-height:1.5;max-width:780px"></div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <div class="top20-tabs" id="top20MetricTabs">
@@ -210,10 +206,10 @@
           <button class="tab-btn" onclick="setTop20Mode('revenue')">По выручке</button>
           <button class="tab-btn" onclick="setTop20Mode('qty')">По количеству</button>
         </div>
-        <div class="top20-tabs" id="top20BasisTabs">
-          <button class="tab-btn active" onclick="setClientTrendMode('ttm')">TTM-импульс</button>
-          <button class="tab-btn" onclick="setClientTrendMode('yoy')">Год к году</button>
-          <button class="tab-btn" onclick="setClientTrendMode('qoq')">Кв. к кварталу</button>
+        <div class="top20-tabs" id="top20BasisTabs" title="Окно сравнения: чем длиннее окно, тем меньше шума, но и реакция позже.">
+          <button class="tab-btn" onclick="setClientTrendMode('m3')">3 мес. vs 3 мес.</button>
+          <button class="tab-btn active" onclick="setClientTrendMode('m6')">6 мес. vs 6 мес.</button>
+          <button class="tab-btn" onclick="setClientTrendMode('m12')">Год к году</button>
         </div>
         <button class="exp-btn" onclick="expandChart('#top20Chart','ТОП-20 клиентов — '+top20Mode)">⤢ Развернуть</button>
       </div>
@@ -272,7 +268,7 @@
 
   </div><!-- /pane fall -->
 
-  <div class="tabpane" data-pane="overview">
+  <div class="tabpane active" data-pane="overview">
 
   <section class="panel">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px">
@@ -413,10 +409,26 @@
 const fmtNum = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
 const fmtMoney = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
 const fmtPct = new Intl.NumberFormat('ru-RU', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const RU_MONTHS_SHORT = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+const RU_MONTHS_GEN   = ['янв.','фев.','мар.','апр.','мая','июн.','июл.','авг.','сен.','окт.','ноя.','дек.'];
+function fmtMeta(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  if (isNaN(+d)) return s;
+  const pad = n => String(n).padStart(2,'0');
+  return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function fmtMonthCode(code) {           // "2025-03" → "март 2025"
+  if (!code) return '—';
+  const [y,m] = code.split('-').map(Number);
+  if (!y || !m) return code;
+  return `${RU_MONTHS_GEN[m-1]} ${y}`;
+}
 let DATA, state = { customer: '', sku: '', month: '' };
 let scenarios = [];
 let top20Mode = 'margin';
-let clientTrendMode = 'ttm';   // 'ttm' (импульс) | 'yoy' (год к году) | 'qoq' (квартал к кварталу)
+let clientTrendMode = 'm6';    // 'm3' (3 vs 3) | 'm6' (6 vs 6, default) | 'm12' (год к году)
+const TREND_DEAD_BAND = 0.20;  // ±20% для статусов «падает / растёт»
 
 const EXCLUDE_CUSTOMERS = new Set(['ГАЛЕН ООО (S3)', 'КОСМЕТИК ВИА ООО', 'НЕЙЛ ГУДС ООО (S2)']);
 
@@ -439,7 +451,7 @@ function schemeColor(s) {
 
 async function init() {
   DATA = await fetch('data.json').then(r => r.json());
-  q('#meta').textContent = `Обновлено: ${DATA.meta.generatedAt}`;
+  q('#meta').innerHTML = `<span style="color:var(--muted);font-weight:500">Обновлено:</span> ${fmtMeta(DATA.meta.generatedAt)}`;
   q('#ruleNote').textContent = DATA.meta.rule + ' · источник маржи: ' + DATA.meta.source;
   fillFilters();
   fillForecastControls();
@@ -984,7 +996,7 @@ function renderDetail(rows) {
   // compute per-SKU monthly trend using all-period data for this customer
   const allPeriodRows = state.customer ? filteredSalesNoMonth().filter(x => x.customer === state.customer) : [];
   const allMonthsSorted = uniq(allPeriodRows.map(x => x.month)).sort();
-  const TREND_WIN = 6; // месяцев в окне сравнения (последние N vs предыдущие N)
+  const TREND_WIN = clientTrendMode === 'm3' ? 3 : clientTrendMode === 'm12' ? 12 : 6;
   const recentMths = new Set(allMonthsSorted.slice(-TREND_WIN));
   const priorMths  = new Set(allMonthsSorted.slice(-2*TREND_WIN, -TREND_WIN));
   const skuPeriod  = new Map(); // sku -> {recent, prior, series}
@@ -1008,7 +1020,7 @@ function renderDetail(rows) {
     if (!hasRecent && (hasPrior || hasOlder)) return { trend:'lost', pct:-1 };
     if (!hasPrior) return { trend: hasRecent ? 'new' : 'stable', pct:0 };
     const pct = pri ? (rec - pri) / Math.abs(pri) : 0;
-    return { trend: pct < -0.12 ? 'falling' : pct > 0.12 ? 'rising' : 'stable', pct };
+    return { trend: pct < -TREND_DEAD_BAND ? 'falling' : pct > TREND_DEAD_BAND ? 'rising' : 'stable', pct };
   }
   function skuTrend(sku) { return skuTrendBy(sku, 'marginRub'); }
   function skuTrendBadge(sku) {
@@ -1054,9 +1066,14 @@ function renderDetail(rows) {
   }
   function skuStatusBadge(sku) {
     const s = skuStatus(sku);
-    return s==='new'  ? '<span class="sku-new">✦ Новинка</span>'
-         : s==='exit' ? '<span class="sku-exit">↓ Выводится</span>'
-         : '<span class="sku-core">Основной</span>';
+    const first = skuFirst.get(sku) || '';
+    const last  = skuLast.get(sku) || '';
+    const tipNew  = `Новинка — первая отгрузка этому клиенту произошла не ранее ${fmtMonthCode(newCutoff)} (≤ 6 мес. назад от ${fmtMonthCode(globalMonths.slice(-1)[0]||'')}). Первая отгрузка: ${fmtMonthCode(first)||'—'}`;
+    const tipExit = `Выводится — последняя отгрузка была раньше ${fmtMonthCode(exitCutoff)} (нет продаж более 3 мес.). Последняя отгрузка: ${fmtMonthCode(last)||'—'}`;
+    const tipCore = `Основной ассортимент — продаётся регулярно. Первая отгрузка: ${fmtMonthCode(first)||'—'}, последняя: ${fmtMonthCode(last)||'—'}`;
+    return s==='new'  ? `<span class="sku-new"  title="${escapeHtml(tipNew)}">✦ Новинка</span>`
+         : s==='exit' ? `<span class="sku-exit" title="${escapeHtml(tipExit)}">↓ Выводится</span>`
+         : `<span class="sku-core" title="${escapeHtml(tipCore)}">Основной</span>`;
   }
 
   const skuRows = groupBy(base, x=>x.sku).map(g => ({
@@ -1091,9 +1108,9 @@ function renderDetail(rows) {
   const currentTable = `<div class="table" style="max-height:460px"><table>
     <thead><tr>
       <th style="width:36px;text-align:center" title="Отметить все видимые / снять"><input type="checkbox" ${allChecked?'checked':''} onclick="togglePickAll(this)" style="width:14px;height:14px;cursor:pointer;accent-color:var(--blue)"></th>
-      <th>SKU</th><th>Наименование</th><th>Статус</th>
+      <th>SKU</th><th>Наименование</th><th>Статус</th><th title="Месяц первой отгрузки этому клиенту">1-я отгрузка</th>
       <th class="num">Штук</th><th class="num">Маржа %</th><th class="num">Вес в марже</th>
-      <th>Схема</th><th class="num">Сырье</th><th class="num">Мат.</th><th>РС</th><th>Тренд (6 мес.)</th>
+      <th>Схема</th><th class="num">Сырье</th><th class="num">Мат.</th><th>РС</th><th>Тренд (<span id="trendWinLabel">6 мес.</span>)</th>
     </tr></thead><tbody>
     ${visibleSku.map(r=>{
       const {trend}=skuTrend(r.sku);
@@ -1103,6 +1120,7 @@ function renderDetail(rows) {
         <td style="text-align:center"><input type="checkbox" class="sku-pick" data-sku="${jsEsc(r.sku)}" ${isPicked?'checked':''} onclick="togglePickSku('${jsEsc(r.sku)}',event)" style="width:14px;height:14px;cursor:pointer;accent-color:var(--blue)"></td>
         <td>${escapeHtml(r.sku)}</td><td>${escapeHtml(r.productName)}</td>
         <td>${skuStatusBadge(r.sku)}</td>
+        <td style="white-space:nowrap;color:var(--muted);font-size:12px">${fmtMonthCode(skuFirst.get(r.sku)||'')}</td>
         <td class="num">${fmtNum.format(r.qty)}</td>
         <td class="num">${fmtPct.format(r.marginPct)}</td>
         <td class="num">${fmtPct.format(total.marginRub?r.marginRub/total.marginRub:0)}</td>
@@ -1131,7 +1149,7 @@ function renderDetail(rows) {
       </div>
       <button class="exp-btn" onclick="expandChart('#skuTrendChart','Сравнение SKU: рост / падение')">⤢ Развернуть</button>
     </div>
-    <div class="hint" style="margin-bottom:6px">Последние 6 мес. против предыдущих 6 мес. Зелёные — растут, красные — проседают, тёмные — продажи прекратились. Статус ассортимента — рядом с названием. Наведите на строку для абсолютных чисел.</div>
+    <div class="hint" id="skuTrendHint" style="margin-bottom:6px"><b>${(allMonthsSorted.length ? `${fmtMonthCode(allMonthsSorted.slice(-TREND_WIN)[0]||'')} — ${fmtMonthCode(allMonthsSorted.slice(-1)[0]||'')} vs ${fmtMonthCode(allMonthsSorted.slice(-2*TREND_WIN, -TREND_WIN)[0]||'')} — ${fmtMonthCode(allMonthsSorted.slice(-TREND_WIN-1, -TREND_WIN)[0]||'')}` : '')}</b>. Зелёные — растут, красные — проседают, тёмные — продажи прекратились. Порог ±20 %. Статус ассортимента — рядом с названием.</div>
     <div id="skuTrendChart">${buildSkuTrendChart(skuTrendItems, skuTrendMetric)}</div>`;
 
   // ── Feature C: period comparison shell (filled by renderCompareArea) ───────
@@ -2039,16 +2057,24 @@ window.showTrendTooltip = (event, month, marginPct, qty, marginRub) => {
 
 // ─── TOP-20 CLIENTS ────────────────────────────────────────────────────────
 
-// Окна сравнения тренда клиента в зависимости от режима
-//  ttm  — TTM-импульс: скользящая сумма за 12 мес. vs она же 3 мес. назад
-//  yoy  — год к году: последние 12 мес. vs предыдущие 12 мес.
-//  qoq  — квартал к кварталу: последние 3 мес. vs предыдущие 3 мес.
+// Окна сравнения тренда клиента: фиксированной длины, не пересекаются.
+//  m3  — 3 vs 3 (последний квартал vs предыдущий)
+//  m6  — 6 vs 6 (последние полгода vs предыдущие)  — default
+//  m12 — 12 vs 12 (последний год vs предыдущий, год к году)
 function clientTrendWindows(A) {
-  if (clientTrendMode === 'qoq')
-    return { rec:A.slice(-3),  pri:A.slice(-6,-3),   lost:A.slice(-3),  label:'к пред. кварталу' };
-  if (clientTrendMode === 'yoy')
-    return { rec:A.slice(-12), pri:A.slice(-24,-12), lost:A.slice(-12), label:'год к году' };
-  return   { rec:A.slice(-12), pri:A.slice(-15,-3),  lost:A.slice(-12), label:'к 12 мес. назад (TTM-импульс)' };
+  const W = clientTrendMode === 'm3' ? 3 : clientTrendMode === 'm12' ? 12 : 6;
+  const rec = A.slice(-W);
+  const pri = A.slice(-2*W, -W);
+  const label = W === 3 ? '3 мес. vs предыдущие 3 мес.'
+              : W === 12 ? '12 мес. vs предыдущие 12 мес. (год к году)'
+              : '6 мес. vs предыдущие 6 мес.';
+  return { rec, pri, lost: rec, label, win: W };
+}
+// Человекочитаемые подписи периодов: «сен. 2025 — фев. 2026 vs мар. 2025 — авг. 2025»
+function trendWindowLabel(allMonths) {
+  const w = clientTrendWindows(allMonths);
+  const fmtRange = a => a.length ? `${fmtMonthCode(a[0])} — ${fmtMonthCode(a[a.length-1])}` : '—';
+  return `${fmtRange(w.rec)} vs ${fmtRange(w.pri)}`;
 }
 
 function computeClientProfiles(allRows) {
@@ -2098,7 +2124,7 @@ function computeClientProfiles(allRows) {
       trend = recRev > 0 ? 'rising' : 'stable';
     } else {
       trendPct = priVal ? (recVal - priVal) / Math.abs(priVal) : 0;
-      trend = trendPct < -0.15 ? 'falling' : trendPct > 0.15 ? 'rising' : 'stable';
+      trend = trendPct < -TREND_DEAD_BAND ? 'falling' : trendPct > TREND_DEAD_BAND ? 'rising' : 'stable';
     }
     c.trend = trend; c.trendPct = trendPct;
     return c;
@@ -2241,19 +2267,47 @@ window.setTop20Mode = m => {
   renderTop20Section();
 };
 
-const CLIENT_TREND_HINT = {
-  ttm: 'Тренд по <b>TTM-импульсу</b>: скользящая сумма за 12 мес. против неё же 3 мес. назад — устойчиво к редким/квартальным заказам.',
-  yoy: 'Тренд <b>год к году</b>: последние 12 мес. против предыдущих 12 мес. — сезонность убрана.',
-  qoq: 'Тренд <b>квартал к кварталу</b>: последние 3 мес. против предыдущих 3 мес. — чувствительно, для частых заказов.'
+const CLIENT_TREND_MODES = ['m3','m6','m12'];
+const CLIENT_TREND_NAMES = { m3:'3 мес. vs 3 мес.', m6:'6 мес. vs 6 мес.', m12:'год к году (12 мес. vs 12 мес.)' };
+function buildTrendHelp() {
+  const allMonths = uniq(filteredSalesNoMonth().map(x => x.month)).sort();
+  const w = clientTrendWindows(allMonths);
+  const fmtRange = a => a.length ? `<b>${fmtMonthCode(a[0])} — ${fmtMonthCode(a[a.length-1])}</b>` : '<b>—</b>';
+  return `<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:start">
+    <div style="color:var(--muted)">Окно сравнения</div><div>${CLIENT_TREND_NAMES[clientTrendMode]} — окна одинаковой длины, не пересекаются.</div>
+    <div style="color:var(--muted)">Текущий период</div><div>${fmtRange(w.rec)}</div>
+    <div style="color:var(--muted)">Прошлый период</div><div>${fmtRange(w.pri)}</div>
+    <div style="color:var(--muted)">Формула</div><div>Δ = (Текущий − Прошлый) / |Прошлый| × 100 %</div>
+    <div style="color:var(--muted)">Метки</div><div>
+      <span style="color:#dc2626;font-weight:700">↓ Падает</span> при Δ &lt; −20 % &nbsp;·&nbsp;
+      <span style="color:#16a34a;font-weight:700">↑ Растёт</span> при Δ &gt; +20 % &nbsp;·&nbsp;
+      <span style="color:#64748b;font-weight:700">→ Стабильно</span> в промежутке &nbsp;·&nbsp;
+      <span style="color:#d97706;font-weight:700">⚠ Потерян</span> — нет продаж в текущем окне, но были раньше
+    </div>
+    <div style="color:var(--muted)">Метрика</div><div>сравнивается выбранная: <b>${{margin:'маржа руб.',revenue:'выручка',qty:'штуки'}[top20Mode]}</b></div>
+  </div>`;
+}
+window.toggleHelp = id => {
+  const el = q('#'+id);
+  if (!el) return;
+  if (el.style.display === 'none' || !el.style.display) {
+    if (id === 'helpTrend') el.innerHTML = buildTrendHelp();
+    el.style.display = 'block';
+  } else el.style.display = 'none';
 };
 window.setClientTrendMode = mode => {
+  if (!CLIENT_TREND_MODES.includes(mode)) return;
   clientTrendMode = mode;
   document.querySelectorAll('#top20BasisTabs .tab-btn').forEach((btn,i) => {
-    btn.classList.toggle('active', ['ttm','yoy','qoq'][i] === mode);
+    btn.classList.toggle('active', CLIENT_TREND_MODES[i] === mode);
   });
-  const h = q('#top20Hint');
-  if (h) h.innerHTML = CLIENT_TREND_HINT[mode] + ' Красный = снижение, жёлтый = потерян, зелёный = рост. Клик по строке — раскрытие до SKU ниже.';
+  const winLbl = q('#trendWinLabel');
+  if (winLbl) winLbl.textContent = mode === 'm3' ? '3 мес.' : mode === 'm12' ? '12 мес.' : '6 мес.';
+  // если шторка «Как считается» открыта — обновить
+  const help = q('#helpTrend');
+  if (help && help.style.display === 'block') help.innerHTML = buildTrendHelp();
   renderTop20Section();
+  if (state.customer) render();   // SKU-таблица в детализации тоже зависит от окна
 };
 
 window.showClientTip = (event, row) => {
@@ -2266,7 +2320,7 @@ window.showClientTip = (event, row) => {
       lost:    `⚠ Потерян — нет продаж за окно сравнения. Последняя поставка: ${d.lastMonth||'?'}`,
       falling: `↓ Снижение: ${pctLabel(d.trendPct)} (${b})`,
       rising:  `↑ Рост: ${pctLabel(d.trendPct)} (${b})`,
-      stable:  `→ Стабильно — изменение в пределах ±15% (${b})`
+      stable:  `→ Стабильно — изменение в пределах ±20% (${b})`
     }[d.trend]||'';
     const trendColor = d.trend==='rising' ? '#6ee7b7' : d.trend==='stable' ? '#94a3b8' : '#fca5a5';
     tip.innerHTML =
