@@ -319,10 +319,24 @@ foreach ($cand in $candidates) {
 }
 $customerOrders = @()
 if ($orderEntity) {
+    # Сначала — probe одного заголовка БЕЗ $select, чтобы увидеть все доступные поля
+    Write-Host "  --- probing header schema ---"
+    $sample = Invoke-OData $orderEntity "`$top=1" 30
+    $partnerField = $null
+    if ($sample -and @($sample.value).Count -gt 0) {
+        $first = @($sample.value)[0]
+        $allProps = $first.PSObject.Properties.Name | Sort-Object
+        Write-Host "  header fields: $($allProps -join ', ')"
+        # ищем поле для контрагента/клиента/партнёра (любое *_Key содержащее ключевые слова)
+        $candidates = $allProps | Where-Object { $_ -match '_Key$' -and $_ -match '(Контрагент|Клиент|Партнер|Партнёр|Покупатель|Заказчик|Давалец)' }
+        if ($candidates) { $partnerField = $candidates[0]; Write-Host "  partner field detected: $partnerField" }
+    }
+    if (-not $partnerField) { $partnerField = "Контрагент_Key" }
+
     # Заголовки заказов за последние 12 мес., только проведённые и не помеченные на удаление
     $sinceDate = (Get-Date).AddMonths(-12).ToString("yyyy-MM-ddTHH:mm:ss")
     $hdrFilter = [uri]::EscapeDataString("Date ge datetime'$sinceDate' and Posted eq true and DeletionMark eq false")
-    $hdrSelect = [uri]::EscapeDataString("Ref_Key,Number,Date,Контрагент_Key")
+    $hdrSelect = [uri]::EscapeDataString("Ref_Key,Number,Date,$partnerField")
     $hdrR = Invoke-OData $orderEntity "`$select=$hdrSelect&`$filter=$hdrFilter&`$top=5000&`$orderby=Date desc" 180
     $headers = if ($hdrR) { @($hdrR.value) } else { @() }
     Write-Host "  orders headers: $($headers.Count)"
@@ -374,19 +388,31 @@ if ($orderEntity) {
     else            { Write-Host "  could not find table with sales-matching SKU among children" }
 
     if ($tabEntity -and $headers.Count -gt 0) {
-        # Имя контрагента: тянем сразу из Catalog_Контрагенты (один раз)
+        # Имя контрагента: тянем из нескольких каталогов (Контрагенты / Партнеры / Клиенты).
+        # Имя поля динамическое — определилось выше как $partnerField.
         $custMap = @{}
-        $custKeys = @($headers | ForEach-Object { [string]$_.Контрагент_Key } | Where-Object { $_ -and $_ -ne "00000000-0000-0000-0000-000000000000" } | Select-Object -Unique)
+        $custKeys = @($headers | ForEach-Object { [string]$_.$partnerField } | Where-Object { $_ -and $_ -ne "00000000-0000-0000-0000-000000000000" } | Select-Object -Unique)
+        Write-Host "  unique partner keys in orders: $($custKeys.Count) (field=$partnerField)"
         if ($custKeys.Count -gt 0) {
-            # пакетами по 50
-            for ($i = 0; $i -lt $custKeys.Count; $i += 50) {
-                $batch = $custKeys[$i..([Math]::Min($i+49,$custKeys.Count-1))]
-                $orParts = $batch | ForEach-Object { "Ref_Key eq guid'$_'" }
-                $f = [uri]::EscapeDataString( ($orParts -join " or ") )
-                $sel = [uri]::EscapeDataString("Ref_Key,Description")
-                $r = Invoke-OData "Catalog_Контрагенты" "`$select=$sel&`$filter=$f&`$top=200" 60
-                if ($r) { foreach ($c in @($r.value)) { $custMap[[string]$c.Ref_Key] = [string]$c.Description } }
+            # Подбираем правильный каталог: пробуем несколько кандидатов
+            $partnerCatalogs = @("Catalog_Контрагенты","Catalog_Партнеры","Catalog_Клиенты","Catalog_Покупатели","Catalog_Заказчики","Catalog_Давальцы")
+            foreach ($cat in $partnerCatalogs) {
+                $probe = Invoke-OData $cat "`$top=1" 20
+                if ($probe -eq $null) { continue }
+                Write-Host "    catalog $cat exists, batching $($custKeys.Count) lookups..."
+                $found = 0
+                for ($i = 0; $i -lt $custKeys.Count; $i += 50) {
+                    $batch = $custKeys[$i..([Math]::Min($i+49,$custKeys.Count-1))]
+                    $orParts = $batch | ForEach-Object { "Ref_Key eq guid'$_'" }
+                    $f = [uri]::EscapeDataString( ($orParts -join " or ") )
+                    $sel = [uri]::EscapeDataString("Ref_Key,Description")
+                    $r = Invoke-OData $cat "`$select=$sel&`$filter=$f&`$top=200" 60
+                    if ($r) { foreach ($c in @($r.value)) { if (-not $custMap.ContainsKey([string]$c.Ref_Key)) { $custMap[[string]$c.Ref_Key] = [string]$c.Description; $found++ } } }
+                }
+                Write-Host "    $cat resolved: $found"
+                if ($custMap.Count -eq $custKeys.Count) { break }    # все нашли — хватит
             }
+            Write-Host "  partner names resolved: $($custMap.Count) / $($custKeys.Count)"
         }
 
         # Идём по каждому заказу и тянем строки
@@ -396,7 +422,7 @@ if ($orderEntity) {
             $lf = [uri]::EscapeDataString("Ref_Key eq guid'$($h.Ref_Key)'")
             $lr = Invoke-OData $tabEntity "`$expand=Номенклатура&`$filter=$lf&`$top=500" 60
             if (-not $lr) { continue }
-            $custName = $custMap[[string]$h.Контрагент_Key]
+            $custName = $custMap[[string]$h.$partnerField]
             if (-not $custName) { $custName = "" }
             $dateStr = ([datetime]$h.Date).ToString("yyyy-MM-dd")
             $monthStr = ([datetime]$h.Date).ToString("yyyy-MM")

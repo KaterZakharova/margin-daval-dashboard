@@ -1546,12 +1546,16 @@ function renderSkuAnalysis() {
   renderSkuAnalysisDrill();
 }
 
+// sales contain " (S3)" suffix, 1C catalog name — без него; нормализуем для матчинга
+function normCust(c) { return String(c||'').replace(/\s*\(S\d+\)\s*$/, '').trim().toUpperCase(); }
+
 // ── эффективные (не отгруженные) заказы по паре (sku, customer):
 //    FIFO-сопоставление с продажами. Если по паре после даты заказа уже
 //    были отгрузки на это количество — заказ считается выполненным.
 function effectiveOrders(sku, customer) {
+  const wantCust = normCust(customer);
   const all = (DATA.orders || [])
-    .filter(o => o.sku === sku && o.customer === customer && (+o.qty || 0) > 0)
+    .filter(o => o.sku === sku && normCust(o.customer) === wantCust && (+o.qty || 0) > 0)
     .map(o => ({ ...o, remaining: +o.qty || 0 }))
     .sort((a, b) => (a.date || a.month || '').localeCompare(b.date || b.month || ''));
   if (!all.length) return all;
