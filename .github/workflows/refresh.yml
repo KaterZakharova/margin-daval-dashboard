@@ -1,12 +1,12 @@
-name: Daily data refresh → Vercel
+name: Daily refresh + publish to hub-stm (Coolify)
 
 on:
   schedule:
-    - cron: '0 7 * * 1-5'   # 10:00 МСК (UTC+3), пн–пт
-  workflow_dispatch:          # ручной запуск
+    - cron: '45 5 * * 1-5'   # 08:45 МСК (UTC+3), пн–пт
+  workflow_dispatch:          # ручной запуск из Actions UI
 
 permissions:
-  contents: write          # нужно для git push обновлённого data.json
+  contents: write              # для push data.json в этот репо
 
 jobs:
   refresh:
@@ -14,37 +14,80 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout
+      # ────────────────────────────────────────────────────────
+      # 1) Checkout margin-daval-dashboard в подпапку margin/
+      # ────────────────────────────────────────────────────────
+      - name: Checkout margin-daval-dashboard
         uses: actions/checkout@v4
+        with:
+          path: margin
 
+      # ────────────────────────────────────────────────────────
+      # 2) Refresh data.json из 1С / MSSQL (~5-7 минут)
+      # ────────────────────────────────────────────────────────
       - name: Refresh data.json
         shell: pwsh
+        working-directory: margin
         env:
-          SQL_CONN: ${{ secrets.SQL_CONN }}
+          SQL_CONN:  ${{ secrets.SQL_CONN }}
           ODATA_URL: ${{ secrets.ODATA_URL }}
           ODATA_KEY: ${{ secrets.ODATA_KEY }}
-          OUT_DIR: ${{ github.workspace }}
+          OUT_DIR:   ${{ github.workspace }}\margin
         run: scripts/refresh_data.ps1
 
-      - name: Commit updated data.json
+      # ────────────────────────────────────────────────────────
+      # 3) Commit + push свежий data.json в margin-daval-dashboard
+      # ────────────────────────────────────────────────────────
+      - name: Commit & push data.json to margin-daval-dashboard
         shell: pwsh
+        working-directory: margin
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name  "github-actions[bot]"
           git add data.json
-          $changed = git diff --staged --quiet; if ($LASTEXITCODE -ne 0) {
+          git diff --staged --quiet; if ($LASTEXITCODE -ne 0) {
             git commit -m "chore: refresh data $(Get-Date -Format 'yyyy-MM-dd HH:mm') UTC"
             git push
           } else {
-            Write-Host "data.json не изменился, коммит пропущен"
+            Write-Host "data.json не изменился, коммит в margin-daval пропущен"
           }
 
-      - name: Deploy to Vercel production
+      # ────────────────────────────────────────────────────────
+      # 4) Checkout hub-stm с PAT (нужен HUB_STM_PAT secret)
+      # ────────────────────────────────────────────────────────
+      - name: Checkout hub-stm
+        uses: actions/checkout@v4
+        with:
+          repository: GSS-AI-Native/hub-stm
+          token: ${{ secrets.HUB_STM_PAT }}
+          path: hub
+          ref: main
+
+      # ────────────────────────────────────────────────────────
+      # 5) Копируем data.json + index.html → hub-v2/public/margin-dashboard/
+      # ────────────────────────────────────────────────────────
+      - name: Sync margin files into hub-stm
         shell: pwsh
-        env:
-          VERCEL_TOKEN:      ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          npm install -g vercel --silent
-          vercel --prod --yes --token $env:VERCEL_TOKEN
+          $dst = "hub\hub-v2\public\margin-dashboard"
+          New-Item -ItemType Directory -Force -Path $dst | Out-Null
+          Copy-Item -Force "margin\data.json"  "$dst\data.json"
+          Copy-Item -Force "margin\index.html" "$dst\index.html"
+
+      # ────────────────────────────────────────────────────────
+      # 6) Commit + push hub-stm (триггерит Coolify rebuild)
+      # ────────────────────────────────────────────────────────
+      - name: Commit & push hub-stm (Coolify rebuild)
+        shell: pwsh
+        working-directory: hub
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name  "github-actions[bot]"
+          git add hub-v2/public/margin-dashboard/data.json hub-v2/public/margin-dashboard/index.html
+          git diff --staged --quiet; if ($LASTEXITCODE -ne 0) {
+            git commit -m "hub-v2/margin-dashboard: auto refresh $(Get-Date -Format 'yyyy-MM-dd HH:mm') UTC"
+            git push origin main
+            Write-Host "OK pushed hub-stm -> Coolify пересоберёт прод (~5 мин)"
+          } else {
+            Write-Host "hub-stm: margin-dashboard файлы не изменились"
+          }
