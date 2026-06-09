@@ -515,7 +515,8 @@ function schemeColor(s) {
 }
 
 async function init() {
-  DATA = await fetch('data.json').then(r => r.json());
+  const dataPath = (location.pathname.endsWith('/') ? location.pathname : location.pathname + '/') + 'data.json';
+  DATA = await fetch(dataPath).then(r => r.json());
   q('#meta').innerHTML = `<span style="color:var(--muted);font-weight:500">Обновлено:</span> ${fmtMeta(DATA.meta.generatedAt)}`;
   q('#ruleNote').textContent = DATA.meta.rule + ' · источник маржи: ' + DATA.meta.source;
   fillFilters();
