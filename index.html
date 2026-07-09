@@ -113,15 +113,15 @@
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
       <div style="display:flex;align-items:center;gap:8px">
         <div id="meta" style="background:#f1f5f9;border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--ink);font-weight:600;line-height:1.3" title="Данные обновляются автоматически 08:45 МСК пн-пт из куба Факт продаж (MSSQL) и 1С OData"></div>
-        <a id="refreshBtn"
-           href="https://github.com/KaterZakharova/margin-daval-dashboard/actions/workflows/refresh.yml"
-           target="_blank" rel="noopener"
-           title="Открыть GitHub Actions → нажать «Run workflow» → ждать ~10 мин. Данные обновятся из куба Факт продаж (MSSQL) и 1С OData."
-           style="display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:#fff;text-decoration:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;line-height:1;box-shadow:0 2px 6px rgba(37,99,235,.25);transition:background .15s"
-           onmouseover="this.style.background='#1d4ed8'"
-           onmouseout="this.style.background='var(--blue)'">
-          <span style="font-size:15px;line-height:1">⟳</span> Обновить данные
-        </a>
+        <button id="refreshBtn"
+           type="button"
+           onclick="triggerRefresh(this)"
+           title="Нажми — запустится обновление из куба Факт продаж (MSSQL) и 1С OData. Занимает ~10 мин."
+           style="display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;line-height:1;box-shadow:0 2px 6px rgba(37,99,235,.25);transition:background .15s;cursor:pointer"
+           onmouseover="if(!this.disabled)this.style.background='#1d4ed8'"
+           onmouseout="if(!this.disabled)this.style.background='var(--blue)'">
+          <span id="refreshBtnIcon" style="font-size:15px;line-height:1">⟳</span> <span id="refreshBtnLabel">Обновить данные</span>
+        </button>
       </div>
       <div id="refreshHint" style="font-size:11px;color:var(--muted)">авто-обновление 08:45 МСК пн-пт</div>
     </div>
@@ -524,6 +524,74 @@ function schemeColor(s) {
   if (s && s.startsWith('Давальческая')) return '#168a5b';
   return '#2563eb';
 }
+
+const REFRESH_PROXY_URL = 'https://vip-clients.vercel.app/api/refresh';
+
+async function triggerRefresh(btn) {
+  if (btn.disabled) return;
+  const icon = document.getElementById('refreshBtnIcon');
+  const label = document.getElementById('refreshBtnLabel');
+  const prevBg = btn.style.background;
+  btn.disabled = true;
+  btn.style.opacity = '.75';
+  btn.style.cursor = 'wait';
+  icon.style.display = 'inline-block';
+  icon.style.animation = 'spin 1s linear infinite';
+  label.textContent = 'Запускаю…';
+  try {
+    const r = await fetch(REFRESH_PROXY_URL, { method: 'POST' });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.ok) {
+      showRefreshToast('✅ Обновление запущено', 'Данные будут готовы через ~10 мин. Обнови страницу через 12-15 минут — увидишь новые цифры.', 'ok');
+      label.textContent = 'Обновление идёт…';
+      btn.title = 'Обновление уже запущено. Обнови страницу через 12-15 мин.';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.style.background = prevBg;
+        icon.style.animation = '';
+        label.textContent = 'Обновить данные';
+      }, 60_000);
+    } else {
+      const err = j.error || (`HTTP ${r.status}`);
+      showRefreshToast('❌ Не удалось запустить обновление', err + '\n\nПопробуй вручную: github.com/KaterZakharova/margin-daval-dashboard/actions', 'bad');
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      btn.style.background = prevBg;
+      icon.style.animation = '';
+      label.textContent = 'Обновить данные';
+    }
+  } catch (e) {
+    showRefreshToast('❌ Сеть недоступна', String(e), 'bad');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+    btn.style.background = prevBg;
+    icon.style.animation = '';
+    label.textContent = 'Обновить данные';
+  }
+}
+
+function showRefreshToast(title, body, kind) {
+  const existing = document.getElementById('refreshToast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = 'refreshToast';
+  const bg = kind === 'ok' ? '#dcfce7' : '#fee2e2';
+  const border = kind === 'ok' ? '#86efac' : '#fca5a5';
+  const color = kind === 'ok' ? '#166534' : '#991b1b';
+  t.style.cssText = `position:fixed;top:20px;right:20px;z-index:99999;background:${bg};border:2px solid ${border};border-radius:12px;padding:16px 20px;max-width:420px;box-shadow:0 10px 30px rgba(15,23,42,.15);font-size:14px;color:${color};animation:slideIn .3s`;
+  t.innerHTML = `<div style="font-weight:700;margin-bottom:6px">${title}</div><div style="white-space:pre-line;line-height:1.5">${body}</div><button onclick="this.parentElement.remove()" style="position:absolute;top:8px;right:10px;background:none;border:none;font-size:18px;cursor:pointer;color:${color};opacity:.6">×</button>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), kind === 'ok' ? 15000 : 20000);
+}
+
+// spinner keyframes + toast slideIn
+const _rf_style = document.createElement('style');
+_rf_style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}';
+document.head.appendChild(_rf_style);
 
 async function init() {
   const dataPath = (location.pathname.endsWith('/') ? location.pathname : location.pathname + '/') + 'data.json';
