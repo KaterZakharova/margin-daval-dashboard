@@ -233,33 +233,42 @@
         </div>
         <button class="exp-btn" onclick="expandChart('#top20Chart','ТОП-20 клиентов — '+top20Mode)">⤢ Развернуть</button>
       </div>
-      <!-- панель custom-периодов; скрыта пока mode !== 'custom' -->
-      <div id="customPeriodPanel" style="display:none;margin-top:10px;padding:12px 14px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;font-size:13px">
-        <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:end">
-          <div>
-            <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px">ПЕРИОД A (текущий, красным)</div>
-            <div style="display:flex;gap:6px;align-items:center">
-              <select id="cpAFrom" onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
-              <span style="color:var(--muted)">—</span>
-              <select id="cpATo"   onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
-            </div>
-          </div>
-          <div style="font-size:20px;color:var(--muted);align-self:center">vs</div>
-          <div>
-            <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px">ПЕРИОД B (сравнение, серым)</div>
-            <div style="display:flex;gap:6px;align-items:center">
-              <select id="cpBFrom" onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
-              <span style="color:var(--muted)">—</span>
-              <select id="cpBTo"   onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:6px;margin-left:auto;align-items:end">
-            <button class="tab-btn" onclick="setCustomPeriodPreset('sameMonthsYoY')" title="Автовыбор: те же месяцы год назад">= те же месяцы, год назад</button>
-            <button class="tab-btn" onclick="setCustomPeriodPreset('h1yoY')" title="Янв–июнь текущего года vs янв–июнь прошлого">H1 vs H1</button>
-            <button class="tab-btn" onclick="setCustomPeriodPreset('ytdYoY')" title="Янв–{текущий месяц} этого года vs те же месяцы прошлого">YTD vs YTD</button>
+    </div>
+    <!-- панель custom-периодов; скрыта пока mode !== 'custom'. Вне flex-header'а. -->
+    <div id="customPeriodPanel" style="display:none;margin:0 0 12px;padding:14px 16px;background:#f0f9ff;border:2px solid #93c5fd;border-radius:10px;font-size:13px;position:relative">
+      <button type="button" onclick="closeCustomPeriodPanel()" title="Закрыть панель и вернуться к 6м vs 6м" style="position:absolute;top:8px;right:10px;width:26px;height:26px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--muted);cursor:pointer;font-size:15px;line-height:1;font-weight:700">×</button>
+      <div style="font-weight:700;color:#1e40af;margin-bottom:10px;font-size:13px">📅 Свой период сравнения</div>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:end">
+        <div>
+          <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px">ПЕРИОД A (текущий, красным)</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="cpAFrom" onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
+            <span style="color:var(--muted)">—</span>
+            <select id="cpATo"   onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
           </div>
         </div>
-        <div id="customPeriodInfo" style="margin-top:8px;font-size:12px;color:var(--muted)"></div>
+        <div style="font-size:20px;color:var(--muted);align-self:center;padding-bottom:4px">vs</div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px">ПЕРИОД B (сравнение, серым)</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="cpBFrom" onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
+            <span style="color:var(--muted)">—</span>
+            <select id="cpBTo"   onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:end;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--muted);font-weight:700;margin-right:4px;align-self:center">пресеты:</span>
+          <button class="tab-btn" onclick="setCustomPeriodPreset('sameMonthsYoY')" title="Автовыбор: последние 6 месяцев vs те же месяцы год назад">= те же месяцы, год назад</button>
+          <button class="tab-btn" onclick="setCustomPeriodPreset('h1yoY')" title="Янв–июнь текущего года vs янв–июнь прошлого">H1 vs H1</button>
+          <button class="tab-btn" onclick="setCustomPeriodPreset('ytdYoY')" title="Янв–{текущий месяц} этого года vs те же месяцы прошлого">YTD vs YTD</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div id="customPeriodInfo" style="font-size:12px;color:var(--muted);flex:1;min-width:200px"></div>
+        <div style="display:flex;gap:8px">
+          <button type="button" onclick="closeCustomPeriodPanel()" style="height:36px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--muted);padding:0 14px;cursor:pointer;font-size:13px;font-weight:600">Отмена</button>
+          <button type="button" id="applyCustomPeriodBtn" onclick="applyCustomPeriod()" style="height:36px;border:none;border-radius:6px;background:var(--blue);color:#fff;padding:0 20px;cursor:pointer;font-size:13px;font-weight:700;box-shadow:0 2px 6px rgba(37,99,235,.25)">Выбрать →</button>
+        </div>
       </div>
     </div>
     <div id="top20Chart" style="height:280px;margin-bottom:12px;position:relative"></div>
@@ -3333,24 +3342,40 @@ window.setClientTrendMode = mode => {
     : mode === 'yYoY' ? 'год'
     : mode === 'custom' ? 'свой период'
     : '6 мес.';
-  // Панель custom-периода
+  // Панель custom-периода — показываем только для custom-режима
   const panel = q('#customPeriodPanel');
   if (panel) {
     if (mode === 'custom') {
       populateCustomPeriodSelects();
-      // если ещё не заполнено — задать «те же месяцы год назад» как дефолт
+      // если ещё не задано — заполняем дефолтом «те же месяцы год назад»
       if (!customPeriodA.from) setCustomPeriodPreset('sameMonthsYoY');
       panel.style.display = 'block';
+      // сбросим кнопку Apply в «нейтральное» состояние
+      resetApplyButton();
     } else {
       panel.style.display = 'none';
     }
   }
-  // если шторка «Как считается» открыта — обновить
   const help = q('#helpTrend');
   if (help && help.style.display === 'block') help.innerHTML = buildTrendHelp();
   renderTop20Section();
-  if (state.customer) render();   // SKU-таблица в детализации тоже зависит от окна
+  if (state.customer) render();
 };
+
+function resetApplyButton() {
+  const btn = q('#applyCustomPeriodBtn');
+  if (!btn) return;
+  btn.style.background = 'var(--blue)';
+  btn.style.boxShadow = '0 2px 6px rgba(37,99,235,.25)';
+  btn.textContent = 'Выбрать →';
+}
+function markApplyButtonPending() {
+  const btn = q('#applyCustomPeriodBtn');
+  if (!btn) return;
+  btn.style.background = '#f59e0b';
+  btn.style.boxShadow = '0 2px 8px rgba(245,158,11,.4)';
+  btn.textContent = 'Применить изменения →';
+}
 
 function populateCustomPeriodSelects() {
   const months = uniq(DATA.sales.map(x => x.month)).sort();
@@ -3369,36 +3394,34 @@ window.setCustomPeriodPreset = preset => {
   if (!months.length) return;
   const last = months[months.length-1];
   const [ly] = last.split('-').map(Number);
+  let a, b;
   if (preset === 'sameMonthsYoY') {
-    // A = последние 6 мес (или сколько есть в этом году от начала года — берём 6)
     const aTo = last;
-    const aFrom = shiftMonth(last, -5);   // 6 мес.
-    customPeriodA = { from: aFrom, to: aTo };
-    customPeriodB = { from: shiftMonth(aFrom, -12), to: shiftMonth(aTo, -12) };
+    const aFrom = shiftMonth(last, -5);
+    a = { from: aFrom, to: aTo };
+    b = { from: shiftMonth(aFrom, -12), to: shiftMonth(aTo, -12) };
   } else if (preset === 'h1yoY') {
-    customPeriodA = { from: `${ly}-01`, to: `${ly}-06` };
-    customPeriodB = { from: `${ly-1}-01`, to: `${ly-1}-06` };
+    a = { from: `${ly}-01`, to: `${ly}-06` };
+    b = { from: `${ly-1}-01`, to: `${ly-1}-06` };
   } else if (preset === 'ytdYoY') {
-    // Январь..last-month текущего года vs те же месяцы прошлого
-    customPeriodA = { from: `${ly}-01`, to: last };
+    a = { from: `${ly}-01`, to: last };
     const lm = last.split('-')[1];
-    customPeriodB = { from: `${ly-1}-01`, to: `${ly-1}-${lm}` };
-  }
+    b = { from: `${ly-1}-01`, to: `${ly-1}-${lm}` };
+  } else return;
   populateCustomPeriodSelects();
-  q('#cpAFrom').value = customPeriodA.from;
-  q('#cpATo').value   = customPeriodA.to;
-  q('#cpBFrom').value = customPeriodB.from;
-  q('#cpBTo').value   = customPeriodB.to;
+  q('#cpAFrom').value = a.from; q('#cpATo').value = a.to;
+  q('#cpBFrom').value = b.from; q('#cpBTo').value = b.to;
+  // обновит infobox и пометит «есть неприменённые изменения»
   onCustomPeriodChange();
 };
+
+// Только обновляет UI-состояние и infobox; НЕ рендерит.
+// Рендер делает applyCustomPeriod() по кнопке.
 window.onCustomPeriodChange = () => {
   const a = { from: q('#cpAFrom').value, to: q('#cpATo').value };
   const b = { from: q('#cpBFrom').value, to: q('#cpBTo').value };
-  // Мягкая коррекция: если from > to, свапаем
   if (a.from > a.to) [a.from, a.to] = [a.to, a.from];
   if (b.from > b.to) [b.from, b.to] = [b.to, b.from];
-  customPeriodA = a;
-  customPeriodB = b;
   q('#cpAFrom').value = a.from; q('#cpATo').value = a.to;
   q('#cpBFrom').value = b.from; q('#cpBTo').value = b.to;
   const info = q('#customPeriodInfo');
@@ -3408,14 +3431,37 @@ window.onCustomPeriodChange = () => {
     const warn = aLen !== bLen
       ? ` <span style="color:#dc2626;font-weight:600">⚠ разная длина: A=${aLen} мес., B=${bLen} мес.</span>`
       : ` <span style="color:#166534;font-weight:600">✓ окна одинаковой длины (${aLen} мес.)</span>`;
-    info.innerHTML = `Сравниваем: <b>${fmtMonthCode(a.from)}—${fmtMonthCode(a.to)}</b> vs <b>${fmtMonthCode(b.from)}—${fmtMonthCode(b.to)}</b>.${warn}`;
+    info.innerHTML = `Выбрано: <b>${fmtMonthCode(a.from)}—${fmtMonthCode(a.to)}</b> vs <b>${fmtMonthCode(b.from)}—${fmtMonthCode(b.to)}</b>.${warn}<br><span style="color:var(--muted)">Нажмите <b>«Выбрать →»</b> чтобы применить.</span>`;
   }
-  if (clientTrendMode === 'custom') {
-    const help = q('#helpTrend');
-    if (help && help.style.display === 'block') help.innerHTML = buildTrendHelp();
-    renderTop20Section();
-    if (state.customer) render();
-  }
+  // отмечаем, что есть неприменённые изменения
+  const applied = customPeriodA.from === a.from && customPeriodA.to === a.to
+               && customPeriodB.from === b.from && customPeriodB.to === b.to;
+  if (applied) resetApplyButton(); else markApplyButtonPending();
+};
+
+// Применяет выбранные периоды и перерисовывает.
+window.applyCustomPeriod = () => {
+  const a = { from: q('#cpAFrom').value, to: q('#cpATo').value };
+  const b = { from: q('#cpBFrom').value, to: q('#cpBTo').value };
+  if (a.from > a.to) [a.from, a.to] = [a.to, a.from];
+  if (b.from > b.to) [b.from, b.to] = [b.to, b.from];
+  customPeriodA = a;
+  customPeriodB = b;
+  resetApplyButton();
+  const btn = q('#applyCustomPeriodBtn');
+  if (btn) { btn.textContent = '✓ Применено'; setTimeout(() => resetApplyButton(), 1800); }
+  clientTrendMode = 'custom';
+  const help = q('#helpTrend');
+  if (help && help.style.display === 'block') help.innerHTML = buildTrendHelp();
+  renderTop20Section();
+  if (state.customer) render();
+};
+
+// Закрывает панель и возвращает к дефолтному режиму «6 мес vs 6 мес».
+window.closeCustomPeriodPanel = () => {
+  const panel = q('#customPeriodPanel');
+  if (panel) panel.style.display = 'none';
+  setClientTrendMode('m6');
 };
 
 window.showClientTip = (event, row) => {
