@@ -110,9 +110,20 @@
       <h1>Маржинальность, объемы и давальческие схемы</h1>
       <p>Плановая валовая маржа из куба «Факт продаж», раскрытие до SKU и ресурсной спецификации.</p>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-      <div id="meta" style="background:#f1f5f9;border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--ink);font-weight:600;line-height:1.3" title="Данные обновляются автоматически 1 раз в сутки из 1С/MS SQL"></div>
-      <div style="font-size:11px;color:var(--muted)">авто-обновление 1×/сут</div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="meta" style="background:#f1f5f9;border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--ink);font-weight:600;line-height:1.3" title="Данные обновляются автоматически 08:45 МСК пн-пт из куба Факт продаж (MSSQL) и 1С OData"></div>
+        <a id="refreshBtn"
+           href="https://github.com/KaterZakharova/margin-daval-dashboard/actions/workflows/refresh.yml"
+           target="_blank" rel="noopener"
+           title="Открыть GitHub Actions → нажать «Run workflow» → ждать ~10 мин. Данные обновятся из куба Факт продаж (MSSQL) и 1С OData."
+           style="display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:#fff;text-decoration:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;line-height:1;box-shadow:0 2px 6px rgba(37,99,235,.25);transition:background .15s"
+           onmouseover="this.style.background='#1d4ed8'"
+           onmouseout="this.style.background='var(--blue)'">
+          <span style="font-size:15px;line-height:1">⟳</span> Обновить данные
+        </a>
+      </div>
+      <div id="refreshHint" style="font-size:11px;color:var(--muted)">авто-обновление 08:45 МСК пн-пт</div>
     </div>
   </div>
 
@@ -517,7 +528,18 @@ function schemeColor(s) {
 async function init() {
   const dataPath = (location.pathname.endsWith('/') ? location.pathname : location.pathname + '/') + 'data.json';
   DATA = await fetch(dataPath).then(r => r.json());
-  q('#meta').innerHTML = `<span style="color:var(--muted);font-weight:500">Обновлено:</span> ${fmtMeta(DATA.meta.generatedAt)}`;
+  const genTs = DATA.meta.generatedAt;
+  const ageDays = genTs ? Math.floor((Date.now() - new Date(genTs.replace(' ', 'T')).getTime()) / 86400000) : 0;
+  let ageBadge = '';
+  const meta = q('#meta');
+  if (ageDays >= 7) {
+    meta.style.background = '#fee2e2'; meta.style.borderColor = '#fca5a5'; meta.style.color = '#991b1b';
+    ageBadge = ` <span style="background:#dc2626;color:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:6px">устарело ${ageDays} дн.</span>`;
+  } else if (ageDays >= 3) {
+    meta.style.background = '#ffedd5'; meta.style.borderColor = '#fdba74'; meta.style.color = '#9a3412';
+    ageBadge = ` <span style="background:#ea580c;color:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:6px">${ageDays} дн. назад</span>`;
+  }
+  meta.innerHTML = `<span style="color:var(--muted);font-weight:500">Обновлено:</span> ${fmtMeta(genTs)}${ageBadge}`;
   q('#ruleNote').textContent = DATA.meta.rule + ' · источник маржи: ' + DATA.meta.source;
   fillFilters();
   fillForecastControls();

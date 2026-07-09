@@ -3,91 +3,101 @@ name: Daily refresh + publish to hub-stm (Coolify)
 on:
   schedule:
     - cron: '45 5 * * 1-5'   # 08:45 МСК (UTC+3), пн–пт
-  workflow_dispatch:          # ручной запуск из Actions UI
+  workflow_dispatch:          # ручной запуск из Actions UI или из кнопки на дашборде
 
 permissions:
   contents: write              # для push data.json в этот репо
 
 jobs:
+  # ────────────────────────────────────────────────────────
+  # JOB 1: обновить data.json из MSSQL + 1С OData и запушить сюда (в margin-daval-dashboard)
+  # ────────────────────────────────────────────────────────
   refresh:
     runs-on: windows-latest
     timeout-minutes: 30
+    outputs:
+      committed: ${{ steps.commit.outputs.committed }}
 
     steps:
-      # ────────────────────────────────────────────────────────
-      # 1) Checkout margin-daval-dashboard в подпапку margin/
-      # ────────────────────────────────────────────────────────
       - name: Checkout margin-daval-dashboard
         uses: actions/checkout@v4
         with:
-          path: margin
+          fetch-depth: 0        # полный history — чтобы git видел актуальный blob для diff
 
-      # ────────────────────────────────────────────────────────
-      # 2) Refresh data.json из 1С / MSSQL (~5-7 минут)
-      # ────────────────────────────────────────────────────────
       - name: Refresh data.json
         shell: pwsh
-        working-directory: margin
         env:
           SQL_CONN:  ${{ secrets.SQL_CONN }}
           ODATA_URL: ${{ secrets.ODATA_URL }}
           ODATA_KEY: ${{ secrets.ODATA_KEY }}
-          OUT_DIR:   ${{ github.workspace }}\margin
+          OUT_DIR:   ${{ github.workspace }}
         run: scripts/refresh_data.ps1
 
-      # ────────────────────────────────────────────────────────
-      # 3) Commit + push свежий data.json в margin-daval-dashboard
-      # ────────────────────────────────────────────────────────
-      - name: Commit & push data.json to margin-daval-dashboard
+      - name: Commit & push data.json
+        id: commit
         shell: pwsh
-        working-directory: margin
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name  "github-actions[bot]"
           git add data.json
-          git diff --staged --quiet; if ($LASTEXITCODE -ne 0) {
+          # Диагностика — что именно git видит
+          Write-Host "----- git status -----"
+          git status --porcelain data.json
+          Write-Host "----- git diff --staged --stat -----"
+          git diff --staged --stat data.json
+          $changed = (git status --porcelain data.json)
+          if ($changed) {
             git commit -m "chore: refresh data $(Get-Date -Format 'yyyy-MM-dd HH:mm') UTC"
             git push
+            "committed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            Write-Host "OK: data.json committed and pushed"
           } else {
-            Write-Host "data.json не изменился, коммит в margin-daval пропущен"
+            "committed=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            Write-Host "SKIP: data.json без изменений (SQL/OData вернули идентичные данные)"
           }
 
-      # ────────────────────────────────────────────────────────
-      # 4) Checkout hub-stm с PAT (нужен HUB_STM_PAT secret)
-      # ────────────────────────────────────────────────────────
-      - name: Checkout hub-stm
+  # ────────────────────────────────────────────────────────
+  # JOB 2: перекопировать свежий data.json + index.html в hub-stm (Coolify rebuild).
+  # Запускается только если refresh реально закоммитил новые данные.
+  # Отдельный job — чтобы падение hub-stm push (SSH ключ и т.п.) не помечало refresh failed.
+  # ────────────────────────────────────────────────────────
+  publish-hub:
+    needs: refresh
+    runs-on: ubuntu-latest
+    if: ${{ needs.refresh.result == 'success' && needs.refresh.outputs.committed == 'true' }}
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout margin-daval-dashboard (fresh data.json)
+        uses: actions/checkout@v4
+        with:
+          path: margin
+
+      - name: Checkout hub-stm (PAT)
         uses: actions/checkout@v4
         with:
           repository: GSS-AI-Native/hub-stm
-          ssh-key: ${{ secrets.HUB_STM_DEPLOY_KEY }}
+          token: ${{ secrets.HUB_STM_PAT }}
           path: hub
           ref: main
 
-      # ────────────────────────────────────────────────────────
-      # 5) Копируем data.json + index.html → hub-v2/public/margin-dashboard/
-      # ────────────────────────────────────────────────────────
       - name: Sync margin files into hub-stm
-        shell: pwsh
         run: |
-          $dst = "hub\hub-v2\public\margin-dashboard"
-          New-Item -ItemType Directory -Force -Path $dst | Out-Null
-          Copy-Item -Force "margin\data.json"  "$dst\data.json"
-          Copy-Item -Force "margin\index.html" "$dst\index.html"
+          dst="hub/hub-v2/public/margin-dashboard"
+          mkdir -p "$dst"
+          cp -f margin/data.json  "$dst/data.json"
+          cp -f margin/index.html "$dst/index.html"
 
-      # ────────────────────────────────────────────────────────
-      # 6) Commit + push hub-stm (триггерит Coolify rebuild)
-      # ────────────────────────────────────────────────────────
       - name: Commit & push hub-stm (Coolify rebuild)
-        shell: pwsh
         working-directory: hub
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name  "github-actions[bot]"
           git add hub-v2/public/margin-dashboard/data.json hub-v2/public/margin-dashboard/index.html
-          git diff --staged --quiet; if ($LASTEXITCODE -ne 0) {
-            git commit -m "hub-v2/margin-dashboard: auto refresh $(Get-Date -Format 'yyyy-MM-dd HH:mm') UTC"
+          if git diff --staged --quiet; then
+            echo "hub-stm: margin-dashboard файлы не изменились"
+          else
+            git commit -m "hub-v2/margin-dashboard: auto refresh $(date -u '+%Y-%m-%d %H:%M') UTC"
             git push origin main
-            Write-Host "OK pushed hub-stm -> Coolify пересоберёт прод (~5 мин)"
-          } else {
-            Write-Host "hub-stm: margin-dashboard файлы не изменились"
-          }
+            echo "OK: pushed hub-stm — Coolify пересоберёт прод (~5 мин)"
+          fi
