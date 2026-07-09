@@ -64,7 +64,9 @@ jobs:
   publish-hub:
     needs: refresh
     runs-on: ubuntu-latest
-    if: ${{ needs.refresh.result == 'success' && needs.refresh.outputs.committed == 'true' }}
+    # Всегда, если refresh не упал: git diff внутри job'а сам решит нужен ли commit.
+    # Так публикация идемпотентна и подхватывает изменения index.html даже когда data.json тот же.
+    if: ${{ needs.refresh.result == 'success' }}
     timeout-minutes: 10
 
     steps:
