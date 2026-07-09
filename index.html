@@ -220,12 +220,46 @@
           <button class="tab-btn" onclick="setTop20Mode('revenue')">По выручке</button>
           <button class="tab-btn" onclick="setTop20Mode('qty')">По количеству</button>
         </div>
-        <div class="top20-tabs" id="top20BasisTabs" title="Окно сравнения: чем длиннее окно, тем меньше шума, но и реакция позже.">
-          <button class="tab-btn" onclick="setClientTrendMode('m3')">3 мес. vs 3 мес.</button>
-          <button class="tab-btn active" onclick="setClientTrendMode('m6')">6 мес. vs 6 мес.</button>
-          <button class="tab-btn" onclick="setClientTrendMode('m12')">Год к году</button>
+        <div class="top20-tabs" id="top20BasisTabs" title="Окно сравнения. Скользящие окна (3м/6м/12м) чувствительны к сезону — сравнивают конец года с началом. YoY-режимы (кв/полугодие год-к-году) убирают сезонность, сравнивая один и тот же период разных лет.">
+          <button class="tab-btn" onclick="setClientTrendMode('m3')" title="Последние 3 мес. vs предыдущие 3 мес.">3м vs 3м</button>
+          <button class="tab-btn active" onclick="setClientTrendMode('m6')" title="Последние 6 мес. vs предыдущие 6 мес. — ⚠ может сравнивать сезон с не-сезоном">6м vs 6м</button>
+          <button class="tab-btn" onclick="setClientTrendMode('m12')" title="Последние 12 мес. vs предыдущие 12 — сглаживает всю сезонность за счёт длинного окна">12м vs 12м</button>
+          <span style="width:1px;height:22px;background:var(--line);align-self:center"></span>
+          <button class="tab-btn" onclick="setClientTrendMode('qYoY')" title="Тот же квартал год назад — устраняет сезонность">Квартал YoY</button>
+          <button class="tab-btn" onclick="setClientTrendMode('hYoY')" title="То же полугодие год назад — устраняет сезонность">Полугодие YoY</button>
+          <button class="tab-btn" onclick="setClientTrendMode('yYoY')" title="Полный год vs полный прошлый год">Год YoY</button>
+          <span style="width:1px;height:22px;background:var(--line);align-self:center"></span>
+          <button class="tab-btn" onclick="setClientTrendMode('custom')" title="Выбрать два произвольных периода для сравнения">Свой период ▾</button>
         </div>
         <button class="exp-btn" onclick="expandChart('#top20Chart','ТОП-20 клиентов — '+top20Mode)">⤢ Развернуть</button>
+      </div>
+      <!-- панель custom-периодов; скрыта пока mode !== 'custom' -->
+      <div id="customPeriodPanel" style="display:none;margin-top:10px;padding:12px 14px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;font-size:13px">
+        <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:end">
+          <div>
+            <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px">ПЕРИОД A (текущий, красным)</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <select id="cpAFrom" onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
+              <span style="color:var(--muted)">—</span>
+              <select id="cpATo"   onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
+            </div>
+          </div>
+          <div style="font-size:20px;color:var(--muted);align-self:center">vs</div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px">ПЕРИОД B (сравнение, серым)</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <select id="cpBFrom" onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
+              <span style="color:var(--muted)">—</span>
+              <select id="cpBTo"   onchange="onCustomPeriodChange()" style="height:32px;min-width:130px"></select>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-left:auto;align-items:end">
+            <button class="tab-btn" onclick="setCustomPeriodPreset('sameMonthsYoY')" title="Автовыбор: те же месяцы год назад">= те же месяцы, год назад</button>
+            <button class="tab-btn" onclick="setCustomPeriodPreset('h1yoY')" title="Янв–июнь текущего года vs янв–июнь прошлого">H1 vs H1</button>
+            <button class="tab-btn" onclick="setCustomPeriodPreset('ytdYoY')" title="Янв–{текущий месяц} этого года vs те же месяцы прошлого">YTD vs YTD</button>
+          </div>
+        </div>
+        <div id="customPeriodInfo" style="margin-top:8px;font-size:12px;color:var(--muted)"></div>
       </div>
     </div>
     <div id="top20Chart" style="height:280px;margin-bottom:12px;position:relative"></div>
@@ -1471,9 +1505,9 @@ function renderSkuAnalysis() {
 
   // окно тренда — берём из глобального переключателя clientTrendMode
   const allMonths = uniq(baseAll.map(x => x.month)).sort();
-  const W = clientTrendMode === 'm3' ? 3 : clientTrendMode === 'm12' ? 12 : 6;
-  const recentMths = new Set(allMonths.slice(-W));
-  const priorMths  = new Set(allMonths.slice(-2*W, -W));
+  const _win = clientTrendWindows(allMonths);
+  const recentMths = new Set(_win.rec);
+  const priorMths  = new Set(_win.pri);
 
   // cutoffs для статуса — глобально по всем данным (как и в детализации)
   const globalMonths = uniq(DATA.sales.filter(x=>!EXCLUDE_CUSTOMERS.has(x.customer)).map(x=>x.month)).sort();
@@ -1881,9 +1915,9 @@ function renderDetail(rows) {
   // compute per-SKU monthly trend using all-period data for this customer
   const allPeriodRows = state.customer ? filteredSalesNoMonth().filter(x => x.customer === state.customer) : [];
   const allMonthsSorted = uniq(allPeriodRows.map(x => x.month)).sort();
-  const TREND_WIN = clientTrendMode === 'm3' ? 3 : clientTrendMode === 'm12' ? 12 : 6;
-  const recentMths = new Set(allMonthsSorted.slice(-TREND_WIN));
-  const priorMths  = new Set(allMonthsSorted.slice(-2*TREND_WIN, -TREND_WIN));
+  const _detWin = clientTrendWindows(allMonthsSorted);
+  const recentMths = new Set(_detWin.rec);
+  const priorMths  = new Set(_detWin.pri);
   const skuPeriod  = new Map(); // sku -> {recent, prior, series}
   for (const r of allPeriodRows) {
     if (!skuPeriod.has(r.sku)) skuPeriod.set(r.sku, { recentRub:0, priorRub:0, recentQty:0, priorQty:0, series: new Map() });
@@ -2917,16 +2951,83 @@ window.showTrendTooltip = (event, month, marginPct, qty, marginRub) => {
 
 // ─── TOP-20 CLIENTS ────────────────────────────────────────────────────────
 
-// Окна сравнения тренда клиента: фиксированной длины, не пересекаются.
-//  m3  — 3 vs 3 (последний квартал vs предыдущий)
-//  m6  — 6 vs 6 (последние полгода vs предыдущие)  — default
-//  m12 — 12 vs 12 (последний год vs предыдущий, год к году)
+// Окна сравнения тренда клиента.
+// Скользящие (m3/m6/m12): последние N мес. vs предыдущие N мес., не пересекаются.
+// YoY (qYoY/hYoY/yYoY): те же месяцы прошлого года — устраняют сезонность.
+// custom: два произвольных диапазона (customPeriodA vs customPeriodB).
+function monthsBetween(fromCode, toCode) {
+  const out = [];
+  if (!fromCode || !toCode) return out;
+  let [y,m] = fromCode.split('-').map(Number);
+  const [ey,em] = toCode.split('-').map(Number);
+  if (y > ey || (y === ey && m > em)) return out;
+  while (y < ey || (y === ey && m <= em)) {
+    out.push(`${y}-${String(m).padStart(2,'0')}`);
+    if (++m > 12) { m = 1; y++; }
+  }
+  return out;
+}
+function shiftMonth(code, deltaMonths) {
+  const [y,m] = code.split('-').map(Number);
+  const total = y*12 + (m-1) + deltaMonths;
+  return `${Math.floor(total/12)}-${String((total%12)+1).padStart(2,'0')}`;
+}
 function clientTrendWindows(A) {
+  if (!A.length) return { rec: [], pri: [], lost: [], label: '—', win: 0 };
+  const last = A[A.length-1];
+  const [ly, lm] = last.split('-').map(Number);
+
+  if (clientTrendMode === 'qYoY') {
+    // Квартал текущего last month vs тот же квартал год назад.
+    const q = Math.floor((lm-1)/3);       // 0..3
+    const startM = q*3 + 1;
+    const endM   = q*3 + 3;
+    const rec = [], pri = [];
+    for (let m = startM; m <= endM; m++) {
+      const mm = String(m).padStart(2,'0');
+      rec.push(`${ly}-${mm}`);
+      pri.push(`${ly-1}-${mm}`);
+    }
+    return { rec, pri, lost: rec, label: `Q${q+1} ${ly} vs Q${q+1} ${ly-1}`, win: 3 };
+  }
+  if (clientTrendMode === 'hYoY') {
+    // Полугодие текущего last month vs то же полугодие год назад.
+    const half = lm <= 6 ? 0 : 1;
+    const startM = half*6 + 1;
+    const endM   = half*6 + 6;
+    const rec = [], pri = [];
+    for (let m = startM; m <= endM; m++) {
+      const mm = String(m).padStart(2,'0');
+      rec.push(`${ly}-${mm}`);
+      pri.push(`${ly-1}-${mm}`);
+    }
+    return { rec, pri, lost: rec, label: `H${half+1} ${ly} vs H${half+1} ${ly-1}`, win: 6 };
+  }
+  if (clientTrendMode === 'yYoY') {
+    // Полный текущий год vs полный прошлый.
+    const rec = [], pri = [];
+    for (let m = 1; m <= 12; m++) {
+      const mm = String(m).padStart(2,'0');
+      rec.push(`${ly}-${mm}`);
+      pri.push(`${ly-1}-${mm}`);
+    }
+    return { rec, pri, lost: rec, label: `${ly} vs ${ly-1}`, win: 12 };
+  }
+  if (clientTrendMode === 'custom') {
+    if (!customPeriodA.from || !customPeriodA.to || !customPeriodB.from || !customPeriodB.to) {
+      return { rec: [], pri: [], lost: [], label: 'Выберите свой период', win: 0 };
+    }
+    const rec = monthsBetween(customPeriodA.from, customPeriodA.to);
+    const pri = monthsBetween(customPeriodB.from, customPeriodB.to);
+    const label = `${fmtMonthCode(customPeriodA.from)}—${fmtMonthCode(customPeriodA.to)} vs ${fmtMonthCode(customPeriodB.from)}—${fmtMonthCode(customPeriodB.to)}`;
+    return { rec, pri, lost: rec, label, win: Math.max(rec.length, pri.length) };
+  }
+  // Скользящие окна m3/m6/m12
   const W = clientTrendMode === 'm3' ? 3 : clientTrendMode === 'm12' ? 12 : 6;
   const rec = A.slice(-W);
   const pri = A.slice(-2*W, -W);
   const label = W === 3 ? '3 мес. vs предыдущие 3 мес.'
-              : W === 12 ? '12 мес. vs предыдущие 12 мес. (год к году)'
+              : W === 12 ? '12 мес. vs предыдущие 12 мес.'
               : '6 мес. vs предыдущие 6 мес.';
   return { rec, pri, lost: rec, label, win: W };
 }
@@ -3180,8 +3281,18 @@ window.setTop20Mode = m => {
   renderTop20Section();
 };
 
-const CLIENT_TREND_MODES = ['m3','m6','m12'];
-const CLIENT_TREND_NAMES = { m3:'3 мес. vs 3 мес.', m6:'6 мес. vs 6 мес.', m12:'год к году (12 мес. vs 12 мес.)' };
+const CLIENT_TREND_MODES = ['m3','m6','m12','qYoY','hYoY','yYoY','custom'];
+const CLIENT_TREND_NAMES = {
+  m3:'3 мес. vs 3 мес.',
+  m6:'6 мес. vs 6 мес.',
+  m12:'12 мес. vs 12 мес.',
+  qYoY:'Квартал год-к-году (тот же квартал прошлого года)',
+  hYoY:'Полугодие год-к-году (то же полугодие прошлого года)',
+  yYoY:'Год год-к-году (полный год vs полный прошлый год)',
+  custom:'Свой период'
+};
+let customPeriodA = { from:'', to:'' };  // текущий
+let customPeriodB = { from:'', to:'' };  // сравнение
 function buildTrendHelp() {
   const allMonths = uniq(filteredSalesNoMonth().map(x => x.month)).sort();
   const w = clientTrendWindows(allMonths);
@@ -3215,12 +3326,96 @@ window.setClientTrendMode = mode => {
     btn.classList.toggle('active', CLIENT_TREND_MODES[i] === mode);
   });
   const winLbl = q('#trendWinLabel');
-  if (winLbl) winLbl.textContent = mode === 'm3' ? '3 мес.' : mode === 'm12' ? '12 мес.' : '6 мес.';
+  if (winLbl) winLbl.textContent = mode === 'm3' ? '3 мес.'
+    : mode === 'm12' ? '12 мес.'
+    : mode === 'qYoY' ? 'квартал'
+    : mode === 'hYoY' ? 'полугодие'
+    : mode === 'yYoY' ? 'год'
+    : mode === 'custom' ? 'свой период'
+    : '6 мес.';
+  // Панель custom-периода
+  const panel = q('#customPeriodPanel');
+  if (panel) {
+    if (mode === 'custom') {
+      populateCustomPeriodSelects();
+      // если ещё не заполнено — задать «те же месяцы год назад» как дефолт
+      if (!customPeriodA.from) setCustomPeriodPreset('sameMonthsYoY');
+      panel.style.display = 'block';
+    } else {
+      panel.style.display = 'none';
+    }
+  }
   // если шторка «Как считается» открыта — обновить
   const help = q('#helpTrend');
   if (help && help.style.display === 'block') help.innerHTML = buildTrendHelp();
   renderTop20Section();
   if (state.customer) render();   // SKU-таблица в детализации тоже зависит от окна
+};
+
+function populateCustomPeriodSelects() {
+  const months = uniq(DATA.sales.map(x => x.month)).sort();
+  if (!months.length) return;
+  const optionsHtml = months.map(m => `<option value="${m}">${fmtMonthCode(m)}</option>`).join('');
+  ['cpAFrom','cpATo','cpBFrom','cpBTo'].forEach(id => {
+    const el = q('#'+id);
+    if (!el) return;
+    const prev = el.value;
+    el.innerHTML = optionsHtml;
+    if (prev && months.includes(prev)) el.value = prev;
+  });
+}
+window.setCustomPeriodPreset = preset => {
+  const months = uniq(DATA.sales.map(x => x.month)).sort();
+  if (!months.length) return;
+  const last = months[months.length-1];
+  const [ly] = last.split('-').map(Number);
+  if (preset === 'sameMonthsYoY') {
+    // A = последние 6 мес (или сколько есть в этом году от начала года — берём 6)
+    const aTo = last;
+    const aFrom = shiftMonth(last, -5);   // 6 мес.
+    customPeriodA = { from: aFrom, to: aTo };
+    customPeriodB = { from: shiftMonth(aFrom, -12), to: shiftMonth(aTo, -12) };
+  } else if (preset === 'h1yoY') {
+    customPeriodA = { from: `${ly}-01`, to: `${ly}-06` };
+    customPeriodB = { from: `${ly-1}-01`, to: `${ly-1}-06` };
+  } else if (preset === 'ytdYoY') {
+    // Январь..last-month текущего года vs те же месяцы прошлого
+    customPeriodA = { from: `${ly}-01`, to: last };
+    const lm = last.split('-')[1];
+    customPeriodB = { from: `${ly-1}-01`, to: `${ly-1}-${lm}` };
+  }
+  populateCustomPeriodSelects();
+  q('#cpAFrom').value = customPeriodA.from;
+  q('#cpATo').value   = customPeriodA.to;
+  q('#cpBFrom').value = customPeriodB.from;
+  q('#cpBTo').value   = customPeriodB.to;
+  onCustomPeriodChange();
+};
+window.onCustomPeriodChange = () => {
+  const a = { from: q('#cpAFrom').value, to: q('#cpATo').value };
+  const b = { from: q('#cpBFrom').value, to: q('#cpBTo').value };
+  // Мягкая коррекция: если from > to, свапаем
+  if (a.from > a.to) [a.from, a.to] = [a.to, a.from];
+  if (b.from > b.to) [b.from, b.to] = [b.to, b.from];
+  customPeriodA = a;
+  customPeriodB = b;
+  q('#cpAFrom').value = a.from; q('#cpATo').value = a.to;
+  q('#cpBFrom').value = b.from; q('#cpBTo').value = b.to;
+  const info = q('#customPeriodInfo');
+  if (info) {
+    const aLen = monthsBetween(a.from, a.to).length;
+    const bLen = monthsBetween(b.from, b.to).length;
+    const warn = aLen !== bLen
+      ? ` <span style="color:#dc2626;font-weight:600">⚠ разная длина: A=${aLen} мес., B=${bLen} мес.</span>`
+      : ` <span style="color:#166534;font-weight:600">✓ окна одинаковой длины (${aLen} мес.)</span>`;
+    info.innerHTML = `Сравниваем: <b>${fmtMonthCode(a.from)}—${fmtMonthCode(a.to)}</b> vs <b>${fmtMonthCode(b.from)}—${fmtMonthCode(b.to)}</b>.${warn}`;
+  }
+  if (clientTrendMode === 'custom') {
+    const help = q('#helpTrend');
+    if (help && help.style.display === 'block') help.innerHTML = buildTrendHelp();
+    renderTop20Section();
+    if (state.customer) render();
+  }
 };
 
 window.showClientTip = (event, row) => {
