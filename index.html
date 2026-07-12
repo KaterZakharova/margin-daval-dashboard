@@ -382,6 +382,12 @@
           </div>
         </div>
       </div>
+      <div style="font-size:11.5px;color:var(--muted);margin:0 0 10px;line-height:1.5;background:#f7f8fa;border:1px solid var(--line);border-radius:6px;padding:7px 10px">
+        <b style="color:var(--ink)">Статус SKU у клиента</b> (по отгрузкам, per-клиент):
+        <span style="color:#168a5b;font-weight:600">✦ Новинка</span> — первая отгрузка ≤ 6 мес. назад ·
+        <span style="color:#8a5a10;font-weight:600">↓ Выводится</span> — последняя отгрузка > 6 мес. назад (заказы бывают раз в квартал, отгрузка уходит в 4-5 мес., поэтому окно 6 мес.) ·
+        <span style="color:var(--ink);font-weight:600">Основной</span> — всё остальное.
+      </div>
       <div id="skuAnalysisTable"></div>
       <div id="skuAnalysisDrill" style="margin-top:18px"></div>
     </section>
@@ -1533,7 +1539,7 @@ function renderSkuAnalysis() {
   // cutoffs для статуса — глобально по всем данным (как и в детализации)
   const globalMonths = uniq(DATA.sales.filter(x=>!EXCLUDE_CUSTOMERS.has(x.customer)).map(x=>x.month)).sort();
   const newCutoff  = globalMonths.slice(-6)[0] || '';
-  const exitCutoff = globalMonths.slice(-3)[0] || '';
+  const exitCutoff = globalMonths.slice(-6)[0] || '';
 
   // группируем по (sku, customer)
   const pairMap = new Map();
@@ -1644,7 +1650,7 @@ function renderSkuAnalysis() {
       const stBadge = p.status==='new'
         ? `<span class="sku-new" title="Первая отгрузка ${fmtMonthCode(p.firstShip)} — ≤ 6 мес. назад">✦ Новинка</span>`
         : p.status==='exit'
-          ? `<span class="sku-exit" title="Последняя отгрузка ${fmtMonthCode(p.lastShip)} — больше 3 мес. назад">↓ Выводится</span>`
+          ? `<span class="sku-exit" title="Последняя отгрузка ${fmtMonthCode(p.lastShip)} — больше 6 мес. назад">↓ Выводится</span>`
           : `<span class="sku-core">Основной</span>`;
       const trBadge = p.trend==='lost'    ? `<span class="trend-badge-lost" title="Нет продаж в текущем окне">⚠ Нет</span>`
                     : p.trend==='falling' ? `<span class="trend-badge-fall">↓ ${Math.abs(Math.round(p.trendPct*100))}%</span>`
@@ -1992,7 +1998,7 @@ function renderDetail(rows) {
   const allCustSales = DATA.sales.filter(x => !EXCLUDE_CUSTOMERS.has(x.customer) && x.customer === state.customer);
   const globalMonths = uniq(DATA.sales.filter(x=>!EXCLUDE_CUSTOMERS.has(x.customer)).map(x=>x.month)).sort();
   const newCutoff  = globalMonths.slice(-6)[0] || '';
-  const exitCutoff = globalMonths.slice(-3)[0] || '';
+  const exitCutoff = globalMonths.slice(-6)[0] || '';
   const skuFirst = new Map(), skuLast = new Map();
   for (const r of allCustSales) {
     if (!skuFirst.has(r.sku) || r.month < skuFirst.get(r.sku)) skuFirst.set(r.sku, r.month);
@@ -2009,7 +2015,7 @@ function renderDetail(rows) {
     const first = skuFirst.get(sku) || '';
     const last  = skuLast.get(sku) || '';
     const tipNew  = `Новинка — первая отгрузка этому клиенту произошла не ранее ${fmtMonthCode(newCutoff)} (≤ 6 мес. назад от ${fmtMonthCode(globalMonths.slice(-1)[0]||'')}). Первая отгрузка: ${fmtMonthCode(first)||'—'}`;
-    const tipExit = `Выводится — последняя отгрузка была раньше ${fmtMonthCode(exitCutoff)} (нет продаж более 3 мес.). Последняя отгрузка: ${fmtMonthCode(last)||'—'}`;
+    const tipExit = `Выводится — последняя отгрузка была раньше ${fmtMonthCode(exitCutoff)} (нет продаж более 6 мес.). Последняя отгрузка: ${fmtMonthCode(last)||'—'}`;
     const tipCore = `Основной ассортимент — продаётся регулярно. Первая отгрузка: ${fmtMonthCode(first)||'—'}, последняя: ${fmtMonthCode(last)||'—'}`;
     return s==='new'  ? `<span class="sku-new"  title="${escapeHtml(tipNew)}">✦ Новинка</span>`
          : s==='exit' ? `<span class="sku-exit" title="${escapeHtml(tipExit)}">↓ Выводится</span>`
@@ -2093,11 +2099,17 @@ function renderDetail(rows) {
   // ── Фильтр статуса ассортимента (Все / Новинка / Основной / Выводится) ────
   const stBtn = (v,t) => `<button class="tab-btn ${skuStatusFilter===v?'active':''}" onclick="setSkuStatusFilter('${v}')">${t}</button>`;
   const currentBlock = `
-    <div style="display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:10px;margin:0 0 6px;flex-wrap:wrap">
       <span style="font-size:12px;color:var(--muted);font-weight:600">СТАТУС:</span>
       <div class="top20-tabs">
         ${stBtn('all','Все')}${stBtn('new','✦ Новинка')}${stBtn('core','Основной')}${stBtn('exit','↓ Выводится')}
       </div>
+    </div>
+    <div style="font-size:11.5px;color:var(--muted);margin:0 0 10px;line-height:1.5;background:#f7f8fa;border:1px solid var(--line);border-radius:6px;padding:7px 10px">
+      <b style="color:var(--ink)">Как считаются статусы SKU у клиента</b> (по отгрузкам, per-клиент):
+      <span style="color:#168a5b;font-weight:600">✦ Новинка</span> — первая отгрузка этому клиенту ≤ 6 мес. назад ·
+      <span style="color:#8a5a10;font-weight:600">↓ Выводится</span> — последняя отгрузка была > 6 мес. назад (заказы могут быть раз в квартал, отгрузки уходят в 4-5 месяц — поэтому окно 6 мес., а не 3) ·
+      <span style="color:var(--ink);font-weight:600">Основной</span> — всё остальное (регулярные продажи).
     </div>
     ${currentTable}`;
 
