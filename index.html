@@ -372,10 +372,6 @@
           <button class="tab-btn" onclick="setSkuAnalysisStatus('core')">Основной</button>
           <button class="tab-btn" onclick="setSkuAnalysisStatus('exit')">↓ Выводится</button>
         </div>
-        <span style="font-size:12px;color:var(--muted);font-weight:600;margin-left:8px">1-Я ОТГРУЗКА В ГОДУ:</span>
-        <select id="skuAnaFirstYearSel" onchange="setSkuAnalysisFirstYear(this.value)" title="Фильтр по году первой отгрузки SKU у клиента" style="font-size:12px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;min-width:110px">
-          <option value="all">все годы</option>
-        </select>
         <div style="flex:1"></div>
         <button class="btn" type="button" onclick="openSkuAnalysisInNewTab()" title="Открыть таблицу в новой вкладке">⤢ Раскрыть в новой вкладке</button>
         <div class="xlsx-drop" style="position:relative">
@@ -1597,19 +1593,9 @@ function renderSkuAnalysis() {
 
   // список годов первой отгрузки — из всех пар в текущем срезе (до status/year фильтров), desc
   const firstYearOpts = uniq(pairs.map(p => p.firstShip.slice(0,4))).sort((a,b) => b.localeCompare(a));
-  const fySel = q('#skuAnaFirstYearSel');
-  if (fySel) {
-    // сохранить выбор, обновить options
-    const cur = skuAnalysisFirstYear;
-    fySel.innerHTML = `<option value="all">все годы</option>` +
-      firstYearOpts.map(y => `<option value="${y}">${y}</option>`).join('');
-    fySel.value = firstYearOpts.includes(cur) || cur === 'all' ? cur : 'all';
-    if (fySel.value !== cur) skuAnalysisFirstYear = fySel.value;
-    // подсветка активного фильтра
-    const active = skuAnalysisFirstYear !== 'all';
-    fySel.style.background = active ? '#dbeafe' : '#fff';
-    fySel.style.fontWeight = active ? '600' : '400';
-    fySel.style.borderColor = active ? '#2563eb' : 'var(--line)';
+  // если ранее выбранный год пропал из среза — сбросить на 'all'
+  if (skuAnalysisFirstYear !== 'all' && !firstYearOpts.includes(skuAnalysisFirstYear)) {
+    skuAnalysisFirstYear = 'all';
   }
 
   // KPI шапка по отфильтрованным
@@ -1666,7 +1652,12 @@ function renderSkuAnalysis() {
       <th>Наименование</th>
       <th>Контрагент</th>
       <th>Статус</th>
-      <th>1-я отгрузка</th>
+      <th style="white-space:nowrap">1-я отгрузка
+        <select onchange="setSkuAnalysisFirstYear(this.value)" onclick="event.stopPropagation()" title="Фильтр по году первой отгрузки" style="display:block;margin-top:4px;font-size:11px;padding:2px 5px;border:1px solid ${skuAnalysisFirstYear==='all'?'var(--line)':'#2563eb'};border-radius:4px;background:${skuAnalysisFirstYear==='all'?'#fff':'#dbeafe'};cursor:pointer;font-weight:${skuAnalysisFirstYear==='all'?400:600};color:var(--ink);width:100%">
+          <option value="all"${skuAnalysisFirstYear==='all'?' selected':''}>все годы</option>
+          ${firstYearOpts.map(y => `<option value="${y}"${skuAnalysisFirstYear===y?' selected':''}>${y}</option>`).join('')}
+        </select>
+      </th>
       <th class="num">Штук</th>
       <th class="num">Выручка ₽</th>
       <th class="num">Маржа ₽</th>
