@@ -1618,7 +1618,7 @@ function renderSkuAnalysis() {
     return `<svg width="${WW}" height="${HH}" style="display:inline-block;vertical-align:middle;margin-left:6px">${
       vals.map((v,i) => {
         const h = Math.max(1, (v/max)*HH);
-        const isR = i >= n - W;
+        const isR = i >= n - (_win.win || 6);
         const col = (p.trend==='falling'||p.trend==='lost') && isR ? '#d92d20'
                   : p.trend==='rising' && isR ? '#168a5b' : '#2563eb';
         return `<rect x="${i*(WW/n)}" y="${HH-h}" width="${bw}" height="${h}" fill="${col}" opacity="${isR?.9:.35}"/>`;
