@@ -1405,6 +1405,7 @@ window.exportSkuExcel = (mode) => {
 // ═══════════════════════════════════════════════════════════════════════════
 let skuAnalysisSort = 'marginRub';            // 'marginRub' | 'qty' | 'revenue'
 let skuAnalysisStatus = 'all';                // 'all' | 'new' | 'core' | 'exit'
+let skuAnalysisFirstYear = 'all';             // фильтр по году первой отгрузки: 'all' | '2024' | ...
 let skuAnalysisPicked = new Set();            // ключ = "sku|customer"
 let skuAnalysisClientFilter = null;           // null = все клиенты
 let skuAnalysisSelected = null;               // выбранный SKU для drill — "sku|customer"
@@ -1438,6 +1439,10 @@ window.setSkuAnalysisStatus = (s) => {
     b.classList.toggle('active', ['all','new','core','exit'][i] === s));
   renderSkuAnalysis();
 };
+window.setSkuAnalysisFirstYear = (y) => {
+  skuAnalysisFirstYear = y || 'all';
+  renderSkuAnalysis();
+};
 window.selectSkuAnalysisClient = (c) => {
   skuAnalysisClientFilter = (skuAnalysisClientFilter === c) ? null : c;
   skuAnalysisPicked.clear();
@@ -1453,6 +1458,7 @@ function monthQuarter(m) { return 'Q' + Math.ceil(Number(m.split('-')[1])/3); }
 
 window.resetSkuAnalysisAll = () => {
   skuAnalysisStatus = 'all';
+  skuAnalysisFirstYear = 'all';
   skuAnalysisClientFilter = null;
   skuAnalysisPicked.clear();
   skuAnalysisSelected = null;
@@ -1578,9 +1584,15 @@ function renderSkuAnalysis() {
     return p;
   });
 
-  const filtered = pairs.filter(p => skuAnalysisStatus === 'all' || p.status === skuAnalysisStatus);
+  const filtered = pairs.filter(p =>
+    (skuAnalysisStatus === 'all' || p.status === skuAnalysisStatus) &&
+    (skuAnalysisFirstYear === 'all' || p.firstShip.slice(0,4) === skuAnalysisFirstYear)
+  );
   const sortFld = skuAnalysisSort === 'qty' ? 'qty' : skuAnalysisSort === 'revenue' ? 'revenue' : 'marginRub';
   filtered.sort((a, b) => b[sortFld] - a[sortFld]);
+
+  // список годов первой отгрузки — из всех пар в текущем срезе (до status/year фильтров), desc
+  const firstYearOpts = uniq(pairs.map(p => p.firstShip.slice(0,4))).sort((a,b) => b.localeCompare(a));
 
   // KPI шапка по отфильтрованным
   const totalQty = filtered.reduce((s,p) => s + p.qty, 0);
@@ -1602,6 +1614,7 @@ function renderSkuAnalysis() {
   const resetBtn = q('#skuAnaResetBtn');
   if (resetBtn) {
     const anyActive = skuAnalysisStatus !== 'all'
+      || skuAnalysisFirstYear !== 'all'
       || skuAnalysisClientFilter
       || skuAnalysisPicked.size > 0
       || skuAnalysisSelected
@@ -1635,7 +1648,12 @@ function renderSkuAnalysis() {
       <th>Наименование</th>
       <th>Контрагент</th>
       <th>Статус</th>
-      <th>1-я отгрузка</th>
+      <th style="white-space:nowrap">1-я отгрузка
+        <select onchange="setSkuAnalysisFirstYear(this.value)" title="Фильтр по году первой отгрузки" style="margin-left:6px;font-size:11px;padding:1px 4px;border:1px solid var(--line);border-radius:4px;background:${skuAnalysisFirstYear==='all'?'#fff':'#dbeafe'};cursor:pointer;font-weight:${skuAnalysisFirstYear==='all'?400:600};color:${skuAnalysisFirstYear==='all'?'var(--muted)':'var(--ink)'}">
+          <option value="all"${skuAnalysisFirstYear==='all'?' selected':''}>все годы</option>
+          ${firstYearOpts.map(y => `<option value="${y}"${skuAnalysisFirstYear===y?' selected':''}>${y}</option>`).join('')}
+        </select>
+      </th>
       <th class="num">Штук</th>
       <th class="num">Выручка ₽</th>
       <th class="num">Маржа ₽</th>
