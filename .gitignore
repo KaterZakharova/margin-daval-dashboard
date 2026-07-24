@@ -4,3 +4,5 @@ node_modules/
 .vercel
 .claude/
 .claude-terminal
+
+Screenshot_*.png

@@ -1,0 +1,4996 @@
+{
+  "meta": {
+    "generatedAt": "2026-07-09 07:24:07",
+    "sourceFile": "data.json",
+    "sourceGeneratedAt": "2026-07-09 07:18:45",
+    "endDateExclusive": "2026-07-10",
+    "lastFullMonth": "2026-06",
+    "totalClients": 22,
+    "totalAllClientsS3": 162
+  },
+  "aggregate": [
+    {
+      "month": "2024-01",
+      "revenue": 8543489,
+      "qty": 123012,
+      "marginRub": 3736041
+    },
+    {
+      "month": "2024-02",
+      "revenue": 14266496,
+      "qty": 173489,
+      "marginRub": 5117155
+    },
+    {
+      "month": "2024-03",
+      "revenue": 21246868,
+      "qty": 294290,
+      "marginRub": 8875942
+    },
+    {
+      "month": "2024-04",
+      "revenue": 13363172,
+      "qty": 212809,
+      "marginRub": 5486628
+    },
+    {
+      "month": "2024-05",
+      "revenue": 16412031,
+      "qty": 204533,
+      "marginRub": 3857701
+    },
+    {
+      "month": "2024-06",
+      "revenue": 32838003,
+      "qty": 332162,
+      "marginRub": 13027643
+    },
+    {
+      "month": "2024-07",
+      "revenue": 25807817,
+      "qty": 258670,
+      "marginRub": 10330318
+    },
+    {
+      "month": "2024-08",
+      "revenue": 43214606,
+      "qty": 481530,
+      "marginRub": 17539692
+    },
+    {
+      "month": "2024-09",
+      "revenue": 21365943,
+      "qty": 287150,
+      "marginRub": 7974791
+    },
+    {
+      "month": "2024-10",
+      "revenue": 31097500,
+      "qty": 430062,
+      "marginRub": 12153818
+    },
+    {
+      "month": "2024-11",
+      "revenue": 28562309,
+      "qty": 351253,
+      "marginRub": 11143348
+    },
+    {
+      "month": "2024-12",
+      "revenue": 19578834,
+      "qty": 315792,
+      "marginRub": 8403189
+    },
+    {
+      "month": "2025-01",
+      "revenue": 26220375,
+      "qty": 305197,
+      "marginRub": 7861098
+    },
+    {
+      "month": "2025-02",
+      "revenue": 12935103,
+      "qty": 151428,
+      "marginRub": 6344444
+    },
+    {
+      "month": "2025-03",
+      "revenue": 16532924,
+      "qty": 243898,
+      "marginRub": 6951475
+    },
+    {
+      "month": "2025-04",
+      "revenue": 30399988,
+      "qty": 354940,
+      "marginRub": 11757873
+    },
+    {
+      "month": "2025-05",
+      "revenue": 28789225,
+      "qty": 566652,
+      "marginRub": 9554844
+    },
+    {
+      "month": "2025-06",
+      "revenue": 30696824,
+      "qty": 354330,
+      "marginRub": 12224027
+    },
+    {
+      "month": "2025-07",
+      "revenue": 23458663,
+      "qty": 306264,
+      "marginRub": 7385257
+    },
+    {
+      "month": "2025-08",
+      "revenue": 32916984,
+      "qty": 414050,
+      "marginRub": 11537823
+    },
+    {
+      "month": "2025-09",
+      "revenue": 38067956,
+      "qty": 394290,
+      "marginRub": 11035600
+    },
+    {
+      "month": "2025-10",
+      "revenue": 39243791,
+      "qty": 563849,
+      "marginRub": 13326397
+    },
+    {
+      "month": "2025-11",
+      "revenue": 49107937,
+      "qty": 649588,
+      "marginRub": 16843312
+    },
+    {
+      "month": "2025-12",
+      "revenue": 53639717,
+      "qty": 705983,
+      "marginRub": 18419308
+    },
+    {
+      "month": "2026-01",
+      "revenue": 32915399,
+      "qty": 359166,
+      "marginRub": 11215212
+    },
+    {
+      "month": "2026-02",
+      "revenue": 37573464,
+      "qty": 414942,
+      "marginRub": 13895055
+    },
+    {
+      "month": "2026-03",
+      "revenue": 31962143,
+      "qty": 419090,
+      "marginRub": 12771427
+    },
+    {
+      "month": "2026-04",
+      "revenue": 36063013,
+      "qty": 422461,
+      "marginRub": 13154909
+    },
+    {
+      "month": "2026-05",
+      "revenue": 24468351,
+      "qty": 296401,
+      "marginRub": 8993973
+    },
+    {
+      "month": "2026-06",
+      "revenue": 0,
+      "qty": 0,
+      "marginRub": 0
+    }
+  ],
+  "aggregateAll": [
+    {
+      "month": "2024-01",
+      "revenue": 11845348,
+      "qty": 196832,
+      "marginRub": 5320408
+    },
+    {
+      "month": "2024-02",
+      "revenue": 22886563,
+      "qty": 288676,
+      "marginRub": 8782478
+    },
+    {
+      "month": "2024-03",
+      "revenue": 27610029,
+      "qty": 443565,
+      "marginRub": 11563488
+    },
+    {
+      "month": "2024-04",
+      "revenue": 20933697,
+      "qty": 339932,
+      "marginRub": 8516043
+    },
+    {
+      "month": "2024-05",
+      "revenue": 24001980,
+      "qty": 346147,
+      "marginRub": 6610732
+    },
+    {
+      "month": "2024-06",
+      "revenue": 38217738,
+      "qty": 418750,
+      "marginRub": 15659971
+    },
+    {
+      "month": "2024-07",
+      "revenue": 31969163,
+      "qty": 350383,
+      "marginRub": 13173847
+    },
+    {
+      "month": "2024-08",
+      "revenue": 51980982,
+      "qty": 571389,
+      "marginRub": 21762430
+    },
+    {
+      "month": "2024-09",
+      "revenue": 29461890,
+      "qty": 384383,
+      "marginRub": 10198448
+    },
+    {
+      "month": "2024-10",
+      "revenue": 38024864,
+      "qty": 547105,
+      "marginRub": 14941286
+    },
+    {
+      "month": "2024-11",
+      "revenue": 35789970,
+      "qty": 408878,
+      "marginRub": 14527489
+    },
+    {
+      "month": "2024-12",
+      "revenue": 27903469,
+      "qty": 402376,
+      "marginRub": 11298155
+    },
+    {
+      "month": "2025-01",
+      "revenue": 30627271,
+      "qty": 352233,
+      "marginRub": 9556670
+    },
+    {
+      "month": "2025-02",
+      "revenue": 23135838,
+      "qty": 277598,
+      "marginRub": 10593739
+    },
+    {
+      "month": "2025-03",
+      "revenue": 24488536,
+      "qty": 360020,
+      "marginRub": 10557235
+    },
+    {
+      "month": "2025-04",
+      "revenue": 40932110,
+      "qty": 433440,
+      "marginRub": 15462635
+    },
+    {
+      "month": "2025-05",
+      "revenue": 36051307,
+      "qty": 630727,
+      "marginRub": 12731174
+    },
+    {
+      "month": "2025-06",
+      "revenue": 34229999,
+      "qty": 391054,
+      "marginRub": 13791517
+    },
+    {
+      "month": "2025-07",
+      "revenue": 28796071,
+      "qty": 370598,
+      "marginRub": 9879127
+    },
+    {
+      "month": "2025-08",
+      "revenue": 35748181,
+      "qty": 431490,
+      "marginRub": 12878629
+    },
+    {
+      "month": "2025-09",
+      "revenue": 45452142,
+      "qty": 451063,
+      "marginRub": 14265437
+    },
+    {
+      "month": "2025-10",
+      "revenue": 43959882,
+      "qty": 631084,
+      "marginRub": 15359826
+    },
+    {
+      "month": "2025-11",
+      "revenue": 55180431,
+      "qty": 717499,
+      "marginRub": 19399581
+    },
+    {
+      "month": "2025-12",
+      "revenue": 57606923,
+      "qty": 754977,
+      "marginRub": 20057928
+    },
+    {
+      "month": "2026-01",
+      "revenue": 34676845,
+      "qty": 382792,
+      "marginRub": 12051282
+    },
+    {
+      "month": "2026-02",
+      "revenue": 41433102,
+      "qty": 447286,
+      "marginRub": 15799239
+    },
+    {
+      "month": "2026-03",
+      "revenue": 35958076,
+      "qty": 460866,
+      "marginRub": 14726499
+    },
+    {
+      "month": "2026-04",
+      "revenue": 39085481,
+      "qty": 451934,
+      "marginRub": 14581384
+    },
+    {
+      "month": "2026-05",
+      "revenue": 28297057,
+      "qty": 332136,
+      "marginRub": 10564176
+    },
+    {
+      "month": "2026-06",
+      "revenue": 0,
+      "qty": 0,
+      "marginRub": 0
+    }
+  ],
+  "clients": [
+    {
+      "slug": "gorelov",
+      "name": "Горелов Никита Александрович ИП",
+      "displayName": "Горелов Н.А. ИП",
+      "rank": 1,
+      "managers": [
+        "Темрина Наталья"
+      ],
+      "topScheme": "Давальческая схема",
+      "firstMonth": "2024-01",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-01",
+          "revenue": 2381057.87,
+          "qty": 37315,
+          "marginRub": 1229203.05
+        },
+        {
+          "month": "2024-02",
+          "revenue": 1308243.02,
+          "qty": 18548,
+          "marginRub": 668108.26
+        },
+        {
+          "month": "2024-03",
+          "revenue": 5194234.98,
+          "qty": 71757,
+          "marginRub": 2763759.62
+        },
+        {
+          "month": "2024-04",
+          "revenue": 2882767.3600000003,
+          "qty": 36463,
+          "marginRub": 1667869.4900000002
+        },
+        {
+          "month": "2024-05",
+          "revenue": 404322.8,
+          "qty": 4137,
+          "marginRub": 192136.07
+        },
+        {
+          "month": "2024-06",
+          "revenue": 1985259.8399999999,
+          "qty": 33208,
+          "marginRub": 1026131.4500000002
+        },
+        {
+          "month": "2024-07",
+          "revenue": 1059922.47,
+          "qty": 18565,
+          "marginRub": 550875.3
+        },
+        {
+          "month": "2024-08",
+          "revenue": 3563382.1,
+          "qty": 53788,
+          "marginRub": 1819631.27
+        },
+        {
+          "month": "2024-09",
+          "revenue": 1633342.7,
+          "qty": 26395,
+          "marginRub": 931381.59
+        },
+        {
+          "month": "2024-10",
+          "revenue": 6460187.059999999,
+          "qty": 92580,
+          "marginRub": 3226044.5999999996
+        },
+        {
+          "month": "2024-11",
+          "revenue": 6863011.94,
+          "qty": 109607,
+          "marginRub": 3485006.33
+        },
+        {
+          "month": "2024-12",
+          "revenue": 9877390.33,
+          "qty": 145404,
+          "marginRub": 5056914.7
+        },
+        {
+          "month": "2025-01",
+          "revenue": 4844310.140000001,
+          "qty": 65803,
+          "marginRub": 2287917.85
+        },
+        {
+          "month": "2025-02",
+          "revenue": 4387017.31,
+          "qty": 71069,
+          "marginRub": 2199475.8299999996
+        },
+        {
+          "month": "2025-03",
+          "revenue": 2797733.42,
+          "qty": 39637,
+          "marginRub": 1433523.9
+        },
+        {
+          "month": "2025-04",
+          "revenue": 6687822.2,
+          "qty": 83866,
+          "marginRub": 3167540.39
+        },
+        {
+          "month": "2025-05",
+          "revenue": 2146700.36,
+          "qty": 37117,
+          "marginRub": 1048574.49
+        },
+        {
+          "month": "2025-06",
+          "revenue": 1632092.74,
+          "qty": 27277,
+          "marginRub": 708352.22
+        },
+        {
+          "month": "2025-07",
+          "revenue": 1331885.65,
+          "qty": 25075,
+          "marginRub": 640026.56
+        },
+        {
+          "month": "2025-08",
+          "revenue": 4980154.52,
+          "qty": 77652,
+          "marginRub": 2348293.14
+        },
+        {
+          "month": "2025-09",
+          "revenue": 2578602.7700000005,
+          "qty": 41769,
+          "marginRub": 1095266.52
+        },
+        {
+          "month": "2025-10",
+          "revenue": 4118369.9699999997,
+          "qty": 77211,
+          "marginRub": 2207556.3499999996
+        },
+        {
+          "month": "2025-11",
+          "revenue": 10227831.17,
+          "qty": 152745,
+          "marginRub": 4463291.25
+        },
+        {
+          "month": "2025-12",
+          "revenue": 9055807.16,
+          "qty": 134541,
+          "marginRub": 4598243.86
+        },
+        {
+          "month": "2026-01",
+          "revenue": 3951947.5600000005,
+          "qty": 59193,
+          "marginRub": 1835101.2200000002
+        },
+        {
+          "month": "2026-02",
+          "revenue": 2015139.1899999997,
+          "qty": 29936,
+          "marginRub": 861573.35
+        },
+        {
+          "month": "2026-03",
+          "revenue": 6069979.62,
+          "qty": 92940,
+          "marginRub": 2592560.7600000002
+        },
+        {
+          "month": "2026-04",
+          "revenue": 2205683.37,
+          "qty": 30854,
+          "marginRub": 1026622.56
+        },
+        {
+          "month": "2026-05",
+          "revenue": 2786397.05,
+          "qty": 42485,
+          "marginRub": 1115232.27
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 43613122,
+        "revenue2025Full": 54788327,
+        "revenueYtd2025": 20863583,
+        "revenueYtd2026": 17029147,
+        "qty2024Full": 647767,
+        "qty2025Full": 833762,
+        "margin2024Full": 22617062,
+        "margin2025Full": 26198062,
+        "forecast2026": 42572867,
+        "forecastSource": "seasonal",
+        "forecastCapped": true,
+        "deltaAbs": -12215460,
+        "deltaPct": -22.3,
+        "ytdDeltaPct": -18.4,
+        "peakRevenue": 54788327,
+        "peakYear": 2025,
+        "recoveryPct": 77.7,
+        "deltaVsPeak": -12215460
+      },
+      "status": "down",
+      "statusLabel": "падает",
+      "topSkus": [
+        {
+          "sku": "KMCB50",
+          "name": "KATIEMUR Увлажняющий крем для лица, омолаживающий, восстанавливающий с гиалуроновой кислотой, 50мл",
+          "revenue2025": 10238781.06
+        },
+        {
+          "sku": "KMSA",
+          "name": "KATIEMUR Сыворотка для лица антивозрастная с ретинолом, 30 мл",
+          "revenue2025": 8001004.86
+        },
+        {
+          "sku": "KMPP",
+          "name": "KATIEMUR Пенка для умывания Anti-Acne, 150 мл",
+          "revenue2025": 6938594.76
+        }
+      ],
+      "mergedFrom": [
+        "Горелов Никита Александрович ИП (S3)"
+      ]
+    },
+    {
+      "slug": "matrix",
+      "name": "МАТРИКС ООО",
+      "displayName": "МАТРИКС",
+      "rank": 2,
+      "managers": [
+        "Клементьева Екатерина Борисовна"
+      ],
+      "topScheme": "Под ключ",
+      "firstMonth": "2024-02",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-02",
+          "revenue": 5253909.17,
+          "qty": 52303,
+          "marginRub": 1694090.45
+        },
+        {
+          "month": "2024-03",
+          "revenue": 921930.67,
+          "qty": 7933,
+          "marginRub": 403804.27
+        },
+        {
+          "month": "2024-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-05",
+          "revenue": 4206960.32,
+          "qty": 29973,
+          "marginRub": 1395492.92
+        },
+        {
+          "month": "2024-06",
+          "revenue": 17910105.37,
+          "qty": 136203,
+          "marginRub": 7045966.680000002
+        },
+        {
+          "month": "2024-07",
+          "revenue": 10070473.57,
+          "qty": 64431,
+          "marginRub": 3863145.2
+        },
+        {
+          "month": "2024-08",
+          "revenue": 22531772.380000003,
+          "qty": 195294,
+          "marginRub": 8696528.389999999
+        },
+        {
+          "month": "2024-09",
+          "revenue": 6495917,
+          "qty": 54529,
+          "marginRub": 2409451.55
+        },
+        {
+          "month": "2024-10",
+          "revenue": 7038740.7,
+          "qty": 70463,
+          "marginRub": 2377590.8899999997
+        },
+        {
+          "month": "2024-11",
+          "revenue": 6929098.17,
+          "qty": 50889,
+          "marginRub": 2665449.3000000003
+        },
+        {
+          "month": "2024-12",
+          "revenue": 1930337.84,
+          "qty": 19699,
+          "marginRub": 665268.06
+        },
+        {
+          "month": "2025-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-03",
+          "revenue": 369762.89,
+          "qty": 28237,
+          "marginRub": 156368.66999999998
+        },
+        {
+          "month": "2025-04",
+          "revenue": 5820776.27,
+          "qty": 56068,
+          "marginRub": 2152659.19
+        },
+        {
+          "month": "2025-05",
+          "revenue": 8918971.65,
+          "qty": 306202,
+          "marginRub": 1722195.1299999997
+        },
+        {
+          "month": "2025-06",
+          "revenue": 6592259.41,
+          "qty": 61570,
+          "marginRub": 2386350.3099999996
+        },
+        {
+          "month": "2025-07",
+          "revenue": 115033.33,
+          "qty": 1,
+          "marginRub": 115033.33
+        },
+        {
+          "month": "2025-08",
+          "revenue": 6352808.13,
+          "qty": 51959,
+          "marginRub": 2259131.32
+        },
+        {
+          "month": "2025-09",
+          "revenue": 12251798.649999999,
+          "qty": 116437,
+          "marginRub": 4054497.96
+        },
+        {
+          "month": "2025-10",
+          "revenue": 4022666.3,
+          "qty": 33445,
+          "marginRub": 1169306.47
+        },
+        {
+          "month": "2025-11",
+          "revenue": 2129249.52,
+          "qty": 15881,
+          "marginRub": 730221.46
+        },
+        {
+          "month": "2025-12",
+          "revenue": 1476736.72,
+          "qty": 14752,
+          "marginRub": 571443.1
+        },
+        {
+          "month": "2026-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-02",
+          "revenue": 2816921.41,
+          "qty": 26010,
+          "marginRub": 1112740.7
+        },
+        {
+          "month": "2026-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-04",
+          "revenue": 3388479.31,
+          "qty": 32619,
+          "marginRub": 995108.58
+        },
+        {
+          "month": "2026-05",
+          "revenue": -1005963.45,
+          "qty": -8502,
+          "marginRub": -351253.47
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 83289245,
+        "revenue2025Full": 48050063,
+        "revenueYtd2025": 15109511,
+        "revenueYtd2026": 5199437,
+        "qty2024Full": 681717,
+        "qty2025Full": 684552,
+        "margin2024Full": 31216788,
+        "margin2025Full": 15317207,
+        "forecast2026": 12998593,
+        "forecastSource": "seasonal",
+        "forecastCapped": true,
+        "deltaAbs": -35051470,
+        "deltaPct": -72.9,
+        "ytdDeltaPct": -65.6,
+        "peakRevenue": 83289245,
+        "peakYear": 2024,
+        "recoveryPct": 15.6,
+        "deltaVsPeak": -70290652
+      },
+      "status": "crash",
+      "statusLabel": "обвал (16% от 2024)",
+      "topSkus": [
+        {
+          "sku": "LAGR001",
+          "name": "LA GRASE Жидкость для укладки волос Double Volume, 150 мл",
+          "revenue2025": 9655777.72
+        },
+        {
+          "sku": "LAGR002",
+          "name": "LA GRASE Жидкость для укладки волос Extra Power, 150 мл",
+          "revenue2025": 6842792.9
+        },
+        {
+          "sku": "LAGR004",
+          "name": "LAGRASE Восстанавливающий шампунь для сухих и поврежденных волос «Hi, repair», 500 мл",
+          "revenue2025": 5683135.56
+        }
+      ],
+      "mergedFrom": [
+        "МАТРИКС ООО (S3)"
+      ]
+    },
+    {
+      "slug": "integral",
+      "name": "ИНТЕГРАААЛ ООО",
+      "displayName": "ИНТЕГРАААЛ",
+      "rank": 3,
+      "managers": [
+        "Темрина Наталья"
+      ],
+      "topScheme": "Давальческая схема",
+      "firstMonth": "2024-01",
+      "lastMonth": "2026-02",
+      "monthly": [
+        {
+          "month": "2024-01",
+          "revenue": 502234.31999999995,
+          "qty": 6558,
+          "marginRub": 192615.99
+        },
+        {
+          "month": "2024-02",
+          "revenue": 929127.26,
+          "qty": 10327,
+          "marginRub": 426451.7
+        },
+        {
+          "month": "2024-03",
+          "revenue": 1046386.6499999999,
+          "qty": 7417,
+          "marginRub": 374937.18
+        },
+        {
+          "month": "2024-04",
+          "revenue": 1410969.19,
+          "qty": 17221,
+          "marginRub": 599844.29
+        },
+        {
+          "month": "2024-05",
+          "revenue": 871720.6599999999,
+          "qty": 12036,
+          "marginRub": 543294.66
+        },
+        {
+          "month": "2024-06",
+          "revenue": 2421446.5,
+          "qty": 55098,
+          "marginRub": 1630221.47
+        },
+        {
+          "month": "2024-07",
+          "revenue": 453783.83999999997,
+          "qty": 6217,
+          "marginRub": 153637.23
+        },
+        {
+          "month": "2024-08",
+          "revenue": 2796030.7,
+          "qty": 38044,
+          "marginRub": 1418111.6099999999
+        },
+        {
+          "month": "2024-09",
+          "revenue": 1641594.87,
+          "qty": 17180,
+          "marginRub": 640053.7300000001
+        },
+        {
+          "month": "2024-10",
+          "revenue": 330104.13,
+          "qty": 4424,
+          "marginRub": 124520.85
+        },
+        {
+          "month": "2024-11",
+          "revenue": 1307558.58,
+          "qty": 24617,
+          "marginRub": 627518.49
+        },
+        {
+          "month": "2024-12",
+          "revenue": 2203511.8699999996,
+          "qty": 58559,
+          "marginRub": 1001814.9999999999
+        },
+        {
+          "month": "2025-01",
+          "revenue": 3125072.2,
+          "qty": 38323,
+          "marginRub": 1690165.3
+        },
+        {
+          "month": "2025-02",
+          "revenue": 2093491.5999999999,
+          "qty": 25348,
+          "marginRub": 1090911.6900000002
+        },
+        {
+          "month": "2025-03",
+          "revenue": 2155951.13,
+          "qty": 28452,
+          "marginRub": 978893.63
+        },
+        {
+          "month": "2025-04",
+          "revenue": 6624542.88,
+          "qty": 106943,
+          "marginRub": 3049997.9299999997
+        },
+        {
+          "month": "2025-05",
+          "revenue": 5899516.119999999,
+          "qty": 83135,
+          "marginRub": 2736904.0000000005
+        },
+        {
+          "month": "2025-06",
+          "revenue": 12527210.45,
+          "qty": 158464,
+          "marginRub": 5299261.93
+        },
+        {
+          "month": "2025-07",
+          "revenue": 4805792.859999999,
+          "qty": 81184,
+          "marginRub": 1528151.02
+        },
+        {
+          "month": "2025-08",
+          "revenue": 140922.88,
+          "qty": 57,
+          "marginRub": 118875.93000000001
+        },
+        {
+          "month": "2025-09",
+          "revenue": 890482.62,
+          "qty": 10045,
+          "marginRub": 419652.65
+        },
+        {
+          "month": "2025-10",
+          "revenue": 39110.91,
+          "qty": 53,
+          "marginRub": 33271.75
+        },
+        {
+          "month": "2025-11",
+          "revenue": 1167736.72,
+          "qty": 24677,
+          "marginRub": 530828.37
+        },
+        {
+          "month": "2025-12",
+          "revenue": 801650.65,
+          "qty": 8757,
+          "marginRub": 397960.93
+        },
+        {
+          "month": "2026-01",
+          "revenue": 4490416.609999999,
+          "qty": 50164,
+          "marginRub": 2101348.5
+        },
+        {
+          "month": "2026-02",
+          "revenue": 3421804.8200000003,
+          "qty": 37247,
+          "marginRub": 1919769.7000000002
+        },
+        {
+          "month": "2026-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 15914469,
+        "revenue2025Full": 40271481,
+        "revenueYtd2025": 19898574,
+        "revenueYtd2026": 7912221,
+        "qty2024Full": 257698,
+        "qty2025Full": 565438,
+        "margin2024Full": 7733022,
+        "margin2025Full": 17874875,
+        "forecast2026": 16013051,
+        "forecastSource": "seasonal",
+        "forecastCapped": false,
+        "deltaAbs": -24258430,
+        "deltaPct": -60.2,
+        "ytdDeltaPct": -60.2,
+        "peakRevenue": 40271481,
+        "peakYear": 2025,
+        "recoveryPct": 39.8,
+        "deltaVsPeak": -24258430
+      },
+      "status": "crash",
+      "statusLabel": "обвал",
+      "topSkus": [
+        {
+          "sku": "CLPLUS003",
+          "name": "CLEAN+ Крем для лица VITAMIN C, 50 мл",
+          "revenue2025": 7832583.51
+        },
+        {
+          "sku": "TMS010",
+          "name": "TO MY SKIN Сыворотка с ретинолом, 30 мл",
+          "revenue2025": 6393132.7
+        },
+        {
+          "sku": "TMS004_2",
+          "name": "TO MY SKIN Гель для умывания VITAMIN C & NIACINAMIDE, 200 мл (без термо)",
+          "revenue2025": 3779463.1
+        }
+      ],
+      "mergedFrom": [
+        "ИНТЕГРАААЛ ООО (S3)"
+      ]
+    },
+    {
+      "slug": "uvelit",
+      "name": "ЮВЕЛИТ АО",
+      "displayName": "ЮВЕЛИТ (бывш. ЛАКСА)",
+      "rank": 4,
+      "managers": [
+        "Темрина Наталья",
+        "Прохоренко Дарья"
+      ],
+      "topScheme": "Под ключ",
+      "firstMonth": "2024-01",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-01",
+          "revenue": 1200240,
+          "qty": 10800,
+          "marginRub": 481186.32
+        },
+        {
+          "month": "2024-02",
+          "revenue": 1214435.2,
+          "qty": 10675,
+          "marginRub": -6379.700000000001
+        },
+        {
+          "month": "2024-03",
+          "revenue": 896000,
+          "qty": 8000,
+          "marginRub": -31440
+        },
+        {
+          "month": "2024-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-05",
+          "revenue": 5254175.04,
+          "qty": 48583,
+          "marginRub": -302147.95
+        },
+        {
+          "month": "2024-06",
+          "revenue": 3290622.75,
+          "qty": 31302,
+          "marginRub": -299233.70999999996
+        },
+        {
+          "month": "2024-07",
+          "revenue": 2918714.53,
+          "qty": 27764,
+          "marginRub": 178685.37
+        },
+        {
+          "month": "2024-08",
+          "revenue": 4055407.12,
+          "qty": 38577,
+          "marginRub": 248242.99
+        },
+        {
+          "month": "2024-09",
+          "revenue": 1584549.12,
+          "qty": 15073,
+          "marginRub": 96994.75
+        },
+        {
+          "month": "2024-10",
+          "revenue": 3274693.12,
+          "qty": 29271,
+          "marginRub": 385938.13
+        },
+        {
+          "month": "2024-11",
+          "revenue": 5083683.11,
+          "qty": 46585,
+          "marginRub": 486209.46
+        },
+        {
+          "month": "2024-12",
+          "revenue": 2062210.62,
+          "qty": 18565,
+          "marginRub": 230030.77
+        },
+        {
+          "month": "2025-01",
+          "revenue": 12716219.24,
+          "qty": 114660,
+          "marginRub": 1400423.8399999999
+        },
+        {
+          "month": "2025-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-04",
+          "revenue": 2572232.92,
+          "qty": 22542,
+          "marginRub": -54856.46
+        },
+        {
+          "month": "2025-05",
+          "revenue": 4100194.15,
+          "qty": 34242,
+          "marginRub": 568914.43
+        },
+        {
+          "month": "2025-06",
+          "revenue": 781553.86,
+          "qty": 6527,
+          "marginRub": -32675.22
+        },
+        {
+          "month": "2025-07",
+          "revenue": 4919853.25,
+          "qty": 34710,
+          "marginRub": 298364.35
+        },
+        {
+          "month": "2025-08",
+          "revenue": 5976319.66,
+          "qty": 38680,
+          "marginRub": 913692.4199999999
+        },
+        {
+          "month": "2025-09",
+          "revenue": 12049912.52,
+          "qty": 72463,
+          "marginRub": 1768672.32
+        },
+        {
+          "month": "2025-10",
+          "revenue": 6526540.13,
+          "qty": 47340,
+          "marginRub": 1265370.75
+        },
+        {
+          "month": "2025-11",
+          "revenue": 9272952.219999999,
+          "qty": 64211,
+          "marginRub": 1251995.2200000002
+        },
+        {
+          "month": "2025-12",
+          "revenue": 11871505.77,
+          "qty": 85996,
+          "marginRub": 1670105.69
+        },
+        {
+          "month": "2026-01",
+          "revenue": 8363729.100000001,
+          "qty": 58450,
+          "marginRub": 845665.1
+        },
+        {
+          "month": "2026-02",
+          "revenue": 11002330.399999999,
+          "qty": 63144,
+          "marginRub": 2353850.46
+        },
+        {
+          "month": "2026-03",
+          "revenue": 1722382.55,
+          "qty": 19390,
+          "marginRub": 509163.83
+        },
+        {
+          "month": "2026-04",
+          "revenue": 11406226.259999998,
+          "qty": 116794,
+          "marginRub": 2424010.61
+        },
+        {
+          "month": "2026-05",
+          "revenue": 7100527.830000001,
+          "qty": 53131,
+          "marginRub": 2458822.6499999994
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 30834731,
+        "revenue2025Full": 70787284,
+        "revenueYtd2025": 19388646,
+        "revenueYtd2026": 39595196,
+        "qty2024Full": 285195,
+        "qty2025Full": 521371,
+        "margin2024Full": 1468086,
+        "margin2025Full": 9050007,
+        "forecast2026": 98987990,
+        "forecastSource": "seasonal",
+        "forecastCapped": true,
+        "deltaAbs": 28200707,
+        "deltaPct": 39.8,
+        "ytdDeltaPct": 104.2,
+        "peakRevenue": 70787284,
+        "peakYear": 2025,
+        "recoveryPct": 139.8,
+        "deltaVsPeak": 28200707
+      },
+      "status": "up",
+      "statusLabel": "растёт",
+      "topSkus": [
+        {
+          "sku": "SK005_1",
+          "name": "SOKOLOV Набор для ухода и чистки серебряных изделий FF",
+          "revenue2025": 33844579.64
+        },
+        {
+          "sku": "SK005",
+          "name": "SOKOLOV Набор для ухода и чистки серебряных изделий",
+          "revenue2025": 14300157.05
+        },
+        {
+          "sku": "SK004",
+          "name": "SOKOLOV Набор для ухода и чистки золотых изделий",
+          "revenue2025": 10261164.81
+        }
+      ],
+      "mergedFrom": [
+        "ЛАКСА ТРЕЙДИНГ АО (S3)",
+        "ЮВЕЛИТ АО (S3)"
+      ]
+    },
+    {
+      "slug": "kearly",
+      "name": "КЕАРЛИ ГРУПП ООО",
+      "displayName": "КЕАРЛИ ГРУПП",
+      "rank": 5,
+      "managers": [
+        "Лигостаева Елена Александровна"
+      ],
+      "topScheme": "Давальческая схема",
+      "firstMonth": "2024-01",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-01",
+          "revenue": 951129.74,
+          "qty": 10060,
+          "marginRub": 422152.91000000003
+        },
+        {
+          "month": "2024-02",
+          "revenue": 1793397.0999999996,
+          "qty": 21773,
+          "marginRub": 650573.87
+        },
+        {
+          "month": "2024-03",
+          "revenue": 5407348.489999999,
+          "qty": 66165,
+          "marginRub": 2199119.9099999997
+        },
+        {
+          "month": "2024-04",
+          "revenue": 5300237.0600000005,
+          "qty": 49498,
+          "marginRub": 1736752.04
+        },
+        {
+          "month": "2024-05",
+          "revenue": 1643307.19,
+          "qty": 20369,
+          "marginRub": 685382.7100000001
+        },
+        {
+          "month": "2024-06",
+          "revenue": 1093064.0299999998,
+          "qty": 13400,
+          "marginRub": 498477.6099999999
+        },
+        {
+          "month": "2024-07",
+          "revenue": 2822647.3400000003,
+          "qty": 38563,
+          "marginRub": 1351699.0899999999
+        },
+        {
+          "month": "2024-08",
+          "revenue": 3440391.5100000002,
+          "qty": 44891,
+          "marginRub": 1981554.3099999998
+        },
+        {
+          "month": "2024-09",
+          "revenue": 5712934.32,
+          "qty": 74981,
+          "marginRub": 2415182.639999999
+        },
+        {
+          "month": "2024-10",
+          "revenue": 1703387.57,
+          "qty": 21210,
+          "marginRub": 920990.9299999999
+        },
+        {
+          "month": "2024-11",
+          "revenue": 3236604.75,
+          "qty": 43708,
+          "marginRub": 1450101.41
+        },
+        {
+          "month": "2024-12",
+          "revenue": 1155329.45,
+          "qty": 16202,
+          "marginRub": 537818.3600000001
+        },
+        {
+          "month": "2025-01",
+          "revenue": 1429065.7000000002,
+          "qty": 18007,
+          "marginRub": 599654.78
+        },
+        {
+          "month": "2025-02",
+          "revenue": 642373.5299999999,
+          "qty": 9062,
+          "marginRub": 319647.48
+        },
+        {
+          "month": "2025-03",
+          "revenue": 686149.1,
+          "qty": 9881,
+          "marginRub": 306619.55
+        },
+        {
+          "month": "2025-04",
+          "revenue": 96972.8,
+          "qty": 2048,
+          "marginRub": 43315.2
+        },
+        {
+          "month": "2025-05",
+          "revenue": 838081.5599999999,
+          "qty": 14000,
+          "marginRub": 385221.11000000004
+        },
+        {
+          "month": "2025-06",
+          "revenue": 305926.5,
+          "qty": 2784,
+          "marginRub": 119197.62
+        },
+        {
+          "month": "2025-07",
+          "revenue": 151219.34,
+          "qty": 2024,
+          "marginRub": 78902.26999999999
+        },
+        {
+          "month": "2025-08",
+          "revenue": 712553.8700000001,
+          "qty": 11480,
+          "marginRub": 299403.64999999997
+        },
+        {
+          "month": "2025-09",
+          "revenue": 250261.94,
+          "qty": 4268,
+          "marginRub": 115197.68
+        },
+        {
+          "month": "2025-10",
+          "revenue": 102298.26000000001,
+          "qty": 1081,
+          "marginRub": 57599.79
+        },
+        {
+          "month": "2025-11",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-12",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-02",
+          "revenue": 147491.61,
+          "qty": 3003,
+          "marginRub": 87041.22
+        },
+        {
+          "month": "2026-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-04",
+          "revenue": 183924.59,
+          "qty": 2760,
+          "marginRub": 66320.99
+        },
+        {
+          "month": "2026-05",
+          "revenue": 332055.74,
+          "qty": 2200,
+          "marginRub": 125123.74
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 34259779,
+        "revenue2025Full": 5214903,
+        "revenueYtd2025": 3692643,
+        "revenueYtd2026": 663472,
+        "qty2024Full": 420820,
+        "qty2025Full": 74635,
+        "margin2024Full": 14849806,
+        "margin2025Full": 2324759,
+        "forecast2026": 936982,
+        "forecastSource": "seasonal",
+        "forecastCapped": false,
+        "deltaAbs": -4277920,
+        "deltaPct": -82,
+        "ytdDeltaPct": -82,
+        "peakRevenue": 34259779,
+        "peakYear": 2024,
+        "recoveryPct": 2.7,
+        "deltaVsPeak": -33322796
+      },
+      "status": "crash",
+      "statusLabel": "обвал (3% от 2024)",
+      "topSkus": [
+        {
+          "sku": "FACT100643",
+          "name": "ART&FACT Точечный крем для лица (Azelaic Acid + Salicylic Acid + Zinc PCA), 20 мл",
+          "revenue2025": 623582.21
+        },
+        {
+          "sku": "FACT100672",
+          "name": "ART&FACT Тоник для лица Face Tonic (Niacinamide + Chamomilla Recutita Flower Extract + Tea Tree Leaf Oil), 150 мл",
+          "revenue2025": 542640.99
+        },
+        {
+          "sku": "FACT100656",
+          "name": "ART&FACT Крем-флюид для лица Face Fluid (Azelaic Acid Derivative + Fructooligosaccharides + Vitamin C), 50 мл",
+          "revenue2025": 527245.9
+        }
+      ],
+      "mergedFrom": [
+        "КЕАРЛИ ГРУПП ООО"
+      ]
+    },
+    {
+      "slug": "mona-biolab",
+      "name": "МОНА БИОЛАБ ООО",
+      "displayName": "МОНА БИОЛАБ",
+      "rank": 6,
+      "managers": [
+        "Трофимова Юлия"
+      ],
+      "topScheme": "Под ключ",
+      "firstMonth": "2024-02",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-02",
+          "revenue": 284362.98,
+          "qty": 2702,
+          "marginRub": 125134.12
+        },
+        {
+          "month": "2024-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-04",
+          "revenue": 106096.13,
+          "qty": 1328,
+          "marginRub": 50147.49
+        },
+        {
+          "month": "2024-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-06",
+          "revenue": 387343.22,
+          "qty": 4967,
+          "marginRub": 178083.51
+        },
+        {
+          "month": "2024-07",
+          "revenue": 893081.1599999999,
+          "qty": 8725,
+          "marginRub": 425097.1
+        },
+        {
+          "month": "2024-08",
+          "revenue": 498703.42,
+          "qty": 6395,
+          "marginRub": 229282.07
+        },
+        {
+          "month": "2024-09",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-10",
+          "revenue": 399976.52,
+          "qty": 5129,
+          "marginRub": 178814.04
+        },
+        {
+          "month": "2024-11",
+          "revenue": 103657.67,
+          "qty": 1259,
+          "marginRub": 40531.41
+        },
+        {
+          "month": "2024-12",
+          "revenue": 624724.93,
+          "qty": 7444,
+          "marginRub": 267809.13
+        },
+        {
+          "month": "2025-01",
+          "revenue": 1344485.62,
+          "qty": 15931,
+          "marginRub": 513319.96
+        },
+        {
+          "month": "2025-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-03",
+          "revenue": 2105801.6,
+          "qty": 24749,
+          "marginRub": 858685.06
+        },
+        {
+          "month": "2025-04",
+          "revenue": 1722168.42,
+          "qty": 19767,
+          "marginRub": 708149.34
+        },
+        {
+          "month": "2025-05",
+          "revenue": 613296.43,
+          "qty": 5938,
+          "marginRub": 243477.79
+        },
+        {
+          "month": "2025-06",
+          "revenue": 2403128.9699999997,
+          "qty": 28708,
+          "marginRub": 1005527.5700000001
+        },
+        {
+          "month": "2025-07",
+          "revenue": 187706.75,
+          "qty": 2189,
+          "marginRub": 60066.16
+        },
+        {
+          "month": "2025-08",
+          "revenue": 1628670,
+          "qty": 18600,
+          "marginRub": 629529.6
+        },
+        {
+          "month": "2025-09",
+          "revenue": 1811247.97,
+          "qty": 21822,
+          "marginRub": 705821.56
+        },
+        {
+          "month": "2025-10",
+          "revenue": 2314899.1399999997,
+          "qty": 25608,
+          "marginRub": 880159.25
+        },
+        {
+          "month": "2025-11",
+          "revenue": 3067553,
+          "qty": 41396,
+          "marginRub": 1068266.64
+        },
+        {
+          "month": "2025-12",
+          "revenue": 4579329.89,
+          "qty": 64254,
+          "marginRub": 1482375.04
+        },
+        {
+          "month": "2026-01",
+          "revenue": 3966722.79,
+          "qty": 51485,
+          "marginRub": 1271973.29
+        },
+        {
+          "month": "2026-02",
+          "revenue": 1461202.5,
+          "qty": 20671,
+          "marginRub": 473128.7
+        },
+        {
+          "month": "2026-03",
+          "revenue": 5799519.920000001,
+          "qty": 72854,
+          "marginRub": 1982413
+        },
+        {
+          "month": "2026-04",
+          "revenue": 2021762.56,
+          "qty": 20376,
+          "marginRub": 705110.78
+        },
+        {
+          "month": "2026-05",
+          "revenue": 1208706.29,
+          "qty": 11754,
+          "marginRub": 576633.47
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 3297946,
+        "revenue2025Full": 21778288,
+        "revenueYtd2025": 5785752,
+        "revenueYtd2026": 14457914,
+        "qty2024Full": 37949,
+        "qty2025Full": 268962,
+        "margin2024Full": 1494899,
+        "margin2025Full": 8155378,
+        "forecast2026": 36144785,
+        "forecastSource": "seasonal",
+        "forecastCapped": true,
+        "deltaAbs": 14366497,
+        "deltaPct": 66,
+        "ytdDeltaPct": 149.9,
+        "peakRevenue": 21778288,
+        "peakYear": 2025,
+        "recoveryPct": 166,
+        "deltaVsPeak": 14366497
+      },
+      "status": "up",
+      "statusLabel": "растёт",
+      "topSkus": [
+        {
+          "sku": "MILL003",
+          "name": "MILLIMO Эмульсия для лица легкая дневная увлажняющая, 50 мл",
+          "revenue2025": 16764416.75
+        },
+        {
+          "sku": "MILL007",
+          "name": "MILLIMO  Маска для волос, 300 мл",
+          "revenue2025": 2211416.57
+        },
+        {
+          "sku": "MILL008",
+          "name": "MILLIMO Маска липидная для интенсивного восстановления волос, 300 мл",
+          "revenue2025": 1232233.65
+        }
+      ],
+      "mergedFrom": [
+        "МОНА БИОЛАБ ООО (S3)"
+      ]
+    },
+    {
+      "slug": "babykin",
+      "name": "Бабыкин Алексей Викторович ИП",
+      "displayName": "Бабыкин А.В. ИП",
+      "rank": 7,
+      "managers": [
+        "Мячина Ирина"
+      ],
+      "topScheme": "Смешанная схема",
+      "firstMonth": "2024-01",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-01",
+          "revenue": 169597.04,
+          "qty": 7004,
+          "marginRub": 119865.37999999999
+        },
+        {
+          "month": "2024-02",
+          "revenue": 715274.09,
+          "qty": 7427,
+          "marginRub": 346370.67
+        },
+        {
+          "month": "2024-03",
+          "revenue": 1588978.83,
+          "qty": 23422,
+          "marginRub": 544774.96
+        },
+        {
+          "month": "2024-04",
+          "revenue": 1142660.2,
+          "qty": 39137,
+          "marginRub": 453019.14
+        },
+        {
+          "month": "2024-05",
+          "revenue": 254708.33,
+          "qty": 5000,
+          "marginRub": 55148.29
+        },
+        {
+          "month": "2024-06",
+          "revenue": 1170999.16,
+          "qty": 5742,
+          "marginRub": 750491.96
+        },
+        {
+          "month": "2024-07",
+          "revenue": 3570546.8599999994,
+          "qty": 22997,
+          "marginRub": 2165152.87
+        },
+        {
+          "month": "2024-08",
+          "revenue": 2125757.79,
+          "qty": 12914,
+          "marginRub": 1265424.0899999999
+        },
+        {
+          "month": "2024-09",
+          "revenue": 32083.33,
+          "qty": 1,
+          "marginRub": 32083.33
+        },
+        {
+          "month": "2024-10",
+          "revenue": 893659.3400000001,
+          "qty": 3970,
+          "marginRub": 654702.4299999999
+        },
+        {
+          "month": "2024-11",
+          "revenue": 1192933.68,
+          "qty": 24900,
+          "marginRub": 790327.2100000001
+        },
+        {
+          "month": "2024-12",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-01",
+          "revenue": 548339.7,
+          "qty": 3058,
+          "marginRub": 338996.36
+        },
+        {
+          "month": "2025-02",
+          "revenue": 1645825.1600000001,
+          "qty": 6724,
+          "marginRub": 929598.9199999999
+        },
+        {
+          "month": "2025-03",
+          "revenue": 240899.67,
+          "qty": 1423,
+          "marginRub": 150339.95
+        },
+        {
+          "month": "2025-04",
+          "revenue": 235357.09,
+          "qty": 1614,
+          "marginRub": 159076.39
+        },
+        {
+          "month": "2025-05",
+          "revenue": 931171.96,
+          "qty": 4565,
+          "marginRub": 701492.73
+        },
+        {
+          "month": "2025-06",
+          "revenue": 447233.18,
+          "qty": 2582,
+          "marginRub": 311596.35
+        },
+        {
+          "month": "2025-07",
+          "revenue": 364362.8,
+          "qty": 2256,
+          "marginRub": 243802.16
+        },
+        {
+          "month": "2025-08",
+          "revenue": 350319.67,
+          "qty": 1691,
+          "marginRub": 243630.75
+        },
+        {
+          "month": "2025-09",
+          "revenue": 256508.51,
+          "qty": 1095,
+          "marginRub": 175735.94999999998
+        },
+        {
+          "month": "2025-10",
+          "revenue": 90717.88,
+          "qty": 20,
+          "marginRub": 84695.18
+        },
+        {
+          "month": "2025-11",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-12",
+          "revenue": 803971.0800000001,
+          "qty": 4790,
+          "marginRub": 682508.53
+        },
+        {
+          "month": "2026-01",
+          "revenue": 905792.49,
+          "qty": 3960,
+          "marginRub": 507103.97
+        },
+        {
+          "month": "2026-02",
+          "revenue": 864359.7400000001,
+          "qty": 5123,
+          "marginRub": 644916.5700000001
+        },
+        {
+          "month": "2026-03",
+          "revenue": 516756.56,
+          "qty": 1850,
+          "marginRub": 373992.06
+        },
+        {
+          "month": "2026-04",
+          "revenue": 1409597.8599999999,
+          "qty": 9817,
+          "marginRub": 1077479.04
+        },
+        {
+          "month": "2026-05",
+          "revenue": 1571639.92,
+          "qty": 9756,
+          "marginRub": 1124689.96
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 12857199,
+        "revenue2025Full": 5914707,
+        "revenueYtd2025": 3601594,
+        "revenueYtd2026": 5268147,
+        "qty2024Full": 152514,
+        "qty2025Full": 29818,
+        "margin2024Full": 7177360,
+        "margin2025Full": 4021473,
+        "forecast2026": 8651599,
+        "forecastSource": "seasonal",
+        "forecastCapped": false,
+        "deltaAbs": 2736892,
+        "deltaPct": 46.3,
+        "ytdDeltaPct": 46.3,
+        "peakRevenue": 12857199,
+        "peakYear": 2024,
+        "recoveryPct": 67.3,
+        "deltaVsPeak": -4205600
+      },
+      "status": "up",
+      "statusLabel": "растёт",
+      "topSkus": [
+        {
+          "sku": "SKIN020",
+          "name": "SKINJESTIQUE Пептидный крем с лифтинг эффектом Absolute Gorgeous firming, 50 мл",
+          "revenue2025": 733576.63
+        },
+        {
+          "sku": "SKIN038",
+          "name": "SKINJESTIQUE Лифтинг сыворотка с ретинолом для кожи вокруг глаз, 15 мл",
+          "revenue2025": 502645.83
+        },
+        {
+          "sku": "SKIN005",
+          "name": "SKINJESTIQUE Гидрофильное масло Perfect cleansing oil, 150 мл.",
+          "revenue2025": 453681.95
+        }
+      ],
+      "mergedFrom": [
+        "Бабыкин Алексей Викторович ИП (S3)"
+      ]
+    },
+    {
+      "slug": "healscare",
+      "name": "ХЭЛСКЕА СОЛЮШНС ООО",
+      "displayName": "ХЭЛСКЕА СОЛЮШНС",
+      "rank": 8,
+      "managers": [
+        "Ягнакова Надежда"
+      ],
+      "topScheme": "Давальческая схема",
+      "firstMonth": "2024-06",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-06",
+          "revenue": 1250,
+          "qty": 1,
+          "marginRub": 1250
+        },
+        {
+          "month": "2024-07",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-08",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-09",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-10",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-11",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-12",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-07",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-08",
+          "revenue": 3110233.58,
+          "qty": 39588,
+          "marginRub": 1162195.63
+        },
+        {
+          "month": "2025-09",
+          "revenue": 669133.5,
+          "qty": 12688,
+          "marginRub": 300970.5
+        },
+        {
+          "month": "2025-10",
+          "revenue": 7126229.57,
+          "qty": 102332,
+          "marginRub": 2639953.53
+        },
+        {
+          "month": "2025-11",
+          "revenue": 7113465.98,
+          "qty": 98820,
+          "marginRub": 2747684.3800000004
+        },
+        {
+          "month": "2025-12",
+          "revenue": 6808762.35,
+          "qty": 82359,
+          "marginRub": 2521377.19
+        },
+        {
+          "month": "2026-01",
+          "revenue": 5146830.16,
+          "qty": 74677,
+          "marginRub": 1608357.13
+        },
+        {
+          "month": "2026-02",
+          "revenue": 1826566.25,
+          "qty": 25322,
+          "marginRub": 584741.59
+        },
+        {
+          "month": "2026-03",
+          "revenue": 6562907.1,
+          "qty": 100076,
+          "marginRub": 2385823.91
+        },
+        {
+          "month": "2026-04",
+          "revenue": 2378876.26,
+          "qty": 28446,
+          "marginRub": 746512.48
+        },
+        {
+          "month": "2026-05",
+          "revenue": 797375.75,
+          "qty": 14573,
+          "marginRub": 126943.43000000001
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 1250,
+        "revenue2025Full": 24827825,
+        "revenueYtd2025": 0,
+        "revenueYtd2026": 16712556,
+        "qty2024Full": 1,
+        "qty2025Full": 335787,
+        "margin2024Full": 1250,
+        "margin2025Full": 9372181,
+        "forecast2026": 33425111,
+        "forecastSource": "naive",
+        "forecastCapped": false,
+        "deltaAbs": 8597286,
+        "deltaPct": 34.6,
+        "ytdDeltaPct": null,
+        "peakRevenue": 24827825,
+        "peakYear": 2025,
+        "recoveryPct": 134.6,
+        "deltaVsPeak": 8597286
+      },
+      "status": "up",
+      "statusLabel": "растёт",
+      "topSkus": [
+        {
+          "sku": "HEALTH003",
+          "name": "KOTTUR  Крем для тела \"Шлейф желания\", 300 мл",
+          "revenue2025": 9088205.38
+        },
+        {
+          "sku": "HEALTH001",
+          "name": "KOTTUR Крем воск от трещин с секретом мягкости, 100 мл",
+          "revenue2025": 6022315.77
+        },
+        {
+          "sku": "HEALTH004",
+          "name": "KOTTUR  Крем для тела \"Наедине с собой\", 300 мл",
+          "revenue2025": 5393269.1
+        }
+      ],
+      "mergedFrom": [
+        "ХЭЛСКЕА СОЛЮШНС ООО (S3)"
+      ]
+    },
+    {
+      "slug": "alekseyuk",
+      "name": "Алексеюк Алла Анатольевна ИП",
+      "displayName": "Алексеюк А.А. ИП",
+      "rank": 9,
+      "managers": [
+        "Темрина Наталья"
+      ],
+      "topScheme": "Под ключ",
+      "firstMonth": "2024-05",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-05",
+          "revenue": 99485.83,
+          "qty": 13200,
+          "marginRub": 9010.8
+        },
+        {
+          "month": "2024-06",
+          "revenue": 1857837.9100000001,
+          "qty": 15322,
+          "marginRub": 831613.8400000001
+        },
+        {
+          "month": "2024-07",
+          "revenue": 230964.83000000002,
+          "qty": 2893,
+          "marginRub": 116849.23
+        },
+        {
+          "month": "2024-08",
+          "revenue": 2000,
+          "qty": 2,
+          "marginRub": 2000
+        },
+        {
+          "month": "2024-09",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-10",
+          "revenue": 89637.62999999999,
+          "qty": 9540,
+          "marginRub": 17063.69
+        },
+        {
+          "month": "2024-11",
+          "revenue": 533877.1,
+          "qty": 2978,
+          "marginRub": 252148.91999999998
+        },
+        {
+          "month": "2024-12",
+          "revenue": 325309.87,
+          "qty": 3371,
+          "marginRub": 102002.08
+        },
+        {
+          "month": "2025-01",
+          "revenue": 173296.99,
+          "qty": 18861,
+          "marginRub": 38030.530000000006
+        },
+        {
+          "month": "2025-02",
+          "revenue": 1674615.97,
+          "qty": 9295,
+          "marginRub": 735351.77
+        },
+        {
+          "month": "2025-03",
+          "revenue": 151391.49999999997,
+          "qty": 15740,
+          "marginRub": 26192.680000000004
+        },
+        {
+          "month": "2025-04",
+          "revenue": 1325063.3900000001,
+          "qty": 8456,
+          "marginRub": 498740.73
+        },
+        {
+          "month": "2025-05",
+          "revenue": 221008.72,
+          "qty": 974,
+          "marginRub": 112261.62
+        },
+        {
+          "month": "2025-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-07",
+          "revenue": 1697399.5700000003,
+          "qty": 22655,
+          "marginRub": 824698.7699999999
+        },
+        {
+          "month": "2025-08",
+          "revenue": 797770.5900000001,
+          "qty": 5690,
+          "marginRub": 438926.7
+        },
+        {
+          "month": "2025-09",
+          "revenue": 149056.1,
+          "qty": 916,
+          "marginRub": 65095.54
+        },
+        {
+          "month": "2025-10",
+          "revenue": 371514.67000000004,
+          "qty": 20208,
+          "marginRub": 220914.66000000003
+        },
+        {
+          "month": "2025-11",
+          "revenue": 2600736.1500000004,
+          "qty": 20648,
+          "marginRub": 1265094.5799999998
+        },
+        {
+          "month": "2025-12",
+          "revenue": 1621491.01,
+          "qty": 54080,
+          "marginRub": 717397.9700000001
+        },
+        {
+          "month": "2026-01",
+          "revenue": 1624555.25,
+          "qty": 11341,
+          "marginRub": 721389.89
+        },
+        {
+          "month": "2026-02",
+          "revenue": 4301012.739999999,
+          "qty": 64140,
+          "marginRub": 1642931.48
+        },
+        {
+          "month": "2026-03",
+          "revenue": 2476191.94,
+          "qty": 14598,
+          "marginRub": 1048647.4000000001
+        },
+        {
+          "month": "2026-04",
+          "revenue": 7545786.61,
+          "qty": 107427,
+          "marginRub": 3451374.13
+        },
+        {
+          "month": "2026-05",
+          "revenue": 1957574.5,
+          "qty": 16390,
+          "marginRub": 858969.8700000001
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 3139113,
+        "revenue2025Full": 10783345,
+        "revenueYtd2025": 3545377,
+        "revenueYtd2026": 17905121,
+        "qty2024Full": 47306,
+        "qty2025Full": 177523,
+        "margin2024Full": 1330689,
+        "margin2025Full": 4942706,
+        "forecast2026": 44762803,
+        "forecastSource": "seasonal",
+        "forecastCapped": true,
+        "deltaAbs": 33979458,
+        "deltaPct": 315.1,
+        "ytdDeltaPct": 405,
+        "peakRevenue": 10783345,
+        "peakYear": 2025,
+        "recoveryPct": 415.1,
+        "deltaVsPeak": 33979458
+      },
+      "status": "up",
+      "statusLabel": "растёт",
+      "topSkus": [
+        {
+          "sku": "SOINT031",
+          "name": "SOINTERA Сыворотка для кожи головы с гиалуроновой кислотой с пептидом, 30 мл",
+          "revenue2025": 1606428.35
+        },
+        {
+          "sku": "SOINT015",
+          "name": "SOINTERA S15 Масло для восстановления волос, 100 мл",
+          "revenue2025": 1598534.4100000001
+        },
+        {
+          "sku": "SOINT026",
+          "name": "SOINTERA S15 Маска для восстановления волос, 500 мл",
+          "revenue2025": 1350512.44
+        }
+      ],
+      "mergedFrom": [
+        "Алексеюк Алла Анатольевна ИП (S3)"
+      ]
+    },
+    {
+      "slug": "myslinsky",
+      "name": "Мыслинский Иван Владимирович ИП",
+      "displayName": "Мыслинский И.В. ИП",
+      "rank": 10,
+      "managers": [
+        "Темрина Наталья"
+      ],
+      "topScheme": "Смешанная схема",
+      "firstMonth": "2024-01",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-01",
+          "revenue": 198558.55,
+          "qty": 1680,
+          "marginRub": 88593.45
+        },
+        {
+          "month": "2024-02",
+          "revenue": 779326.3,
+          "qty": 10078,
+          "marginRub": 467766.26
+        },
+        {
+          "month": "2024-03",
+          "revenue": 341600.08999999997,
+          "qty": 4027,
+          "marginRub": 155063.22
+        },
+        {
+          "month": "2024-04",
+          "revenue": 530333.3,
+          "qty": 6143,
+          "marginRub": 295171.08
+        },
+        {
+          "month": "2024-05",
+          "revenue": 518897.9199999999,
+          "qty": 7426,
+          "marginRub": 307218.42999999993
+        },
+        {
+          "month": "2024-06",
+          "revenue": 288205.59,
+          "qty": 3923,
+          "marginRub": 129437.66000000002
+        },
+        {
+          "month": "2024-07",
+          "revenue": 944861.2000000001,
+          "qty": 10199,
+          "marginRub": 467351.31
+        },
+        {
+          "month": "2024-08",
+          "revenue": 524791.3200000001,
+          "qty": 6938,
+          "marginRub": 266165.9
+        },
+        {
+          "month": "2024-09",
+          "revenue": 626910.88,
+          "qty": 9308,
+          "marginRub": 318657.64
+        },
+        {
+          "month": "2024-10",
+          "revenue": 1458336.0199999998,
+          "qty": 22684,
+          "marginRub": 704180.7699999999
+        },
+        {
+          "month": "2024-11",
+          "revenue": 607356.38,
+          "qty": 8931,
+          "marginRub": 303894.39999999997
+        },
+        {
+          "month": "2024-12",
+          "revenue": 431783.11,
+          "qty": 5764,
+          "marginRub": 211385.13
+        },
+        {
+          "month": "2025-01",
+          "revenue": 153196.28,
+          "qty": 2081,
+          "marginRub": 77281.4
+        },
+        {
+          "month": "2025-02",
+          "revenue": 259535.64,
+          "qty": 3277,
+          "marginRub": 109750.42
+        },
+        {
+          "month": "2025-03",
+          "revenue": 917992.96,
+          "qty": 11106,
+          "marginRub": 442786.93999999994
+        },
+        {
+          "month": "2025-04",
+          "revenue": 454483.56999999995,
+          "qty": 4976,
+          "marginRub": 211953.05
+        },
+        {
+          "month": "2025-05",
+          "revenue": 451309.52,
+          "qty": 6105,
+          "marginRub": 200741.16
+        },
+        {
+          "month": "2025-06",
+          "revenue": 1040073.71,
+          "qty": 13076,
+          "marginRub": 512586.74
+        },
+        {
+          "month": "2025-07",
+          "revenue": 1187810.24,
+          "qty": 14312,
+          "marginRub": 544254.8
+        },
+        {
+          "month": "2025-08",
+          "revenue": 808647.83,
+          "qty": 10606,
+          "marginRub": 346970.08
+        },
+        {
+          "month": "2025-09",
+          "revenue": 368201.19,
+          "qty": 3885,
+          "marginRub": 209912.44
+        },
+        {
+          "month": "2025-10",
+          "revenue": 898237.5099999999,
+          "qty": 12886,
+          "marginRub": 438169.71
+        },
+        {
+          "month": "2025-11",
+          "revenue": 1170086.95,
+          "qty": 16769,
+          "marginRub": 526181.57
+        },
+        {
+          "month": "2025-12",
+          "revenue": 1822600.7,
+          "qty": 21597,
+          "marginRub": 970683.0800000002
+        },
+        {
+          "month": "2026-01",
+          "revenue": 621824.1599999999,
+          "qty": 9163,
+          "marginRub": 386848.52
+        },
+        {
+          "month": "2026-02",
+          "revenue": 693540.9899999999,
+          "qty": 9692,
+          "marginRub": 354128.02
+        },
+        {
+          "month": "2026-03",
+          "revenue": 1381186.37,
+          "qty": 17213,
+          "marginRub": 724923.4100000001
+        },
+        {
+          "month": "2026-04",
+          "revenue": 1795092.81,
+          "qty": 20054,
+          "marginRub": 952097.77
+        },
+        {
+          "month": "2026-05",
+          "revenue": 746918.04,
+          "qty": 8943,
+          "marginRub": 317573.57
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 7250961,
+        "revenue2025Full": 9532176,
+        "revenueYtd2025": 2236518,
+        "revenueYtd2026": 5238562,
+        "qty2024Full": 97101,
+        "qty2025Full": 120676,
+        "margin2024Full": 3714885,
+        "margin2025Full": 4591271,
+        "forecast2026": 13096406,
+        "forecastSource": "seasonal",
+        "forecastCapped": true,
+        "deltaAbs": 3564230,
+        "deltaPct": 37.4,
+        "ytdDeltaPct": 134.2,
+        "peakRevenue": 9532176,
+        "peakYear": 2025,
+        "recoveryPct": 137.4,
+        "deltaVsPeak": 3564230
+      },
+      "status": "up",
+      "statusLabel": "растёт",
+      "topSkus": [
+        {
+          "sku": "MYSL008",
+          "name": "МТЕN Масло для бороды, 50 мл",
+          "revenue2025": 1706567.81
+        },
+        {
+          "sku": "MYSL003",
+          "name": "МТЕN Спрей с морской солью, 110 мл",
+          "revenue2025": 1377501.3499999999
+        },
+        {
+          "sku": "MYSL012",
+          "name": "МТЕN Дезодорант \"Нейтральный\". Минеральный антиперспирант для мужчин без запаха, 110 мл",
+          "revenue2025": 1239108.69
+        }
+      ],
+      "mergedFrom": [
+        "Мыслинский Иван Владимирович ИП (S3)"
+      ]
+    },
+    {
+      "slug": "cosmo-beauty",
+      "name": "КОСМО БЬЮТИ ООО",
+      "displayName": "КОСМО БЬЮТИ",
+      "rank": 11,
+      "managers": [
+        "Темрина Наталья"
+      ],
+      "topScheme": "Давальческая схема",
+      "firstMonth": "2025-03",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2025-03",
+          "revenue": 367376.82,
+          "qty": 19226,
+          "marginRub": 51493.64
+        },
+        {
+          "month": "2025-04",
+          "revenue": 512316,
+          "qty": 9120,
+          "marginRub": 15896.7
+        },
+        {
+          "month": "2025-05",
+          "revenue": 2309862.77,
+          "qty": 49276,
+          "marginRub": 757842.99
+        },
+        {
+          "month": "2025-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-07",
+          "revenue": 2497566.67,
+          "qty": 48340,
+          "marginRub": 647111.47
+        },
+        {
+          "month": "2025-08",
+          "revenue": 3198487.11,
+          "qty": 62213,
+          "marginRub": 752105.3799999999
+        },
+        {
+          "month": "2025-09",
+          "revenue": 3788430.5,
+          "qty": 73740,
+          "marginRub": 887393.8999999999
+        },
+        {
+          "month": "2025-10",
+          "revenue": 6942898.08,
+          "qty": 132109,
+          "marginRub": 1703469.9600000002
+        },
+        {
+          "month": "2025-11",
+          "revenue": 6493457.67,
+          "qty": 131714,
+          "marginRub": 1688497.56
+        },
+        {
+          "month": "2025-12",
+          "revenue": 7453069.65,
+          "qty": 144846,
+          "marginRub": 1767890.55
+        },
+        {
+          "month": "2026-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-02",
+          "revenue": 2440594.34,
+          "qty": 44236,
+          "marginRub": 738393.06
+        },
+        {
+          "month": "2026-03",
+          "revenue": 366122.26,
+          "qty": 6636,
+          "marginRub": 110768.98
+        },
+        {
+          "month": "2026-04",
+          "revenue": 401542.77,
+          "qty": 7278,
+          "marginRub": 121485.33
+        },
+        {
+          "month": "2026-05",
+          "revenue": 3306273.4899999998,
+          "qty": 72134,
+          "marginRub": 1107048.99
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 0,
+        "revenue2025Full": 33563465,
+        "revenueYtd2025": 3189556,
+        "revenueYtd2026": 6514533,
+        "qty2024Full": 0,
+        "qty2025Full": 670584,
+        "margin2024Full": 0,
+        "margin2025Full": 8271702,
+        "forecast2026": 16286332,
+        "forecastSource": "seasonal",
+        "forecastCapped": true,
+        "deltaAbs": -17277133,
+        "deltaPct": -51.5,
+        "ytdDeltaPct": 104.2,
+        "peakRevenue": 33563465,
+        "peakYear": 2025,
+        "recoveryPct": 48.5,
+        "deltaVsPeak": -17277133
+      },
+      "status": "new",
+      "statusLabel": "новичок 2025",
+      "topSkus": [
+        {
+          "sku": "LIK004",
+          "name": "LIKATO PROFESSIONAL Комплект для ecom Энзимная пудра для очищения чувствительной кожи и уменьшения следов постакне, 120 г",
+          "revenue2025": 9818991.07
+        },
+        {
+          "sku": "LIK003_1",
+          "name": "LIKATO PROFESSIONAL  Энзимная пудра для умывания с энзимами папайи для всех типов кожи 120 г",
+          "revenue2025": 9642913.34
+        },
+        {
+          "sku": "LIK004_1",
+          "name": "LIKATO PROFESSIONAL  Энзимная пудра для очищения чувствительной кожи и уменьшения следов постакне, 120 г",
+          "revenue2025": 5559943.109999999
+        }
+      ],
+      "mergedFrom": [
+        "КОСМО БЬЮТИ ООО (S3)"
+      ]
+    },
+    {
+      "slug": "openface",
+      "name": "ОПЕНФЕЙС ООО",
+      "displayName": "ОПЕНФЕЙС",
+      "rank": 12,
+      "managers": [
+        "Калядзина Мария"
+      ],
+      "topScheme": "Смешанная схема",
+      "firstMonth": "2024-10",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-10",
+          "revenue": 423426.82,
+          "qty": 2813,
+          "marginRub": 306317.83
+        },
+        {
+          "month": "2024-11",
+          "revenue": 292921.65,
+          "qty": 1946,
+          "marginRub": 142009.35
+        },
+        {
+          "month": "2024-12",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-01",
+          "revenue": 427492.03,
+          "qty": 2894,
+          "marginRub": 201268.05
+        },
+        {
+          "month": "2025-02",
+          "revenue": 775574.77,
+          "qty": 4826,
+          "marginRub": 326306.71
+        },
+        {
+          "month": "2025-03",
+          "revenue": 546631.91,
+          "qty": 4835,
+          "marginRub": 261257.31
+        },
+        {
+          "month": "2025-04",
+          "revenue": 1094925.3599999999,
+          "qty": 4937,
+          "marginRub": 406942.19
+        },
+        {
+          "month": "2025-05",
+          "revenue": 444724,
+          "qty": 2940,
+          "marginRub": 285480.21
+        },
+        {
+          "month": "2025-06",
+          "revenue": 527412.87,
+          "qty": 4478,
+          "marginRub": 266359.36
+        },
+        {
+          "month": "2025-07",
+          "revenue": 575346.67,
+          "qty": 3008,
+          "marginRub": 202932.93
+        },
+        {
+          "month": "2025-08",
+          "revenue": 1671875.86,
+          "qty": 10622,
+          "marginRub": 769077.6599999999
+        },
+        {
+          "month": "2025-09",
+          "revenue": 664393,
+          "qty": 9791,
+          "marginRub": 350152.58999999997
+        },
+        {
+          "month": "2025-10",
+          "revenue": 1548118.7499999998,
+          "qty": 9685,
+          "marginRub": 677521.28
+        },
+        {
+          "month": "2025-11",
+          "revenue": 756990.0999999999,
+          "qty": 9826,
+          "marginRub": 344630.69
+        },
+        {
+          "month": "2025-12",
+          "revenue": 1953009.53,
+          "qty": 14707,
+          "marginRub": 870023.7399999999
+        },
+        {
+          "month": "2026-01",
+          "revenue": 81419.37999999999,
+          "qty": 997,
+          "marginRub": 32304.460000000003
+        },
+        {
+          "month": "2026-02",
+          "revenue": 1010006.2899999999,
+          "qty": 19488,
+          "marginRub": 509591.45999999996
+        },
+        {
+          "month": "2026-03",
+          "revenue": 840038.4800000001,
+          "qty": 9184,
+          "marginRub": 440163.25
+        },
+        {
+          "month": "2026-04",
+          "revenue": 534568.89,
+          "qty": 10122,
+          "marginRub": 267976.41000000003
+        },
+        {
+          "month": "2026-05",
+          "revenue": 1395568.76,
+          "qty": 14882,
+          "marginRub": 604252.73
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 716348,
+        "revenue2025Full": 10986495,
+        "revenueYtd2025": 3289348,
+        "revenueYtd2026": 3861602,
+        "qty2024Full": 4759,
+        "qty2025Full": 82549,
+        "margin2024Full": 448327,
+        "margin2025Full": 4961953,
+        "forecast2026": 9654005,
+        "forecastSource": "seasonal",
+        "forecastCapped": true,
+        "deltaAbs": -1332490,
+        "deltaPct": -12.1,
+        "ytdDeltaPct": 17.4,
+        "peakRevenue": 10986495,
+        "peakYear": 2025,
+        "recoveryPct": 87.9,
+        "deltaVsPeak": -1332490
+      },
+      "status": "stable",
+      "statusLabel": "стабильно",
+      "topSkus": [
+        {
+          "sku": "OPF003_1",
+          "name": "OPEN FACE  Анти-акне крем для тела с азелаиновой кислотой Acid Cloud, 250 мл",
+          "revenue2025": 1886442.01
+        },
+        {
+          "sku": "OPF009_1",
+          "name": "OPENFACE Выравнивающий крем для тела с гликолевой кислотой Peel Me Please, 250 мл с термоусадкой",
+          "revenue2025": 1631416.18
+        },
+        {
+          "sku": "OPF003",
+          "name": "OPEN FACE Анти-акне крем для тела с азелаиновой кислотой Acid Cloud, 250 мл",
+          "revenue2025": 870541.1399999999
+        }
+      ],
+      "mergedFrom": [
+        "ОПЕНФЕЙС ООО (S3)"
+      ]
+    },
+    {
+      "slug": "smart-sale",
+      "name": "СМАРТ-СЭЙЛ ООО",
+      "displayName": "СМАРТ-СЭЙЛ",
+      "rank": 13,
+      "managers": [
+        "Калядзина Мария"
+      ],
+      "topScheme": "Под ключ",
+      "firstMonth": "2024-03",
+      "lastMonth": "2026-03",
+      "monthly": [
+        {
+          "month": "2024-03",
+          "revenue": 362310.91,
+          "qty": 2659,
+          "marginRub": 124809.03
+        },
+        {
+          "month": "2024-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-05",
+          "revenue": 609036.79,
+          "qty": 5897,
+          "marginRub": 229387.56
+        },
+        {
+          "month": "2024-06",
+          "revenue": 590501,
+          "qty": 5100,
+          "marginRub": 202828.4
+        },
+        {
+          "month": "2024-07",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-08",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-09",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-10",
+          "revenue": 515369.35,
+          "qty": 15021,
+          "marginRub": 51234.280000000006
+        },
+        {
+          "month": "2024-11",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-12",
+          "revenue": 251978.24,
+          "qty": 2977,
+          "marginRub": 81604.53
+        },
+        {
+          "month": "2025-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-03",
+          "revenue": 701848.67,
+          "qty": 9839,
+          "marginRub": 212358.42
+        },
+        {
+          "month": "2025-04",
+          "revenue": 530584.99,
+          "qty": 7879,
+          "marginRub": 329512.91
+        },
+        {
+          "month": "2025-05",
+          "revenue": 1377621.37,
+          "qty": 14942,
+          "marginRub": 548099.81
+        },
+        {
+          "month": "2025-06",
+          "revenue": 1230999.33,
+          "qty": 17257,
+          "marginRub": 498784.82
+        },
+        {
+          "month": "2025-07",
+          "revenue": 2003967.33,
+          "qty": 28093,
+          "marginRub": 811981.34
+        },
+        {
+          "month": "2025-08",
+          "revenue": 1560916,
+          "qty": 21882,
+          "marginRub": 632462.74
+        },
+        {
+          "month": "2025-09",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-10",
+          "revenue": 2679707.99,
+          "qty": 37566,
+          "marginRub": 1085782.61
+        },
+        {
+          "month": "2025-11",
+          "revenue": 2922199.25,
+          "qty": 41517,
+          "marginRub": 1291213.38
+        },
+        {
+          "month": "2025-12",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-03",
+          "revenue": 359696.68,
+          "qty": 5421,
+          "marginRub": 199397.71
+        },
+        {
+          "month": "2026-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 2329196,
+        "revenue2025Full": 13007845,
+        "revenueYtd2025": 2610055,
+        "revenueYtd2026": 359697,
+        "qty2024Full": 31654,
+        "qty2025Full": 178975,
+        "margin2024Full": 689864,
+        "margin2025Full": 5410196,
+        "forecast2026": 899242,
+        "forecastSource": "seasonal",
+        "forecastCapped": true,
+        "deltaAbs": -12108603,
+        "deltaPct": -93.1,
+        "ytdDeltaPct": -86.2,
+        "peakRevenue": 13007845,
+        "peakYear": 2025,
+        "recoveryPct": 6.9,
+        "deltaVsPeak": -12108603
+      },
+      "status": "crash",
+      "statusLabel": "обвал",
+      "topSkus": [
+        {
+          "sku": "ALT002",
+          "name": "АЛТЕЯ Крем с ретинолом 0,5%, 50 мл",
+          "revenue2025": 11120581.33
+        },
+        {
+          "sku": "ALT004",
+          "name": "АЛТЕЯ Масло для бороды, 50 мл",
+          "revenue2025": 1215556.9
+        },
+        {
+          "sku": "ALT003",
+          "name": "АЛТЕЯ Масло для волос парфюмированное, 110 мл",
+          "revenue2025": 671706.7
+        }
+      ],
+      "mergedFrom": [
+        "СМАРТ-СЭЙЛ ООО (S3)"
+      ]
+    },
+    {
+      "slug": "bestland",
+      "name": "ООО БЕСТЛАНД",
+      "displayName": "БЕСТЛАНД",
+      "rank": 14,
+      "managers": [
+        "Калядзина Мария"
+      ],
+      "topScheme": "Смешанная схема",
+      "firstMonth": "2024-01",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-01",
+          "revenue": 530350,
+          "qty": 20348,
+          "marginRub": 168399
+        },
+        {
+          "month": "2024-02",
+          "revenue": 354136.25,
+          "qty": 20151,
+          "marginRub": 118150.67000000001
+        },
+        {
+          "month": "2024-03",
+          "revenue": 2019592.6800000002,
+          "qty": 70232,
+          "marginRub": 807148.87
+        },
+        {
+          "month": "2024-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-05",
+          "revenue": 1046112.0900000001,
+          "qty": 39248,
+          "marginRub": 166363.61
+        },
+        {
+          "month": "2024-06",
+          "revenue": 401442.4,
+          "qty": 5908,
+          "marginRub": 199134.69
+        },
+        {
+          "month": "2024-07",
+          "revenue": 1000720.83,
+          "qty": 36391,
+          "marginRub": 275256.61
+        },
+        {
+          "month": "2024-08",
+          "revenue": 1120563.83,
+          "qty": 45954,
+          "marginRub": 288322.37
+        },
+        {
+          "month": "2024-09",
+          "revenue": 1489262.46,
+          "qty": 67506,
+          "marginRub": 254972.61000000002
+        },
+        {
+          "month": "2024-10",
+          "revenue": 4489328.430000001,
+          "qty": 60097,
+          "marginRub": 1313902.66
+        },
+        {
+          "month": "2024-11",
+          "revenue": 793416.81,
+          "qty": 16913,
+          "marginRub": 289932.05
+        },
+        {
+          "month": "2024-12",
+          "revenue": 437982.72,
+          "qty": 4991,
+          "marginRub": 140833.15
+        },
+        {
+          "month": "2025-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-06",
+          "revenue": 1876362.53,
+          "qty": 14501,
+          "marginRub": 613440.9
+        },
+        {
+          "month": "2025-07",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-08",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-09",
+          "revenue": 971448.1599999999,
+          "qty": 8845,
+          "marginRub": 279708.07
+        },
+        {
+          "month": "2025-10",
+          "revenue": 528563.47,
+          "qty": 6039,
+          "marginRub": 44356.45
+        },
+        {
+          "month": "2025-11",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-12",
+          "revenue": 74710,
+          "qty": 14910,
+          "marginRub": 74710
+        },
+        {
+          "month": "2026-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-02",
+          "revenue": 470300.61,
+          "qty": 4779,
+          "marginRub": 139402.65
+        },
+        {
+          "month": "2026-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-05",
+          "revenue": 1893291.83,
+          "qty": 29385,
+          "marginRub": 461482.55
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 13682908,
+        "revenue2025Full": 3451084,
+        "revenueYtd2025": 0,
+        "revenueYtd2026": 2363592,
+        "qty2024Full": 387739,
+        "qty2025Full": 44295,
+        "margin2024Full": 4022416,
+        "margin2025Full": 1012215,
+        "forecast2026": 4727185,
+        "forecastSource": "naive",
+        "forecastCapped": false,
+        "deltaAbs": 1276101,
+        "deltaPct": 37,
+        "ytdDeltaPct": null,
+        "peakRevenue": 13682908,
+        "peakYear": 2024,
+        "recoveryPct": 34.5,
+        "deltaVsPeak": -8955724
+      },
+      "status": "down",
+      "statusLabel": "не восст. (35% от 2024)",
+      "topSkus": [
+        {
+          "sku": "BEST020",
+          "name": "BESTLAND Двухфазный спрей для тела с SPF30, 200 мл",
+          "revenue2025": 1097929.61
+        },
+        {
+          "sku": "BEST007",
+          "name": "BESTLAND Крем-воск для ног, 150 мл",
+          "revenue2025": 846104.1599999999
+        },
+        {
+          "sku": "BEST013",
+          "name": "BESTLAND Твердое масло для тела, 150 мл",
+          "revenue2025": 653907.47
+        }
+      ],
+      "mergedFrom": [
+        "ООО БЕСТЛАНД (S3)"
+      ]
+    },
+    {
+      "slug": "sviridova",
+      "name": "Свиридова Ольга Константиновна ИП",
+      "displayName": "Свиридова О.К. ИП",
+      "rank": 15,
+      "managers": [
+        "Клементьева Екатерина Борисовна"
+      ],
+      "topScheme": "Давальческая схема",
+      "firstMonth": "2024-01",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-01",
+          "revenue": 1657333.63,
+          "qty": 16938,
+          "marginRub": 590084.48
+        },
+        {
+          "month": "2024-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-03",
+          "revenue": 3065183.6900000004,
+          "qty": 28333,
+          "marginRub": 1314006.46
+        },
+        {
+          "month": "2024-04",
+          "revenue": 689566.7,
+          "qty": 6172,
+          "marginRub": 328196.1
+        },
+        {
+          "month": "2024-05",
+          "revenue": 154449.6,
+          "qty": 3312,
+          "marginRub": 95694.72
+        },
+        {
+          "month": "2024-06",
+          "revenue": 1337939.55,
+          "qty": 21858,
+          "marginRub": 750932.61
+        },
+        {
+          "month": "2024-07",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-08",
+          "revenue": 1353865.51,
+          "qty": 25628,
+          "marginRub": 784477.2299999999
+        },
+        {
+          "month": "2024-09",
+          "revenue": 453831.17,
+          "qty": 3019,
+          "marginRub": 191993.3
+        },
+        {
+          "month": "2024-10",
+          "revenue": 449442.4,
+          "qty": 2958,
+          "marginRub": 177979.90999999997
+        },
+        {
+          "month": "2024-11",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-12",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-01",
+          "revenue": 248862,
+          "qty": 4560,
+          "marginRub": 102714
+        },
+        {
+          "month": "2025-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-03",
+          "revenue": 771759,
+          "qty": 4936,
+          "marginRub": 313225.31
+        },
+        {
+          "month": "2025-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-07",
+          "revenue": 668410.02,
+          "qty": 4838,
+          "marginRub": 223894.58
+        },
+        {
+          "month": "2025-08",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-09",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-10",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-11",
+          "revenue": 399441,
+          "qty": 6616,
+          "marginRub": 168542.6
+        },
+        {
+          "month": "2025-12",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-01",
+          "revenue": 413884.67,
+          "qty": 6855,
+          "marginRub": 174645.17
+        },
+        {
+          "month": "2026-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-04",
+          "revenue": 450704.07,
+          "qty": 6636,
+          "marginRub": 218842.23
+        },
+        {
+          "month": "2026-05",
+          "revenue": 438438,
+          "qty": 3172,
+          "marginRub": 154512.28
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 9161612,
+        "revenue2025Full": 2088472,
+        "revenueYtd2025": 1020621,
+        "revenueYtd2026": 1303027,
+        "qty2024Full": 108218,
+        "qty2025Full": 20950,
+        "margin2024Full": 4233365,
+        "margin2025Full": 808376,
+        "forecast2026": 2666352,
+        "forecastSource": "seasonal",
+        "forecastCapped": false,
+        "deltaAbs": 577880,
+        "deltaPct": 27.7,
+        "ytdDeltaPct": 27.7,
+        "peakRevenue": 9161612,
+        "peakYear": 2024,
+        "recoveryPct": 29.1,
+        "deltaVsPeak": -6495260
+      },
+      "status": "crash",
+      "statusLabel": "обвал (29% от 2024)",
+      "topSkus": [
+        {
+          "sku": "COS009003",
+          "name": "COSMEYA Лосьон-автозагар для лица и тела SunGlazed, 150 мл",
+          "revenue2025": 1436002.35
+        },
+        {
+          "sku": "COS009004",
+          "name": "COSMEYA Пилинг для лица с AHA и BHA-кислотами, 30 мл",
+          "revenue2025": 648303
+        },
+        {
+          "sku": "",
+          "name": "Изготовление образца косметической продукции",
+          "revenue2025": 4166.67
+        }
+      ],
+      "mergedFrom": [
+        "Свиридова Ольга Константиновна ИП (S3)"
+      ]
+    },
+    {
+      "slug": "ingeokom",
+      "name": "ИНГЕОКОМ ДИСТРИБЬЮШЕН ПАРТНЕРС АО",
+      "displayName": "ИНГЕОКОМ",
+      "rank": 16,
+      "managers": [
+        "Калядзина Мария"
+      ],
+      "topScheme": "Смешанная схема",
+      "firstMonth": "2024-03",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-03",
+          "revenue": 14166.67,
+          "qty": 17,
+          "marginRub": 14166.67
+        },
+        {
+          "month": "2024-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-05",
+          "revenue": 898253.23,
+          "qty": 8969,
+          "marginRub": 263736.43
+        },
+        {
+          "month": "2024-06",
+          "revenue": 10000,
+          "qty": 12,
+          "marginRub": 10000
+        },
+        {
+          "month": "2024-07",
+          "revenue": 685371.6100000001,
+          "qty": 8585,
+          "marginRub": 320057.10000000003
+        },
+        {
+          "month": "2024-08",
+          "revenue": 608669.26,
+          "qty": 8951,
+          "marginRub": 231456.38
+        },
+        {
+          "month": "2024-09",
+          "revenue": 3333.32,
+          "qty": 4,
+          "marginRub": 3333.32
+        },
+        {
+          "month": "2024-10",
+          "revenue": 1187239.3000000003,
+          "qty": 16888,
+          "marginRub": 625488.3699999999
+        },
+        {
+          "month": "2024-11",
+          "revenue": 467101.95,
+          "qty": 5449,
+          "marginRub": 203381.73
+        },
+        {
+          "month": "2024-12",
+          "revenue": 170038.59999999998,
+          "qty": 1768,
+          "marginRub": 78260.84
+        },
+        {
+          "month": "2025-01",
+          "revenue": 23631.83,
+          "qty": 260,
+          "marginRub": 9155.03
+        },
+        {
+          "month": "2025-02",
+          "revenue": 427584.29000000004,
+          "qty": 5586,
+          "marginRub": 200158.15
+        },
+        {
+          "month": "2025-03",
+          "revenue": 230911.57,
+          "qty": 2301,
+          "marginRub": 120255.12000000001
+        },
+        {
+          "month": "2025-04",
+          "revenue": 996632.73,
+          "qty": 11494,
+          "marginRub": 443199.55000000005
+        },
+        {
+          "month": "2025-05",
+          "revenue": 391627.88,
+          "qty": 3875,
+          "marginRub": 170465.13
+        },
+        {
+          "month": "2025-06",
+          "revenue": 269656.95,
+          "qty": 4788,
+          "marginRub": 126802.47
+        },
+        {
+          "month": "2025-07",
+          "revenue": 402274.1,
+          "qty": 6576,
+          "marginRub": 168679.86
+        },
+        {
+          "month": "2025-08",
+          "revenue": 1666.67,
+          "qty": 2,
+          "marginRub": 1666.67
+        },
+        {
+          "month": "2025-09",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-10",
+          "revenue": 8333.33,
+          "qty": 11,
+          "marginRub": 8333.33
+        },
+        {
+          "month": "2025-11",
+          "revenue": 600652.27,
+          "qty": 10188,
+          "marginRub": 242596.37
+        },
+        {
+          "month": "2025-12",
+          "revenue": 1517491.8199999996,
+          "qty": 15079,
+          "marginRub": 717991.3
+        },
+        {
+          "month": "2026-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-02",
+          "revenue": 1184790.47,
+          "qty": 13101,
+          "marginRub": 558727.83
+        },
+        {
+          "month": "2026-03",
+          "revenue": 1591632.9300000002,
+          "qty": 17996,
+          "marginRub": 751565.04
+        },
+        {
+          "month": "2026-04",
+          "revenue": 387150.56,
+          "qty": 5029,
+          "marginRub": 172060.23
+        },
+        {
+          "month": "2026-05",
+          "revenue": 172888.98,
+          "qty": 2824,
+          "marginRub": 91218.9
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 4044174,
+        "revenue2025Full": 4870463,
+        "revenueYtd2025": 2070388,
+        "revenueYtd2026": 3336463,
+        "qty2024Full": 50643,
+        "qty2025Full": 60160,
+        "margin2024Full": 1749881,
+        "margin2025Full": 2209303,
+        "forecast2026": 7848828,
+        "forecastSource": "seasonal",
+        "forecastCapped": false,
+        "deltaAbs": 2978364,
+        "deltaPct": 61.2,
+        "ytdDeltaPct": 61.2,
+        "peakRevenue": 4870463,
+        "peakYear": 2025,
+        "recoveryPct": 161.2,
+        "deltaVsPeak": 2978364
+      },
+      "status": "up",
+      "statusLabel": "растёт",
+      "topSkus": [
+        {
+          "sku": "MW1437",
+          "name": "MAN WAY Бальзам-скраб для лица с витамином Е и пудрой абрикосовой косточки, 200 мл/FACE SCRUB BALM",
+          "revenue2025": 690180.72
+        },
+        {
+          "sku": "ING009",
+          "name": "305 Miami SPA Увлажняющий баттер для тела, 250 мл/Deep Moisture Body Butter",
+          "revenue2025": 604314.68
+        },
+        {
+          "sku": "DMBLM9",
+          "name": "305 Miami SPA Увлажняющее молочко-лифтинг для тела, 250 мл/ 305 Miami SPA Deep moisture body lifting mil",
+          "revenue2025": 516838.82
+        }
+      ],
+      "mergedFrom": [
+        "ИНГЕОКОМ ДИСТРИБЬЮШЕН ПАРТНЕРС АО (S3)"
+      ]
+    },
+    {
+      "slug": "iqkea",
+      "name": "АЙКЬЮКЕА ООО",
+      "displayName": "АЙКЬЮКЕА",
+      "rank": 17,
+      "managers": [
+        "Темрина Наталья"
+      ],
+      "topScheme": "Смешанная схема",
+      "firstMonth": "2024-03",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-03",
+          "revenue": 143124.24000000002,
+          "qty": 1009,
+          "marginRub": 84213.20999999999
+        },
+        {
+          "month": "2024-04",
+          "revenue": 773477.7799999999,
+          "qty": 50053,
+          "marginRub": 138348.06000000003
+        },
+        {
+          "month": "2024-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-06",
+          "revenue": 24166.66,
+          "qty": 5,
+          "marginRub": 24166.66
+        },
+        {
+          "month": "2024-07",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-08",
+          "revenue": 593271.3,
+          "qty": 4154,
+          "marginRub": 308494.95
+        },
+        {
+          "month": "2024-09",
+          "revenue": 310291.66000000003,
+          "qty": 57,
+          "marginRub": 72231.04
+        },
+        {
+          "month": "2024-10",
+          "revenue": 1039719.86,
+          "qty": 57333,
+          "marginRub": 553185.3099999999
+        },
+        {
+          "month": "2024-11",
+          "revenue": 159308.02,
+          "qty": 1858,
+          "marginRub": 26535.34
+        },
+        {
+          "month": "2024-12",
+          "revenue": 108236.57,
+          "qty": 31048,
+          "marginRub": 29447.47
+        },
+        {
+          "month": "2025-01",
+          "revenue": 54166.67,
+          "qty": 1,
+          "marginRub": 54166.67
+        },
+        {
+          "month": "2025-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-03",
+          "revenue": 41666.67,
+          "qty": 1,
+          "marginRub": 41666.67
+        },
+        {
+          "month": "2025-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-07",
+          "revenue": 521017.94,
+          "qty": 11476,
+          "marginRub": 279764.26
+        },
+        {
+          "month": "2025-08",
+          "revenue": 591323.77,
+          "qty": 46857,
+          "marginRub": 442790.69999999995
+        },
+        {
+          "month": "2025-09",
+          "revenue": 623108.27,
+          "qty": 5251,
+          "marginRub": 285293.05
+        },
+        {
+          "month": "2025-10",
+          "revenue": 130251.67,
+          "qty": 29000,
+          "marginRub": 31729.94
+        },
+        {
+          "month": "2025-11",
+          "revenue": 137333.53999999998,
+          "qty": 1962,
+          "marginRub": 85190.55
+        },
+        {
+          "month": "2025-12",
+          "revenue": 546531.3,
+          "qty": 5142,
+          "marginRub": 215832.54
+        },
+        {
+          "month": "2026-01",
+          "revenue": 1798355.6199999999,
+          "qty": 13931,
+          "marginRub": 1008625.71
+        },
+        {
+          "month": "2026-02",
+          "revenue": 641153.07,
+          "qty": 5255,
+          "marginRub": 324539.32
+        },
+        {
+          "month": "2026-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-04",
+          "revenue": 653492.39,
+          "qty": 7248,
+          "marginRub": 371689.99
+        },
+        {
+          "month": "2026-05",
+          "revenue": 766876.13,
+          "qty": 5364,
+          "marginRub": 190407.05
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 3151596,
+        "revenue2025Full": 2645400,
+        "revenueYtd2025": 95833,
+        "revenueYtd2026": 3859877,
+        "qty2024Full": 145517,
+        "qty2025Full": 99690,
+        "margin2024Full": 1236622,
+        "margin2025Full": 1436434,
+        "forecast2026": 9649693,
+        "forecastSource": "seasonal",
+        "forecastCapped": true,
+        "deltaAbs": 7004293,
+        "deltaPct": 264.8,
+        "ytdDeltaPct": 3927.7,
+        "peakRevenue": 3151596,
+        "peakYear": 2024,
+        "recoveryPct": 306.2,
+        "deltaVsPeak": 6498097
+      },
+      "status": "up",
+      "statusLabel": "растёт",
+      "topSkus": [
+        {
+          "sku": "IQ009",
+          "name": "IQCARE Обновляющий энзимный пилинг Renewal enzyme peeling, 40 гр",
+          "revenue2025": 377793.15
+        },
+        {
+          "sku": "IQ010",
+          "name": "IQCARE Очищающая сыворотка Purifying Serum, 30 мл",
+          "revenue2025": 364246.93
+        },
+        {
+          "sku": "IQ002",
+          "name": "IQCARE Мягкая кремообразная пенка для умывания для всех типов кожи, 125 мл",
+          "revenue2025": 335865.6
+        }
+      ],
+      "mergedFrom": [
+        "АЙКЬЮКЕА ООО (S3)"
+      ]
+    },
+    {
+      "slug": "beauty-service",
+      "name": "БЬЮТИ СЕРВИС ООО",
+      "displayName": "БЬЮТИ СЕРВИС",
+      "rank": 18,
+      "managers": [
+        "Лигостаева Елена Александровна"
+      ],
+      "topScheme": "Смешанная схема",
+      "firstMonth": "2024-01",
+      "lastMonth": "2026-04",
+      "monthly": [
+        {
+          "month": "2024-01",
+          "revenue": 344169.59,
+          "qty": 4069,
+          "marginRub": 125687.92000000001
+        },
+        {
+          "month": "2024-02",
+          "revenue": 1394187.0899999999,
+          "qty": 16483,
+          "marginRub": 511146.03
+        },
+        {
+          "month": "2024-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-04",
+          "revenue": 360917.08,
+          "qty": 4267,
+          "marginRub": 137539.63
+        },
+        {
+          "month": "2024-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-07",
+          "revenue": 797536.25,
+          "qty": 9429,
+          "marginRub": 304892.18
+        },
+        {
+          "month": "2024-08",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-09",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-10",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-11",
+          "revenue": 655301.2500000001,
+          "qty": 7665,
+          "marginRub": 256080.59999999998
+        },
+        {
+          "month": "2024-12",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-01",
+          "revenue": 371311.5,
+          "qty": 4660,
+          "marginRub": 165352.95
+        },
+        {
+          "month": "2025-02",
+          "revenue": 630314.99,
+          "qty": 7452,
+          "marginRub": 240202.79
+        },
+        {
+          "month": "2025-03",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-04",
+          "revenue": 662456.66,
+          "qty": 7832,
+          "marginRub": 253279.90999999997
+        },
+        {
+          "month": "2025-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-06",
+          "revenue": 530292.7,
+          "qty": 6375,
+          "marginRub": 216397.98
+        },
+        {
+          "month": "2025-07",
+          "revenue": 657635.41,
+          "qty": 7775,
+          "marginRub": 250733.38
+        },
+        {
+          "month": "2025-08",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-09",
+          "revenue": 500,
+          "qty": 4,
+          "marginRub": 500
+        },
+        {
+          "month": "2025-10",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-11",
+          "revenue": 1048251.84,
+          "qty": 12618,
+          "marginRub": 439076.92999999993
+        },
+        {
+          "month": "2025-12",
+          "revenue": 158377.87,
+          "qty": 1864,
+          "marginRub": 81021.87
+        },
+        {
+          "month": "2026-01",
+          "revenue": 821886,
+          "qty": 9516,
+          "marginRub": 317442.56
+        },
+        {
+          "month": "2026-02",
+          "revenue": 641537.48,
+          "qty": 7954,
+          "marginRub": 298062.12
+        },
+        {
+          "month": "2026-03",
+          "revenue": 1244747.9100000001,
+          "qty": 14412,
+          "marginRub": 490527.2700000001
+        },
+        {
+          "month": "2026-04",
+          "revenue": 618464.34,
+          "qty": 7260,
+          "marginRub": 295340.92000000004
+        },
+        {
+          "month": "2026-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 3552111,
+        "revenue2025Full": 4059141,
+        "revenueYtd2025": 1664083,
+        "revenueYtd2026": 3326636,
+        "qty2024Full": 41913,
+        "qty2025Full": 48580,
+        "margin2024Full": 1335346,
+        "margin2025Full": 1646566,
+        "forecast2026": 8114548,
+        "forecastSource": "seasonal",
+        "forecastCapped": false,
+        "deltaAbs": 4055408,
+        "deltaPct": 99.9,
+        "ytdDeltaPct": 99.9,
+        "peakRevenue": 4059141,
+        "peakYear": 2025,
+        "recoveryPct": 199.9,
+        "deltaVsPeak": 4055408
+      },
+      "status": "up",
+      "statusLabel": "растёт",
+      "topSkus": [
+        {
+          "sku": "BS001",
+          "name": "Beauty Service Крем для рук Filler, 100 мл",
+          "revenue2025": 431279.1
+        },
+        {
+          "sku": "BSLRT002",
+          "name": "Beauty Service Лосьон для рук LORETTE (L06/3 S-2_07%) , 250 мл",
+          "revenue2025": 429000.91000000003
+        },
+        {
+          "sku": "BSLRT001",
+          "name": "Beauty Service Лосьон для рук GASPARD, 250 мл",
+          "revenue2025": 339478.08
+        }
+      ],
+      "mergedFrom": [
+        "БЬЮТИ СЕРВИС ООО (S3)"
+      ]
+    },
+    {
+      "slug": "krygina",
+      "name": "КРЫГИНА КОСМЕТИКС ООО",
+      "displayName": "КРЫГИНА КОСМЕТИКС",
+      "rank": 19,
+      "managers": [
+        "Ягнакова Надежда"
+      ],
+      "topScheme": "Давальческая: сырье",
+      "firstMonth": "2024-01",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2024-01",
+          "revenue": 608817.94,
+          "qty": 8240,
+          "marginRub": 318252.72000000003
+        },
+        {
+          "month": "2024-02",
+          "revenue": 240097.9,
+          "qty": 3022,
+          "marginRub": 115742.6
+        },
+        {
+          "month": "2024-03",
+          "revenue": 246010.40000000002,
+          "qty": 3319,
+          "marginRub": 121578.69
+        },
+        {
+          "month": "2024-04",
+          "revenue": 166146.85,
+          "qty": 2527,
+          "marginRub": 79740.57
+        },
+        {
+          "month": "2024-05",
+          "revenue": 450601.63,
+          "qty": 6383,
+          "marginRub": 216983.23
+        },
+        {
+          "month": "2024-06",
+          "revenue": 67818.83,
+          "qty": 113,
+          "marginRub": 48140.05
+        },
+        {
+          "month": "2024-07",
+          "revenue": 359192.76,
+          "qty": 3911,
+          "marginRub": 157619.82
+        },
+        {
+          "month": "2024-08",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2024-09",
+          "revenue": 1381892.29,
+          "qty": 19097,
+          "marginRub": 608455.37
+        },
+        {
+          "month": "2024-10",
+          "revenue": 1344251.6199999999,
+          "qty": 15681,
+          "marginRub": 535863.51
+        },
+        {
+          "month": "2024-11",
+          "revenue": 336478.1,
+          "qty": 3948,
+          "marginRub": 124222.24
+        },
+        {
+          "month": "2024-12",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-01",
+          "revenue": 760924.74,
+          "qty": 16098,
+          "marginRub": 382651.26
+        },
+        {
+          "month": "2025-02",
+          "revenue": 398769.86,
+          "qty": 8789,
+          "marginRub": 193040.36
+        },
+        {
+          "month": "2025-03",
+          "revenue": 1077264.8199999998,
+          "qty": 23503,
+          "marginRub": 527796.05
+        },
+        {
+          "month": "2025-04",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-05",
+          "revenue": 145138.61,
+          "qty": 3341,
+          "marginRub": 73173.47
+        },
+        {
+          "month": "2025-06",
+          "revenue": 402757.95,
+          "qty": 4443,
+          "marginRub": 151506.3
+        },
+        {
+          "month": "2025-07",
+          "revenue": 195120,
+          "qty": 1920,
+          "marginRub": 73622.4
+        },
+        {
+          "month": "2025-08",
+          "revenue": -74422.21999999999,
+          "qty": 4304,
+          "marginRub": -302882.28
+        },
+        {
+          "month": "2025-09",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-10",
+          "revenue": 628921.98,
+          "qty": 7372,
+          "marginRub": 251301.27999999997
+        },
+        {
+          "month": "2025-11",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-12",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-02",
+          "revenue": 422204.34,
+          "qty": 8640,
+          "marginRub": 203951.88
+        },
+        {
+          "month": "2026-03",
+          "revenue": 505420.22,
+          "qty": 7445,
+          "marginRub": 245763.93
+        },
+        {
+          "month": "2026-04",
+          "revenue": 125433.48,
+          "qty": 351,
+          "marginRub": 34927.759999999995
+        },
+        {
+          "month": "2026-05",
+          "revenue": 127079.59,
+          "qty": 2018,
+          "marginRub": 72969.64
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 5201308,
+        "revenue2025Full": 3534476,
+        "revenueYtd2025": 2382098,
+        "revenueYtd2026": 1180138,
+        "qty2024Full": 66241,
+        "qty2025Full": 69770,
+        "margin2024Full": 2326599,
+        "margin2025Full": 1350209,
+        "forecast2026": 1751048,
+        "forecastSource": "seasonal",
+        "forecastCapped": false,
+        "deltaAbs": -1783428,
+        "deltaPct": -50.5,
+        "ytdDeltaPct": -50.5,
+        "peakRevenue": 5201308,
+        "peakYear": 2024,
+        "recoveryPct": 33.7,
+        "deltaVsPeak": -3450260
+      },
+      "status": "down",
+      "statusLabel": "не восст. (34% от 2024)",
+      "topSkus": [
+        {
+          "sku": "KrCos001",
+          "name": "KRYGINA Крем для лица, 50 мл",
+          "revenue2025": 822318.4299999999
+        },
+        {
+          "sku": "KrCos009",
+          "name": "KRYGINA Блеск для губ бордовый, 10 мл",
+          "revenue2025": 579164.3
+        },
+        {
+          "sku": "KrCos010",
+          "name": "KRYGINA Блеск для губ шоколадный, 10 мл",
+          "revenue2025": 403499.64
+        }
+      ],
+      "mergedFrom": [
+        "КРЫГИНА КОСМЕТИКС ООО (S3)"
+      ]
+    },
+    {
+      "slug": "vkusvill",
+      "name": "ВКУСВИЛЛ АО",
+      "displayName": "ВКУСВИЛЛ",
+      "rank": 20,
+      "managers": [
+        "Мячина Ирина"
+      ],
+      "topScheme": "Под ключ",
+      "firstMonth": "2025-03",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2025-03",
+          "revenue": 3369781.84,
+          "qty": 20032,
+          "marginRub": 1070011.6400000001
+        },
+        {
+          "month": "2025-04",
+          "revenue": 1063652.25,
+          "qty": 7398,
+          "marginRub": 372465.75
+        },
+        {
+          "month": "2025-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-06",
+          "revenue": 129862.5,
+          "qty": 1500,
+          "marginRub": 40537.5
+        },
+        {
+          "month": "2025-07",
+          "revenue": 239405.83,
+          "qty": 1540,
+          "marginRub": 73378.43
+        },
+        {
+          "month": "2025-08",
+          "revenue": 426792.57999999996,
+          "qty": 3070,
+          "marginRub": 131541.38
+        },
+        {
+          "month": "2025-09",
+          "revenue": 124668,
+          "qty": 1440,
+          "marginRub": 32018.4
+        },
+        {
+          "month": "2025-10",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-11",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-12",
+          "revenue": 1487316.8299999998,
+          "qty": 10220,
+          "marginRub": 408853.55000000005
+        },
+        {
+          "month": "2026-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-02",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-03",
+          "revenue": 757333.6599999999,
+          "qty": 5534,
+          "marginRub": 216195.54
+        },
+        {
+          "month": "2026-04",
+          "revenue": 188567.61,
+          "qty": 1344,
+          "marginRub": 74085.69
+        },
+        {
+          "month": "2026-05",
+          "revenue": 491531.5,
+          "qty": 3556,
+          "marginRub": 94918.78
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 0,
+        "revenue2025Full": 6841480,
+        "revenueYtd2025": 4433434,
+        "revenueYtd2026": 1437433,
+        "qty2024Full": 0,
+        "qty2025Full": 45200,
+        "margin2024Full": 0,
+        "margin2025Full": 2128807,
+        "forecast2026": 2218183,
+        "forecastSource": "seasonal",
+        "forecastCapped": false,
+        "deltaAbs": -4623297,
+        "deltaPct": -67.6,
+        "ytdDeltaPct": -67.6,
+        "peakRevenue": 6841480,
+        "peakYear": 2025,
+        "recoveryPct": 32.4,
+        "deltaVsPeak": -4623297
+      },
+      "status": "new",
+      "statusLabel": "новичок 2025",
+      "topSkus": [
+        {
+          "sku": "VKVL005",
+          "name": "Вкус Вилл  Мыло бельди для тела \"Терпкий эвкалипт\" с маслом оливы, 200 мл",
+          "revenue2025": 2253080
+        },
+        {
+          "sku": "VKVL002",
+          "name": "Вкус Вилл  Масло для тела \"Карамель и розовое дерево\", 110 мл",
+          "revenue2025": 1403788.75
+        },
+        {
+          "sku": "VKVL001",
+          "name": "Вкус Вилл  Крем-масло для рук и ног \"Нежная роза и амбра\", 50 мл",
+          "revenue2025": 925911
+        }
+      ],
+      "mergedFrom": [
+        "ВКУСВИЛЛ АО (S3)"
+      ]
+    },
+    {
+      "slug": "semi",
+      "name": "СЭМИ КОСМЕТИК ООО",
+      "displayName": "СЭМИ КОСМЕТИК (Semily)",
+      "rank": 21,
+      "managers": [
+        "Темрина Наталья"
+      ],
+      "topScheme": "Давальческая схема",
+      "firstMonth": "2025-12",
+      "lastMonth": "2026-04",
+      "monthly": [
+        {
+          "month": "2025-12",
+          "revenue": 483413.12,
+          "qty": 9778,
+          "marginRub": 131910.3
+        },
+        {
+          "month": "2026-01",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-02",
+          "revenue": 678806.3,
+          "qty": 9003,
+          "marginRub": 349594.38
+        },
+        {
+          "month": "2026-03",
+          "revenue": 929670.23,
+          "qty": 19000,
+          "marginRub": 328895.02
+        },
+        {
+          "month": "2026-04",
+          "revenue": 275910.25,
+          "qty": 5235,
+          "marginRub": 121791.85
+        },
+        {
+          "month": "2026-05",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 0,
+        "revenue2025Full": 483413,
+        "revenueYtd2025": 0,
+        "revenueYtd2026": 1884387,
+        "qty2024Full": 0,
+        "qty2025Full": 9778,
+        "margin2024Full": 0,
+        "margin2025Full": 131910,
+        "forecast2026": 3768774,
+        "forecastSource": "naive",
+        "forecastCapped": false,
+        "deltaAbs": 3285360,
+        "deltaPct": 679.6,
+        "ytdDeltaPct": null,
+        "peakRevenue": 483413,
+        "peakYear": 2025,
+        "recoveryPct": 779.6,
+        "deltaVsPeak": 3285360
+      },
+      "status": "new",
+      "statusLabel": "новичок 2025",
+      "topSkus": [
+        {
+          "sku": "SM0099",
+          "name": "Semily Сыворотка для лица с витамином С и экстрактом юзду для сияния кожи C-VIT SERUM , 30 мл",
+          "revenue2025": 283950.45
+        },
+        {
+          "sku": "SM0100",
+          "name": "Semily Крем для лица с витамином С и экстрактом юзду для сияния кожи C-VIT CREAM, 50 мл",
+          "revenue2025": 199462.67
+        }
+      ],
+      "mergedFrom": [
+        "СЭМИ КОСМЕТИК ООО (S3)"
+      ]
+    },
+    {
+      "slug": "nuolab",
+      "name": "НУОЛАБ ООО (бывш. ПУРПУР ООО)",
+      "displayName": "НУОЛАБ (бывш. ПУРПУР)",
+      "rank": 22,
+      "managers": [
+        "Трофимова Юлия"
+      ],
+      "topScheme": "Смешанная схема",
+      "firstMonth": "2025-07",
+      "lastMonth": "2026-05",
+      "monthly": [
+        {
+          "month": "2025-07",
+          "revenue": 936855.63,
+          "qty": 8292,
+          "marginRub": 319859.17
+        },
+        {
+          "month": "2025-08",
+          "revenue": 681943.85,
+          "qty": 9097,
+          "marginRub": 350411.3
+        },
+        {
+          "month": "2025-09",
+          "revenue": 620202.65,
+          "qty": 9831,
+          "marginRub": 289710.38
+        },
+        {
+          "month": "2025-10",
+          "revenue": 1166411.4,
+          "qty": 21883,
+          "marginRub": 526904.6
+        },
+        {
+          "month": "2025-11",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        },
+        {
+          "month": "2025-12",
+          "revenue": 1123941.58,
+          "qty": 18311,
+          "marginRub": 538978.28
+        },
+        {
+          "month": "2026-01",
+          "revenue": 728035.0700000001,
+          "qty": 9434,
+          "marginRub": 404406.91
+        },
+        {
+          "month": "2026-02",
+          "revenue": 1533701.27,
+          "qty": 18198,
+          "marginRub": 737970.8800000001
+        },
+        {
+          "month": "2026-03",
+          "revenue": 838557,
+          "qty": 14541,
+          "marginRub": 370626.15
+        },
+        {
+          "month": "2026-04",
+          "revenue": 91749.2,
+          "qty": 2811,
+          "marginRub": 32071.67
+        },
+        {
+          "month": "2026-05",
+          "revenue": 381170.63,
+          "qty": 12336,
+          "marginRub": -135573.67
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "qty": 0,
+          "marginRub": 0
+        }
+      ],
+      "stats": {
+        "revenue2024Full": 0,
+        "revenue2025Full": 4529355,
+        "revenueYtd2025": 0,
+        "revenueYtd2026": 3573213,
+        "qty2024Full": 0,
+        "qty2025Full": 67414,
+        "margin2024Full": 0,
+        "margin2025Full": 2025864,
+        "forecast2026": 7146426,
+        "forecastSource": "naive",
+        "forecastCapped": false,
+        "deltaAbs": 2617071,
+        "deltaPct": 57.8,
+        "ytdDeltaPct": null,
+        "peakRevenue": 4529355,
+        "peakYear": 2025,
+        "recoveryPct": 157.8,
+        "deltaVsPeak": 2617071
+      },
+      "status": "new",
+      "statusLabel": "новичок 2025",
+      "topSkus": [
+        {
+          "sku": "PUR021",
+          "name": "CHAUKAO Солнцезащитное масло-спрей для интенсивного загара DON’T KISS ME SUN SPF 10, 150 мл",
+          "revenue2025": 832185.87
+        },
+        {
+          "sku": "PUR024",
+          "name": "CHAUKAO Увлажняющая маска для лица AQUA BOOSTER, 50 мл",
+          "revenue2025": 797370.85
+        },
+        {
+          "sku": "PUR023",
+          "name": "CHAUKAO Спрей - фиксатор макияжа HAZY, 100 мл",
+          "revenue2025": 771745.2000000001
+        }
+      ],
+      "mergedFrom": [
+        "НУОЛАБ ООО (бывш. ПУРПУР ООО) (S3)"
+      ]
+    }
+  ]
+}
